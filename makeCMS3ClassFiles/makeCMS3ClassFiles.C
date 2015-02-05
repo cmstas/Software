@@ -192,6 +192,7 @@ void makeHeaderFile(TFile *f, const string& treeName, bool paranoid, const strin
            !branchtitle.EndsWith("/I") &&
            !branchtitle.EndsWith("/i") &&
            !branchtitle.EndsWith("/O") &&
+           !branchtitle.EndsWith("/D") &&
            !branchtitle.BeginsWith("TString") &&
            !branchtitle.BeginsWith("TBits") &&
            !branchclass.Contains("LorentzVector") &&
@@ -200,6 +201,7 @@ void makeHeaderFile(TFile *f, const string& treeName, bool paranoid, const strin
            !branchclass.Contains("bool") &&  
            !branchclass.Contains("float") && 
            !branchclass.Contains("double") &&
+           !branchclass.Contains("string") &&
            !branchclass.Contains("TString"))
             continue;
 
@@ -260,6 +262,8 @@ void makeHeaderFile(TFile *f, const string& treeName, bool paranoid, const strin
                     headerf << "\tint" << "\t" << aliasname << "_;" << endl;
                 if(title.EndsWith("/O"))
                     headerf << "\tbool" << "\t" << aliasname << "_;" << endl;
+                if(title.EndsWith("/D"))
+                    headerf << "\tdouble" << "\t" << aliasname << "_;" << endl;
             }
         }
         headerf << "\tTBranch *" << Form("%s_branch",aliasname.Data()) << ";" << endl;
@@ -394,6 +398,8 @@ void makeHeaderFile(TFile *f, const string& treeName, bool paranoid, const strin
                     headerf << "\tint &" << aliasname << "()" << endl;
                 if(title.EndsWith("/O"))
                     headerf << "\tbool &" << "\t" << aliasname << "()" << endl;
+                if(title.EndsWith("/D"))
+                    headerf << "\tdouble &" << "\t" << aliasname << "()" << endl;
             }
         }
         aliasname = aliasarray->At(i)->GetName();
@@ -503,7 +509,7 @@ void makeHeaderFile(TFile *f, const string& treeName, bool paranoid, const strin
         if(isSkimmedNtuple) {
             headerf << "\t\t" << "return *" << aliasname << "_;" << endl << "\t}" << endl;
         }
-        else if(classname == "TString") {
+        else if(classname == "TString" || classname == "string") {
             headerf << "\t\t" << "return *" << aliasname << "_;" << endl << "\t}" << endl;
         }
         else {
@@ -688,6 +694,10 @@ void makeHeaderFile(TFile *f, const string& treeName, bool paranoid, const strin
                 if(title.EndsWith("/O")){
                     headerf << "\tconst bool &" << aliasname << "()";
                     implf   << "\tconst bool &" << aliasname << "()";
+                }
+                if(title.EndsWith("/D")){
+                    headerf << "\tconst double &" << aliasname << "()";
+                    implf   << "\tconst double &" << aliasname << "()";
                 }
             }
         }
@@ -934,6 +944,13 @@ void makeBranchFile(std::string branchNamesFile, std::string treeName) {
         if(varType=="int" || varType == "Int_t") {
             branchfile << "   outTree_->Branch(\"" << varName << "\",   &" << varName;
             branchfile << ",   \"" << varName + "/I\");" << endl;
+            branchfile << "   outTree_->SetAlias(\"" << v_varNames[i] << "\",   " 
+                       << "\"" << varName << "\");" << endl;
+            continue;
+        }
+        if(varType=="double" || varType == "Double_t") {
+            branchfile << "   outTree_->Branch(\"" << varName << "\",   &" << varName;
+            branchfile << ",   \"" << varName + "/D\");" << endl;
             branchfile << "   outTree_->SetAlias(\"" << v_varNames[i] << "\",   " 
                        << "\"" << varName << "\");" << endl;
             continue;
