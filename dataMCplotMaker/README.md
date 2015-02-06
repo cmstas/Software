@@ -4,7 +4,7 @@ dataMCplotMaker
 Function to quickly make nice data/MC plots or data plots, with or without signal.  In addition to formatting, it automatically makes an overflow bin for your data, automatically puts the smallest backgrounds on the bottom, and automatically chooses a reasonable maximum and minimum.  
 
 To download this:
-git clone https://github.com/cmstas/software/dataMCplotMaker/
+git clone https://github.com/cmstas/software.git
 
 To run:
   1.  Put both .cc and .h files in the same directory as your macro

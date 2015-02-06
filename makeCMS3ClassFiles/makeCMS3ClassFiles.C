@@ -6,7 +6,7 @@
 of CMS3 ntuples. Usage:
 
 root [0] .L makeCMS3ClassFiles.C++
-root [1] makeCMS3ClassFiles(filename, treename, classname, namespace, objname)
+root [1] makeCMS3ClassFiles(filename, treename, classname, namespace, objname, paranoia = 0)
 
 filename = location+name of ntuple file
 paranoia = boolean. If true, will add checks for branches that have nans
@@ -14,10 +14,8 @@ branchfilename = See http://www.t2.ucsd.edu/tastwiki/bin/view/CMS/SkimNtuples
 classname = you can change the default name of the class "CMS3" to whatever you want
 namespace = you can change the default namepace of "tas" to whatever you want
 ojbname = you can change the default classname object of "cms2" to whatever you want
-Paranoia and BranchNamesFile are hardcoded below!
- --Paranoia is a bool. If true, will add checks for branches that have nans 
+BranchNamesFile are hardcoded below!
  --BranchNamesFile is a const string&: see See http://www.t2.ucsd.edu/tastwiki/bin/view/CMS/SkimNtuples   */
-bool paranoid_ = false;
 const string& branchNamesFile_ = "";
 
 #include "TBranch.h"
@@ -47,11 +45,10 @@ void makeDriverFile(string fname, string treeName);
 
 //-------------------------------------------------------------------------------------------------
 void makeCMS3ClassFiles (const std::string& fname, const std::string& treeName="", const std::string& className="CMS3",
-                         const std::string& nameSpace="tas", const std::string& objName="cms3") {
+                         const std::string& nameSpace="tas", const std::string& objName="cms3", const bool paranoid = false) {
 
     using namespace std;
 
-    bool paranoid = paranoid_;
     const string& branchNamesFile = branchNamesFile_;
   
     TFile *f = TFile::Open( fname.c_str() );
@@ -167,19 +164,18 @@ void makeHeaderFile(TFile *f, const string& treeName, bool paranoid, const strin
     // }
 
     TList *aliasarray = new TList();
-    
     for(Int_t i = 0; i < fullarray->GetSize(); ++i) {
         TBranch *branch = 0;
-        TString aliasname;
+        TString aliasname(fullarray->At(i)->GetName());
         if (have_aliases){
             branch = ev->GetBranch(ev->GetAlias(aliasname.Data()));
             aliasname = fullarray->At(i)->GetName();
         } 
         else
             branch = (TBranch*)fullarray->At(i);
-   
+ 
         if (branch == 0) continue;
-  
+
         TString branchname(branch->GetName());
         TString branchtitle(branch->GetTitle());
         TString branchclass(branch->GetClassName());
