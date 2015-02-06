@@ -11,6 +11,6 @@ To run:
   2.  .L makeCMS3ClassFiles.C++
   3.  makeCMS3ClassFiles("file you want to run on.root", "tree within that file", "class name", "namespace name", "object name")
 
-N.B. The paranoia option is hardcoded to false, and the branchNamesFile is hardcoded to null.  If you want to change these, you should do so in the file directly.  If you have no idea what I'm talking about, don't worry about it.  
+N.B. The branchNamesFile variable is hardcoded to null, and paranoid is an optional sixth argument that defaults to false.  If you want to change the branchNamesFile, you should do so in the file directly.  If you have no idea what I'm talking about, don't worry about it.  
 
 E-mail Alex with bug reports or feature requests, george AT physics DOT ucsb
