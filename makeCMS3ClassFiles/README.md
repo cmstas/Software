@@ -4,7 +4,7 @@ makeCMS3ClassFiles
 This function quickly makes class files -- for CMS3 or anything else -- as well as the skeleton for a looper.
 
 To download this:
-git clone https://github.com/cmstas/software/makeCMS3ClassFiles.git
+git clone https://github.com/cmstas/software.git
 
 To run:
   1.  root
