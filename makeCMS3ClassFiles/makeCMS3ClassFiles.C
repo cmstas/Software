@@ -63,6 +63,13 @@ void makeCMS3ClassFiles (const std::string& fname, const std::string& treeName="
         cout << "Exiting..." << endl;
         return;
     }
+  
+    bool tree_exists = f->GetListOfKeys()->Contains(Form("%s", treeName.c_str()));
+    if (!tree_exists){
+      cout << "No tree with name " << treeName.c_str() << " in file " << f->GetName() << endl;
+      cout << "Exiting..." << endl;
+      return;
+    }
 
     //check if the branchNamesFile exists
     if(branchNamesFile != "") {
