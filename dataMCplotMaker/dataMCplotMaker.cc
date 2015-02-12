@@ -474,10 +474,10 @@ void dataMCplotMaker(TH1F* Data, std::vector <TH1F*> Backgrounds, std::vector <c
     Colors.push_back(kCyan);
     Colors.push_back(kOrange-4);
     Colors.push_back(kMagenta-8);
-    Colors.push_back(kYellow-7);
     Colors.push_back(kRed);
     Colors.push_back(kBlue);
     Colors.push_back(kGreen+3);
+    Colors.push_back(kYellow-7);
   }
   else if (color_input.size() > Backgrounds.size()){
     for (unsigned int i = Backgrounds.size(); i < color_input.size(); i++){
@@ -602,12 +602,12 @@ if(noFill == 0){
   tex->SetNDC();
   tex->SetTextSize(0.035);
   if (noData == false){
-    tex->DrawLatex(0.2,0.83,title);
-    tex->DrawLatex(0.2,0.78,title2);
+    tex->DrawLatex(0.16,0.73,title);
+    tex->DrawLatex(0.16,0.68,title2);
   }
   if (noData == true){
-    tex->DrawLatex(0.23,0.86,title);
-    tex->DrawLatex(0.23,0.81,title2);
+    tex->DrawLatex(0.16,0.78,title);
+    tex->DrawLatex(0.16,0.73,title2);
   }
 
   //Draw vertical lines
@@ -622,8 +622,11 @@ if(noFill == 0){
   }
 
   //Draw header
-  float type_y = .96;
-  if (overrideHeader && overrideHeader[0] == '\0') tex->DrawLatex(0.17,type_y,Form("%s        #sqrt{s} = %s TeV,  #scale[0.6]{#int}Ldt = %s fb^{-1}", type, energy, lumi));
+  float type_y = .95;
+  tex->SetTextSize(0.028);
+  if (overrideHeader && overrideHeader[0] == '\0') tex->DrawLatex(0.79,type_y,Form("%s fb^{-1} (%s TeV)", lumi, energy));
+  tex->SetTextSize(0.035);
+  if (overrideHeader && overrideHeader[0] == '\0') tex->DrawLatex(0.16,type_y-.08, "CMS");
   if (overrideHeader && overrideHeader[0] != '\0') tex->DrawLatex(0.17,type_y,Form("%s", overrideHeader));
   if (!noData && stack->GetMaximum() > 80000 && linear) finPad[0]->SetPad(0.0, 0.0, 1.0, 0.84);
 
