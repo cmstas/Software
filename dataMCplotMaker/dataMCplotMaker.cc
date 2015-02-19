@@ -583,7 +583,8 @@ if(noFill == 0){
 
   //Legend
   TLegend *leg;
-  if (Backgrounds.size() == 1 || Backgrounds.size() == 2) leg = new TLegend(0.7+legendRight,0.79+legendUp,0.92+legendRight,0.87+legendUp); 
+  if ((Backgrounds.size() == 1 || Backgrounds.size() == 2) && noData) leg = new TLegend(0.7+legendRight,0.79+legendUp,0.92+legendRight,0.87+legendUp); 
+  else if ((Backgrounds.size() == 1 || Backgrounds.size() == 2) && !noData) leg = new TLegend(0.7+legendRight,0.64+legendUp,0.92+legendRight,0.72+legendUp); 
   else leg = new TLegend(0.7+legendRight,0.59+legendUp,0.92+legendRight,0.87+legendUp);
   leg->SetTextSize(legendTextSize);
   if (noData == false) leg->AddEntry(Data, dataName, "lp");
@@ -602,8 +603,8 @@ if(noFill == 0){
   tex->SetNDC();
   tex->SetTextSize(0.035);
   if (noData == false){
-    tex->DrawLatex(0.16,0.73,title);
-    tex->DrawLatex(0.16,0.68,title2);
+    tex->DrawLatex(0.16,0.83,title);
+    tex->DrawLatex(0.16,0.78,title2);
   }
   if (noData == true){
     tex->DrawLatex(0.16,0.78,title);
@@ -623,10 +624,15 @@ if(noFill == 0){
 
   //Draw header
   float type_y = .95;
+  if (!noData) type_y = .92;
   tex->SetTextSize(0.028);
   if (overrideHeader && overrideHeader[0] == '\0') tex->DrawLatex(0.79,type_y,Form("%s fb^{-1} (%s TeV)", lumi, energy));
   tex->SetTextSize(0.035);
-  if (overrideHeader && overrideHeader[0] == '\0') tex->DrawLatex(0.16,type_y-.08, "CMS");
+  if (noData && overrideHeader && overrideHeader[0] == '\0') tex->DrawLatex(0.16,type_y-.08, "CMS");
+  if (!noData && overrideHeader && overrideHeader[0] == '\0'){ 
+    tex->DrawLatex(0.83,type_y-.08, "CMS");
+    tex->DrawLatex(0.73,type_y-.13, "#it{Preliminary}"); 
+  }
   if (overrideHeader && overrideHeader[0] != '\0') tex->DrawLatex(0.17,type_y,Form("%s", overrideHeader));
   if (!noData && stack->GetMaximum() > 80000 && linear) finPad[0]->SetPad(0.0, 0.0, 1.0, 0.84);
 
