@@ -490,10 +490,12 @@ void dataMCplotMaker(TH1F* Data, std::vector <TH1F*> Backgrounds, std::vector <c
   TPad* finPad[2];
   if (noData == false){
     c0.SetCanvasSize(600, 700);
-    finPad[0] = new TPad("1", "1", 0.0, 0.0, 1.0, 0.885);
+    finPad[0] = new TPad("1", "1", 0.0, 0.0, 1.0, 1.0);
     if (!linear) finPad[0]->SetLogy();
+    finPad[0]->SetTopMargin(0.05);
     finPad[0]->SetLeftMargin(0.12);
-    finPad[1] = new TPad("2", "2", 0.0, 0.8, 1.0, 0.95);
+    finPad[0]->SetBottomMargin(0.11);
+    finPad[1] = new TPad("2", "2", 0.0, 0.83, 1.0, 1.0);
     finPad[1]->SetLeftMargin(0.12);
     finPad[0]->Draw();
     finPad[1]->Draw();
@@ -603,8 +605,8 @@ if(noFill == 0){
   tex->SetNDC();
   tex->SetTextSize(0.035);
   if (noData == false){
-    tex->DrawLatex(0.16,0.83,title);
-    tex->DrawLatex(0.16,0.78,title2);
+    tex->DrawLatex(0.16,0.88,title);
+    tex->DrawLatex(0.16,0.83,title2);
   }
   if (noData == true){
     tex->DrawLatex(0.16,0.78,title);
@@ -624,11 +626,14 @@ if(noFill == 0){
 
   //Draw header
   float type_y = .95;
-  if (!noData) type_y = .92;
+  if (!noData) type_y = .96;
   tex->SetTextSize(0.028);
   if (overrideHeader && overrideHeader[0] == '\0') tex->DrawLatex(0.79,type_y,Form("%s fb^{-1} (%s TeV)", lumi, energy));
   tex->SetTextSize(0.035);
-  if (noData && overrideHeader && overrideHeader[0] == '\0') tex->DrawLatex(0.16,type_y-.08, "CMS");
+  if (noData && overrideHeader && overrideHeader[0] == '\0'){
+    tex->DrawLatex(0.16,type_y-.08, "CMS");
+    tex->DrawLatex(0.16,type_y-.11, "#it{Preliminary}"); 
+  }
   if (!noData && overrideHeader && overrideHeader[0] == '\0'){ 
     tex->DrawLatex(0.83,type_y-.08, "CMS");
     tex->DrawLatex(0.73,type_y-.13, "#it{Preliminary}"); 
@@ -675,9 +680,9 @@ if(noFill == 0){
     err_hist->Draw("PE");
     TText *blah = new TText();
     blah->SetTextFont(42);
-    blah->SetTextSize(0.21);
+    blah->SetTextSize(0.17);
     blah->SetTextAngle(90);
-    blah->DrawTextNDC(0.045,0.075,topYaxisTitle);
+    blah->DrawTextNDC(0.045,0.15,topYaxisTitle);
     TLine line;
     line.SetLineColor(kGray+2);
     line.SetLineWidth(2);
