@@ -358,7 +358,7 @@ void dataMCplotMaker(TH1F* Data, std::vector <TH1F*> Backgrounds, std::vector <c
     std::strcpy(blank, "");
     Titles.push_back(blank);
   }
-  if (SignalTitles.size() != Signals.size()) cout << "Warning! Wrong number of titles for your signals!" << endl;
+  if (use_signals && SignalTitles.size() != Signals.size()) cout << "Warning! Wrong number of titles for your signals!" << endl;
   while (SignalTitles.size() < Signals.size()){
     char* blank = new char[strlen("")+2];
     std::strcpy(blank, "");
@@ -590,12 +590,8 @@ if(noFill == 0){
   else leg = new TLegend(0.7+legendRight,0.59+legendUp,0.92+legendRight,0.87+legendUp);
   leg->SetTextSize(legendTextSize);
   if (noData == false) leg->AddEntry(Data, dataName, "lp");
-  for (int i = Titles.size()-1; i > -1; i--){
-    leg->AddEntry(Backgrounds[i], Titles[i], "f");
-  }
-  for (int i = SignalTitles.size()-1; i > -1; i--){
-    leg->AddEntry(Signals[i], SignalTitles[i], "P");
-  }
+  for (int i = Titles.size()-1; i > -1; i--) leg->AddEntry(Backgrounds[i], Titles[i], "f");
+  if (use_signals) for (int i = SignalTitles.size()-1; i > -1; i--) leg->AddEntry(Signals[i], SignalTitles[i], "P");
   leg->SetFillStyle(0);
   leg->SetBorderSize(0);
   if (!noLegend) leg->Draw();
