@@ -616,7 +616,7 @@ if(noFill == 0){
     linecut.SetLineStyle(2);
     linecut.SetLineWidth(2);
     linecut.SetLineColor(kGray+2);
-    if (!linear) linecut.DrawLine(vLines[i],0.,vLines[i],100000000000000);
+    if (!linear) linecut.DrawLine(vLines[i],0.,vLines[i],myMax);
     if (linear) linecut.DrawLine(vLines[i],0.,vLines[i],myMax);
   }
 
