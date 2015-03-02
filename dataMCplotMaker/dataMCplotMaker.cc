@@ -585,8 +585,8 @@ if(noFill == 0){
 
   //Legend
   TLegend *leg;
-  if ((Backgrounds.size() == 1 || Backgrounds.size() == 2) && noData) leg = new TLegend(0.7+legendRight,0.79+legendUp,0.92+legendRight,0.87+legendUp); 
-  else if ((Backgrounds.size() == 1 || Backgrounds.size() == 2) && !noData) leg = new TLegend(0.7+legendRight,0.64+legendUp,0.92+legendRight,0.72+legendUp); 
+  if ((Backgrounds.size()+Signals.size() == 1 || Backgrounds.size()+Signals.size() == 2) && noData) leg = new TLegend(0.7+legendRight,0.79+legendUp,0.92+legendRight,0.87+legendUp); 
+  else if ((Backgrounds.size()+Signals.size() == 1 || Backgrounds.size()+Signals.size() == 2) && !noData) leg = new TLegend(0.7+legendRight,0.64+legendUp,0.92+legendRight,0.72+legendUp); 
   else leg = new TLegend(0.7+legendRight,0.59+legendUp,0.92+legendRight,0.87+legendUp);
   leg->SetTextSize(legendTextSize);
   if (noData == false) leg->AddEntry(Data, dataName, "lp");
