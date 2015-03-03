@@ -70,4 +70,7 @@ Example:
   - myTitles.push_back("ttdl");
   - dataMCplotMaker(CR1_data, myVector, myTitles, "#tilde{t} #rightarrow t#tilde{#chi} _ {1}^{0} ISR", "CR-0b", "--vLine 120 --outputName test _ plot");
 
+Advanced Usage
+  - If you run with more than 5 signals, it will automatically set your backgrounds to gray and striped.
+
 E-mail Alex with bug reports or feature requests, george AT physics DOT ucsb
