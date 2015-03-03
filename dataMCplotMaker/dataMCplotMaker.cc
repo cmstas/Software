@@ -243,6 +243,7 @@ void dataMCplotMaker(TH1F* Data, std::vector <TH1F*> Backgrounds, std::vector <c
   float legendRight = 0;
   float legendTextSize = 0.04;
   vector <float> vLines;
+  vector <float> hLines;
   bool doHalf = 0;
   Int_t nDivisions = -1;
   bool noLegend = false;
@@ -318,6 +319,9 @@ void dataMCplotMaker(TH1F* Data, std::vector <TH1F*> Backgrounds, std::vector <c
     }
     else if (Options[i].find("vLine") < Options[i].length()){
       vLines.push_back(atof( getString(Options[i], "vLine") ));
+    }
+    else if (Options[i].find("hLine") < Options[i].length()){
+      hLines.push_back(atof( getString(Options[i], "hLine") ));
     }
     else if (Options[i].find("setMaximum") < Options[i].length()){
       setMaximum = atof( getString(Options[i], "setMaximum") );
@@ -513,21 +517,37 @@ void dataMCplotMaker(TH1F* Data, std::vector <TH1F*> Backgrounds, std::vector <c
   THStack *stack = new THStack("stack", ""); 
   Data->SetMarkerStyle(20);
   Data->UseCurrentStyle();
-if(noFill == 0){
+  if(noFill == 0 && Signals.size() >= 5 && !nostack){
+    vector <int> Style;
+    Style.push_back(3003);
+    Style.push_back(3004);
+    Style.push_back(3005);
+    Style.push_back(3006);
+    Style.push_back(3007);
+    Style.push_back(3013);
+    Style.push_back(3001);
+    for (unsigned int i = 0; i < Backgrounds.size(); i++){
+      Backgrounds[i]->UseCurrentStyle();
+      Backgrounds[i]->SetFillColor(kGray);
+      Backgrounds[i]->SetLineColor(kGray);
+      Backgrounds[i]->SetFillStyle(Style[i]);
+      stack->Add(Backgrounds[i]);
+    }
+  } 
+  if(noFill == 0 && (Signals.size() < 5 || nostack)){
+    for (unsigned int i = 0; i < Backgrounds.size(); i++){
+      Backgrounds[i]->UseCurrentStyle();
+      if (!nostack) Backgrounds[i]->SetFillColor(Colors[i]);
+      if (nostack) Backgrounds[i]->SetLineColor(Colors[i]);
+      if (nostack && normalize) Backgrounds[i]->Scale(1.0/Backgrounds[i]->Integral());
+      stack->Add(Backgrounds[i]);
+    }
+  } 
+  else if(noFill == 1){
   for (unsigned int i = 0; i < Backgrounds.size(); i++){
     Backgrounds[i]->UseCurrentStyle();
-    if (!nostack) Backgrounds[i]->SetFillColor(Colors[i]);
-    if (nostack) Backgrounds[i]->SetLineColor(Colors[i]);
-    if (nostack && normalize) Backgrounds[i]->Scale(1.0/Backgrounds[i]->Integral());
-    stack->Add(Backgrounds[i]);
-  }
-} else if(noFill == 1){
-  for (unsigned int i = 0; i < Backgrounds.size(); i++){
-    Backgrounds[i]->UseCurrentStyle();
-    if (!nostack) Backgrounds[i]->SetFillColor(kWhite);
-    if (nostack) Backgrounds[i]->SetFillColor(kWhite);
-    if (!nostack) Backgrounds[i]->SetLineColor(Colors[i]);
-    if (nostack) Backgrounds[i]->SetLineColor(Colors[i]);
+    Backgrounds[i]->SetFillColor(kWhite);
+    Backgrounds[i]->SetLineColor(Colors[i]);
     if (nostack && normalize) Backgrounds[i]->Scale(1.0/Backgrounds[i]->Integral());
     stack->Add(Backgrounds[i]);
   }
@@ -575,12 +595,20 @@ if(noFill == 0){
   THStack *stack2 = new THStack("stack2", "stack2"); 
   stack2->Add(Data);
   stack2->Draw("PSAMEE");
+  vector<int> markerStyle;
+  markerStyle.push_back(20);
+  markerStyle.push_back(21);
+  markerStyle.push_back(22);
+  markerStyle.push_back(23);
+  markerStyle.push_back(29);
+  markerStyle.push_back(33);
+  markerStyle.push_back(34);
   for (unsigned int i = 0; i < Signals.size(); i++){
     Signals[i]->Draw("SAMEP");
     if (Colors.size() >= i + Backgrounds.size() + 1) Signals[i]->SetMarkerColor(Colors[i + Backgrounds.size()]);
     else Signals[i]->SetLineColor(kBlack);
     Signals[i]->SetLineWidth(3);
-    Signals[i]->SetMarkerStyle(21+i);
+    Signals[i]->SetMarkerStyle(markerStyle[i%7]);
   }
 
   //Legend
@@ -618,6 +646,16 @@ if(noFill == 0){
     linecut.SetLineColor(kGray+2);
     if (!linear) linecut.DrawLine(vLines[i],0.,vLines[i],myMax);
     if (linear) linecut.DrawLine(vLines[i],0.,vLines[i],myMax);
+  }
+
+  //Draw Horizontal lines
+  for (unsigned int i = 0; i < hLines.size(); i++){
+    TLine linecut;
+    c0.Update();
+    linecut.SetLineStyle(2);
+    linecut.SetLineWidth(2);
+    linecut.SetLineColor(kGray+2);
+    linecut.DrawLine(0.0, hLines[i], Backgrounds.size() > 0 ? Backgrounds[0]->GetXaxis()->GetXmax() : Signals[0]->GetXaxis()->GetXmax(), hLines[i]);
   }
 
   //Draw header
