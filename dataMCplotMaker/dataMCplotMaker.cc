@@ -494,7 +494,7 @@ void dataMCplotMaker(TH1F* Data, std::vector <TH1F*> Backgrounds, std::vector <c
   TPad* finPad[2];
   if (noData == false){
     c0.SetCanvasSize(600, 700);
-    finPad[0] = new TPad("1", "1", 0.0, 0.0, 1.0, 1.0);
+    finPad[0] = new TPad("1", "1", 0.0, 0.0, 1.0, 0.84);
     if (!linear) finPad[0]->SetLogy();
     finPad[0]->SetTopMargin(0.05);
     finPad[0]->SetLeftMargin(0.12);
@@ -575,8 +575,8 @@ void dataMCplotMaker(TH1F* Data, std::vector <TH1F*> Backgrounds, std::vector <c
   float bin_width = Backgrounds[0]->GetXaxis()->GetBinWidth(1);
   if (yAxisOverride && yAxisOverride[0] != '\0') stack->GetYaxis()->SetTitle(Form("%s", yAxisOverride));
   else if (yAxisOverride[0] == '\0' && showDivisionLabel && yAxisUnit[0] != '\0') stack->GetYaxis()->SetTitle(Form("%s [%s] / %.0f %s  ", yAxisLabel, yAxisUnit, bin_width, xAxisUnit));
-  else if (yAxisOverride[0] == '\0' && showDivisionLabel && yAxisUnit[0] == '\0' && bin_width > 3) stack->GetYaxis()->SetTitle(Form("%s / %.0f %s  ", yAxisLabel, bin_width, xAxisUnit)); 
-  else if (yAxisOverride[0] == '\0' && showDivisionLabel && yAxisUnit[0] == '\0' && bin_width <= 3) stack->GetYaxis()->SetTitle(Form("%s / %.2f %s  ", yAxisLabel, bin_width, xAxisUnit)); 
+  else if (yAxisOverride[0] == '\0' && showDivisionLabel && yAxisUnit[0] == '\0' && bin_width >= 2) stack->GetYaxis()->SetTitle(Form("%s / %.0f %s  ", yAxisLabel, bin_width, xAxisUnit)); 
+  else if (yAxisOverride[0] == '\0' && showDivisionLabel && yAxisUnit[0] == '\0' && bin_width < 2) stack->GetYaxis()->SetTitle(Form("%s / %.2f %s  ", yAxisLabel, bin_width, xAxisUnit)); 
   else if (yAxisOverride[0] == '\0' && !showDivisionLabel && yAxisUnit[0] != '\0')stack->GetYaxis()->SetTitle(Form("%s [%s]  ", yAxisLabel, yAxisUnit)); 
   else if (yAxisOverride[0] == '\0' && !showDivisionLabel && yAxisUnit[0] == '\0')stack->GetYaxis()->SetTitle(Form("%s  ", yAxisLabel));
   else cout << "nothing" << endl;
