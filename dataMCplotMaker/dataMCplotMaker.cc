@@ -544,14 +544,13 @@ void dataMCplotMaker(TH1F* Data, std::vector <TH1F*> Backgrounds, std::vector <c
     }
   } 
   else if(noFill == 1){
-  for (unsigned int i = 0; i < Backgrounds.size(); i++){
-    Backgrounds[i]->UseCurrentStyle();
-    Backgrounds[i]->SetFillColor(kWhite);
-    Backgrounds[i]->SetLineColor(Colors[i]);
-    if (nostack && normalize) Backgrounds[i]->Scale(1.0/Backgrounds[i]->Integral());
-    stack->Add(Backgrounds[i]);
-  }
-
+    for (unsigned int i = 0; i < Backgrounds.size(); i++){
+      Backgrounds[i]->UseCurrentStyle();
+      Backgrounds[i]->SetFillColor(kWhite);
+      Backgrounds[i]->SetLineColor(Colors[i]);
+      if (nostack && normalize) Backgrounds[i]->Scale(1.0/Backgrounds[i]->Integral());
+      stack->Add(Backgrounds[i]);
+    }
 }
 
   //Minimum and maximum
