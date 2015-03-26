@@ -523,6 +523,7 @@ void makeHeaderFile(TFile *f, const string& treeName, bool paranoid, const strin
     bool haveHLTInfo = false;
     bool haveL1Info  = false;
     bool haveHLT8E29Info = false;
+    bool haveTauIDInfo = false;
     for(int i = 0; i < aliasarray->GetSize(); i++) {
         TString aliasname(aliasarray->At(i)->GetName());
         if(aliasname=="hlt_trigNames") 
@@ -531,6 +532,8 @@ void makeHeaderFile(TFile *f, const string& treeName, bool paranoid, const strin
             haveL1Info = true;
         if(aliasname=="hlt8e29_trigNames") 
             haveHLT8E29Info = true;
+        if(aliasname=="taus_pf_IDnames") 
+            haveTauIDInfo = true;
     }
    
     if(haveHLTInfo) {
@@ -620,6 +623,27 @@ void makeHeaderFile(TFile *f, const string& treeName, bool paranoid, const strin
         headerf << "\t" << "return 0;" << endl;
         headerf << "\t" << "}" << endl;
     }//if(haveL1Info)
+    if(haveTauIDInfo) {
+        //functions to return whether or not trigger fired - HLT
+        headerf << "\t" << "float passTauID(TString idName, unsigned int tauIndx) {" << endl;
+        headerf << "\t\t" << "int idIndx;" << endl;
+        headerf << "\t\t" << "vector<TString>::const_iterator begin_it = taus_pf_IDnames().begin();" << endl;
+        headerf << "\t\t" << "vector<TString>::const_iterator end_it = taus_pf_IDnames().end();" << endl;
+        headerf << "\t\t" << "vector<TString>::const_iterator found_it = find(begin_it, end_it, idName);" << endl;
+        headerf << "\t\t" << "if(found_it != end_it)" << endl;
+        headerf << "\t\t\t" << "idIndx = found_it - begin_it;" << endl;
+        headerf << "\t\t" << "else {" << endl;
+        headerf << "\t\t\t" << "cout << \"Cannot find Tau ID \" << idName << endl; " << endl;
+        headerf << "\t\t\t" << "return 0;" << endl;
+        headerf << "\t\t"   << "}" << endl << endl;
+	headerf << "\t\t"   << "if (tauIndx < taus_pf_IDs().size()) " << endl;
+	headerf << "\t\t\t" << "return taus_pf_IDs().at(tauIndx).at(idIndx);" << endl;
+	headerf << "\t\t"   << "else {" << endl;
+	headerf << "\t\t\t" << "cout << \"Cannot find tau # \"<< tauIndx << endl;" << endl;
+	headerf << "\t\t\t" << "return 0;" << endl;
+	headerf << "\t\t"   << "}" << endl;
+        headerf << "\t" << "}" << endl;
+    }//if(haveTauIDInfo)
     
     headerf << endl;
     headerf << "  static void progress( int nEventsTotal, int nEventsChain ){" << endl;
@@ -722,6 +746,11 @@ void makeHeaderFile(TFile *f, const string& treeName, bool paranoid, const strin
         headerf << "\t" << "bool passL1Trigger(TString trigName);" << endl;
         implf   << "\t" << "bool passL1Trigger(TString trigName) { return " << objName << ".passL1Trigger(trigName); }" << endl;
     }//if(haveL1Info)
+    if(haveTauIDInfo) {
+        //functions to return whether or not trigger fired - HLT
+        headerf << "\t" << "float passTauID(TString idName, unsigned int tauIndx);" << endl;
+        implf   << "\t" << "float passTauID(TString idName, unsigned int tauIndx) { return " << objName << ".passTauID(idName, tauIndx); }" << endl;
+    }//if(haveTauIDInfo) 
  
 }
   
