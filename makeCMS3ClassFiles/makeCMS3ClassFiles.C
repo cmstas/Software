@@ -205,7 +205,8 @@ void makeHeaderFile(TFile *f, const string& treeName, bool paranoid, const strin
            !branchclass.Contains("float") && 
            !branchclass.Contains("double") &&
            !branchclass.Contains("string") &&
-           !branchclass.Contains("TString"))
+           !branchclass.Contains("TString") &&
+           !branchclass.Contains("long long"))
             continue;
 
         // if (branchclass.Contains("TString"))
