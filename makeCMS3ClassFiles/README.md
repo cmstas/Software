@@ -21,4 +21,12 @@ For New Students:
   2.  Test this by running "root doAll.C".  If you have troubles, your ROOT is probably installed incorrectly, ask smart people for help.
   3.  Now you write your code in looper.C and run it in doAll.C.  You can use this ScanChain to fill plots, make babies, whatever you want.  
 
+Troubleshooting: 
+  - The most common symptom is getting all 0s back.  In this case:
+    - Make sure your class files are generated on the exact file you're running over.  In particular, if branches have been added or removed, it can easily cause problems
+    - If you're running on CMS3.cc/CMS3.h, make sure you update CORE and rerun.  The .so file in CORE depends on the CMS3 class files, and you don't want a mismatch.
+    - If you're making private class files, make sure not to call them CMS3.cc/CMS3.h.  This will cause conflicts and undefind behavior.
+    - If it complains about a ROOT version mismatch, recompile CORE from your current terminal.  That mismatch has been known to lead to this behavior.  
+  - If it says that a branch does not exist, you're not doing the Init and/or GetEntry properly in your looper.
+
 E-mail Alex with bug reports or feature requests, george AT physics DOT ucsb
