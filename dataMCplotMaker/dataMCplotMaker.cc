@@ -5,6 +5,20 @@ bool Integral(PlotInfo plot1, PlotInfo plot2){
   return plot1.Plot->Integral(0,plot1.Plot->GetNbinsX()) < plot2.Plot->Integral(0,plot2.Plot->GetNbinsX());
 }
 
+//Needed for freaking vertical lines
+void DrawVerticalLine(Double_t x){
+  TLine l;
+  l.SetLineStyle(2);
+  l.SetLineWidth(2);
+  l.SetLineColor(kGray+2);
+  Double_t lm = gPad->GetLeftMargin();
+  Double_t rm = 1.-gPad->GetRightMargin();
+  Double_t tm = 1.-gPad->GetTopMargin();
+  Double_t bm = gPad->GetBottomMargin();
+  Double_t xndc = (rm-lm)*((x-gPad->GetUxmin())/(gPad->GetUxmax()-gPad->GetUxmin()))+lm;
+  l.DrawLineNDC(xndc,bm,xndc,tm);
+}
+
 //Parse Parameters from options input string
 vector <std::string> GetParms(std::string blah){
   int a = -1;
@@ -637,15 +651,8 @@ void dataMCplotMaker(TH1F* Data, std::vector <TH1F*> Backgrounds, std::vector <c
   }
 
   //Draw vertical lines
-  for (unsigned int i = 0; i < vLines.size(); i++){
-    TLine linecut;
-    c0.Update();
-    linecut.SetLineStyle(2);
-    linecut.SetLineWidth(2);
-    linecut.SetLineColor(kGray+2);
-    if (!linear) linecut.DrawLine(vLines[i],0.,vLines[i],myMax);
-    if (linear) linecut.DrawLine(vLines[i],0.,vLines[i],myMax);
-  }
+  c0.Update();
+  for (unsigned int i = 0; i < vLines.size(); i++) DrawVerticalLine(vLines[i]); 
 
   //Draw Horizontal lines
   for (unsigned int i = 0; i < hLines.size(); i++){
