@@ -188,6 +188,7 @@ void makeHeaderFile(TFile *f, const string& treeName, bool paranoid, const strin
         TString branchclass(branch->GetClassName());
         if(!branchname.BeginsWith("int") && 
            !branchname.BeginsWith("uint") && 
+           !branchname.BeginsWith("ullong") && 
            !branchname.BeginsWith("bool") && 
            !branchname.BeginsWith("float") &&
            !branchname.BeginsWith("double") &&
@@ -195,6 +196,7 @@ void makeHeaderFile(TFile *f, const string& treeName, bool paranoid, const strin
            !branchtitle.EndsWith("/F") && 
            !branchtitle.EndsWith("/I") &&
            !branchtitle.EndsWith("/i") &&
+           !branchtitle.EndsWith("/l") &&
            !branchtitle.EndsWith("/O") &&
            !branchtitle.EndsWith("/D") &&
            !branchtitle.BeginsWith("TString") &&
@@ -261,6 +263,8 @@ void makeHeaderFile(TFile *f, const string& treeName, bool paranoid, const strin
             } else {
                 if(title.EndsWith("/i"))
                     headerf << "\tunsigned int" << "\t" << aliasname << "_;" << endl;
+                if(title.EndsWith("/l"))
+                    headerf << "\tunsigned long long" << "\t" << aliasname << "_;" << endl;
                 if(title.EndsWith("/F"))
                     headerf << "\tfloat" << "\t" << aliasname << "_;" << endl;
                 if(title.EndsWith("/I"))
