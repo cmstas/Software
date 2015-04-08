@@ -401,6 +401,8 @@ void makeHeaderFile(TFile *f, const string& treeName, bool paranoid, const strin
             } else {
                 if(title.EndsWith("/i"))
                     headerf << "\tunsigned int &" << aliasname << "()" << endl;
+                if(title.EndsWith("/l"))
+                    headerf << "\tunsigned long long &" << aliasname << "()" << endl;
                 if(title.EndsWith("/F"))
                     headerf << "\tfloat &" << aliasname << "()" << endl;
                 if(title.EndsWith("/I"))
@@ -716,6 +718,10 @@ void makeHeaderFile(TFile *f, const string& treeName, bool paranoid, const strin
                     headerf << "\tconst unsigned int &" << aliasname << "()";
                     implf   << "\tconst unsigned int &" << aliasname << "()";
                 }
+                if(title.EndsWith("/l")){
+                    headerf << "\tconst unsigned long long &" << aliasname << "()";
+                    implf   << "\tconst unsigned long long &" << aliasname << "()";
+                }
                 if(title.EndsWith("/F")){
                     headerf << "\tconst float &" << aliasname << "()";
                     implf   << "\tconst float &" << aliasname << "()";
@@ -977,6 +983,13 @@ void makeBranchFile(std::string branchNamesFile, std::string treeName) {
         if(varType=="unsigned int" || varType == "UInt_t") {
             branchfile << "   outTree_->Branch(\"" << varName << "\",   &" << varName;
             branchfile << ",   \"" << varName + "/i\");" << endl;
+            branchfile << "   outTree_->SetAlias(\"" << v_varNames[i] << "\",   " 
+                       << "\"" << varName << "\");" << endl;
+            continue;
+        }
+        if(varType=="unsigned long long" || varType == "ULong64_t") {
+            branchfile << "   outTree_->Branch(\"" << varName << "\",   &" << varName;
+            branchfile << ",   \"" << varName + "/l\");" << endl;
             branchfile << "   outTree_->SetAlias(\"" << v_varNames[i] << "\",   " 
                        << "\"" << varName << "\");" << endl;
             continue;
