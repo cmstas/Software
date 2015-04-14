@@ -987,7 +987,7 @@ void makeBranchFile(std::string branchNamesFile, std::string treeName) {
                        << "\"" << varName << "\");" << endl;
             continue;
         }
-        if(varType=="unsigned long long" || varType == "ULong64_t") {
+        if(varType=="unsigned long long" || varType == "ULong64_t" || varType == "const unsigned long long") {
             branchfile << "   outTree_->Branch(\"" << varName << "\",   &" << varName;
             branchfile << ",   \"" << varName + "/l\");" << endl;
             branchfile << "   outTree_->SetAlias(\"" << v_varNames[i] << "\",   " 
