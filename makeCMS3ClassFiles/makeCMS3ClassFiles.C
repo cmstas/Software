@@ -44,7 +44,7 @@ void makeDriverFile(string fname, string treeName);
 
 
 //-------------------------------------------------------------------------------------------------
-void makeCMS3ClassFiles (const std::string& fname, const std::string& treeName="", const std::string& className="CMS3",
+void makeCMS3ClassFiles (const std::string& fname, const std::string& treeName="Events", const std::string& className="CMS3",
                          const std::string& nameSpace="tas", const std::string& objName="cms3", const bool paranoid = false) {
 
     using namespace std;
