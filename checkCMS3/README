@@ -9,7 +9,7 @@ root[0] .L checkCMS3.C+
 root[1] checkCMS3("/path/to/some/sample/directory/")
 
 Return value: the number of problems found.
-
+Detailed printouts will highlight where any problems are found.
 
 Tests performed:
 -Detailed event counting
