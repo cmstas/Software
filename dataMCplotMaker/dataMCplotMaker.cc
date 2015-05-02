@@ -38,15 +38,17 @@ vector <std::string> GetParms(std::string blah){
   return options;
 }
 
-//Function to determine maximum of each histogram, including error bars
+//Function to determine maximum of each histogram, including error bars.  Side = 1 left, 2 right, 3 both
 TH1F *null = new TH1F("", "", 1,0,1);
-float AdjustedMaximum(std::vector <TH1F*> Plots, TH1F* data = null, std::vector <TH1F*> Signals = std::vector<TH1F*>()){
+float AdjustedMaximum(int side, std::vector <TH1F*> Plots, TH1F* data = null, std::vector <TH1F*> Signals = std::vector<TH1F*>()){
+  int lowerBound = 0;
+  if (side == 2) lowerBound = 0.5*Plots[0]->GetNbinsX();
+  int upperBound = Plots[0]->GetNbinsX()+2;
+  if (side == 1) upperBound = 0.5*Plots[0]->GetNbinsX();
   vector <float> heights;
-  for (int i = 0; i < Plots[0]->GetNbinsX()+2; i++){
+  for (int i = lowerBound; i < upperBound; i++){
     float temp = 0;
-    for (unsigned int j = 0; j < Plots.size(); j++){
-      temp += Plots[j]->GetBinContent(i)+Plots[j]->GetBinError(i);
-    }
+    for (unsigned int j = 0; j < Plots.size(); j++) temp += Plots[j]->GetBinContent(i);
     heights.push_back(temp);
   }
   if (Signals.size() > 0 && Signals[0]->GetEntries() > 0){
@@ -61,7 +63,7 @@ float AdjustedMaximum(std::vector <TH1F*> Plots, TH1F* data = null, std::vector 
   std::sort( heights.begin(), heights.end() );
   float bkgd_height = heights[heights.size()-1];
   heights.clear();
-  for (int i = 0; i < data->GetNbinsX()+2; i++){
+  for (int i = lowerBound; i < upperBound; i++){
     heights.push_back(data->GetBinContent(i)+data->GetBinError(i));
   }
   std::sort( heights.begin(), heights.end() );
@@ -505,7 +507,6 @@ void dataMCplotMaker(TH1F* Data, std::vector <TH1F*> Backgrounds, std::vector <c
     }
   }
 
-
   //Draw histogram with two pads
   TCanvas c0("c0", "c0");
   TPad* finPad[2];
@@ -571,6 +572,8 @@ void dataMCplotMaker(TH1F* Data, std::vector <TH1F*> Backgrounds, std::vector <c
 }
 
   //Minimum and maximum
+  float leftMax = AdjustedMaximum(1, Backgrounds, Data, Signals);
+  float rightMax = AdjustedMaximum(2, Backgrounds, Data, Signals);
   if (setMinimum != -1) stack->SetMinimum(setMinimum);
   if (setMinimum == -1 && !linear && Backgrounds[0]->GetMinimum() > 0) stack->SetMinimum(min(1.0, 0.9*Backgrounds[0]->GetMinimum()));
   else if (setMinimum == -1 && !linear && stack->GetMinimum() > 0) stack->SetMinimum(min(1.0, 0.1*stack->GetMinimum()));
@@ -580,11 +583,28 @@ void dataMCplotMaker(TH1F* Data, std::vector <TH1F*> Backgrounds, std::vector <c
   if (nostack) stack->Draw("nostack");
   float myMax = 0;
   if (setMaximum != -1) myMax = setMaximum; 
-  else if (setMaximum == -1 && !linear && stack->GetMinimum() > 0) myMax = pow(stack->GetMinimum(), -1.0/3.0) * pow(AdjustedMaximum(Backgrounds, Data, Signals), 4.0/3.0);
-  else if (setMaximum == -1 && linear && noLegend)  myMax = (AdjustedMaximum(Backgrounds, Data, Signals))*(1.2) - (stack->GetMinimum())*(1.0/3.0);
-  else if (setMaximum == -1 && linear) myMax = (AdjustedMaximum(Backgrounds, Data, Signals))*(4.0/3.0) - (stack->GetMinimum())*(1.0/3.0);  
+  else if (setMaximum == -1 && !linear && stack->GetMinimum() > 0){
+    myMax = pow(stack->GetMinimum(), -1.0/3.0) * pow(AdjustedMaximum(3, Backgrounds, Data, Signals), 4.0/3.0);
+    if (rightMax > leftMax){
+      myMax = myMax*6.0;
+      if (Backgrounds.size() + Signals.size() >= 4) myMax = myMax*5.0;
+    }
+    if (rightMax < leftMax) myMax = myMax*0.02;
+  }
+  else if (setMaximum == -1 && linear && noLegend)  myMax = (AdjustedMaximum(3, Backgrounds, Data, Signals))*(1.2) - (stack->GetMinimum())*(1.0/3.0);
+  else if (setMaximum == -1 && linear){
+    myMax = (AdjustedMaximum(3, Backgrounds, Data, Signals))*1.46 - (stack->GetMinimum())*(1.0/3.0);  
+    if (rightMax < 0.7*leftMax){
+      myMax = myMax*0.88;
+      if (strcmp(title2, "") == 0) myMax = myMax*0.94; 
+    }
+    else if (rightMax > leftMax){ 
+      if (Backgrounds.size() + Signals.size() >= 4) myMax = myMax*1.2;
+    }
+  }
   else if (!linear) myMax = stack->GetMaximum()*20.0;
   else myMax = stack->GetMaximum()*2;
+
   stack->SetMaximum(myMax);
 
   //Y-axis titles
