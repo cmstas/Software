@@ -57,7 +57,7 @@ int checkCMS3( TString samplePath = "" ) {
 
 
   /////////////////////////////////////////////////////////////////////////////////
-  // Setup a few branches, and read in some key values
+  // Set up a few branches, and read in some key values
 
   chain->SetMakeClass(1);
   
@@ -105,24 +105,27 @@ int checkCMS3( TString samplePath = "" ) {
   /////////////////////////////////////////////////////////////////////////////////
   // Event counting
 
-  // Number of events in the chain
   cout << "\n================ Event counts ================================\n" << endl;
 
+  // Read from nEvts branch
   Long64_t nEvts_branch = 0;
-  
   if( isMerged ) {
 	nEvts_branch = (Long64_t)chain->GetMaximum("evt_nEvts");
 	cout << "Number in \"nEvts\" branch: " << nEvts_branch << endl;
   }
+
+  // Count using chain->GetEntries()
   cout << "Total events in files:    ";
   const Long64_t nEvts_chain = chain->GetEntries();
   cout << nEvts_chain << endl;
+
+  // Get event count from DAS
   cout << "Event count from DAS:     ";
   TString Evts_das = gSystem->GetFromPipe( "python das_client.py --query=\"dataset= "+dataset_name+" | grep dataset.nevents\" | tail -1" );
   const Long64_t nEvts_das = Evts_das.Atoll();
   cout << nEvts_das << endl;
 
-
+  // Check to see if the numbers match up
   if( nEvts_chain==nEvts_das ) {
 	if( !isMerged ) printf("           \033[92m Matched \033[0m\n");
 	else if( isMerged && nEvts_chain==nEvts_branch ) printf("           \033[92m Matched \033[0m\n");
@@ -136,17 +139,14 @@ int checkCMS3( TString samplePath = "" ) {
 	nProblems++;
   }
   
-
-  cout << "\nNumber of events by file:" << endl;
-
   // Breakdown by filename
+  cout << "\nNumber of events by file:" << endl;
   TObjArray *fileList = chain->GetListOfFiles();
   TIter fileIter(fileList);
   TFile *currentFile = 0;
   TRegexp shortname("[mergd_]*ntuple_[0-9]+.root");
 
   while(( currentFile = (TFile*)fileIter.Next() )) {
-
 	TFile *file = new TFile( currentFile->GetTitle() );
 	TTree *tree = (TTree*)file->Get("Events");
 	TString filename = file->GetName();
@@ -162,7 +162,7 @@ int checkCMS3( TString samplePath = "" ) {
   cout << "\n\n============ Post-processing variables ============================" << endl;
 
   if( isMerged ) {
-
+	// Check for branches with values set to zero
 	cout << "\nChecking for events with important values set to zero:" << endl;
 	Long64_t nZeros_xsec     = chain->GetEntries("evt_xsec_incl==0");
 	cout << "Cross-section: ";
@@ -193,8 +193,8 @@ int checkCMS3( TString samplePath = "" ) {
 	  nProblems++;
 	}
 
+	// Make sure the value of scale1fb is consistent with the other numbers
 	cout << "\nChecking values for consistency:" << endl;
-
 	cout << " Number of events = " << nEvts_chain << endl;
 	double xsec = chain->GetMaximum("evt_xsec_incl");
 	cout << "    Cross section = " << xsec << endl;
