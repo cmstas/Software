@@ -416,62 +416,6 @@ void dataMCplotMaker(TH1F* Data, std::vector <TH1F*> Backgrounds, std::vector <c
 
   std::vector <Color_t> Colors;
 
-  //Sort Backgrounds, with Titles and Colors
-  if (preserveBackgroundOrder == 0){
-    std::vector<PlotInfo> myPlotInfo;
- 
-    for (unsigned int i = 0; i < Backgrounds.size(); i++){
-      PlotInfo temp;
-      temp.Plot = Backgrounds[i];
-      temp.Title = Titles[i];
-      if (color_input.size() > 0){
-        temp.Color = color_input[i];
-      }
-      else{
-        temp.Color = kWhite;
-      }
-      myPlotInfo.push_back(temp);
-    }
-
-    std::sort(myPlotInfo.begin(), myPlotInfo.end(), Integral);
-    Backgrounds.clear();
-    Titles.clear();
-
-    for (unsigned int i = 0; i < myPlotInfo.size(); i++){
-      Backgrounds.push_back(myPlotInfo[i].Plot);
-      Titles.push_back(myPlotInfo[i].Title);
-      if (color_input.size() > 0) Colors.push_back(myPlotInfo[i].Color);
-    }
-  }
-
-  //Sort Signals, with Titles and Colors
-  if (preserveSignalOrder == 0){
-    std::vector<PlotInfo> myPlotInfo;
- 
-    for (unsigned int i = 0; i < Signals.size(); i++){
-      PlotInfo temp;
-      temp.Plot = Signals[i];
-      temp.Title = SignalTitles[i];
-      if (color_input.size() > 0){
-        temp.Color = color_input[i+Backgrounds.size()];
-      }
-      else{
-        temp.Color = kBlack;
-      }
-      myPlotInfo.push_back(temp);
-    }
-
-    std::sort(myPlotInfo.begin(), myPlotInfo.end(), Integral);
-    Signals.clear();
-    SignalTitles.clear();
-
-    for (unsigned int i = 0; i < myPlotInfo.size(); i++){
-      Signals.push_back(myPlotInfo[i].Plot);
-      SignalTitles.push_back(myPlotInfo[i].Title);
-      if (color_input.size() > 0) Colors.push_back(myPlotInfo[i].Color);
-    }
-  }
-
   //Set colors for histograms (this is my color scheme, probably needs changed for publishable plots)
   if (color_input.size() == 0 && use_signals == 0 && nostack == 0){ 
     Colors.push_back(kGreen+3);   
@@ -502,6 +446,65 @@ void dataMCplotMaker(TH1F* Data, std::vector <TH1F*> Backgrounds, std::vector <c
       Colors.push_back(color_input[i]);
     }
   }
+
+  //Sort Backgrounds, with Titles and Colors
+  if (preserveBackgroundOrder == 0){
+    std::vector<PlotInfo> myPlotInfo;
+ 
+    for (unsigned int i = 0; i < Backgrounds.size(); i++){
+      PlotInfo temp;
+      temp.Plot = Backgrounds[i];
+      temp.Title = Titles[i];
+      if (color_input.size() > 0){
+        temp.Color = color_input[i];
+      }
+      else{
+        temp.Color = Colors[i];
+      }
+      myPlotInfo.push_back(temp);
+    }
+
+    std::sort(myPlotInfo.begin(), myPlotInfo.end(), Integral);
+    Backgrounds.clear();
+    Titles.clear();
+
+    for (unsigned int i = 0; i < myPlotInfo.size(); i++){
+      Backgrounds.push_back(myPlotInfo[i].Plot);
+      Titles.push_back(myPlotInfo[i].Title);
+      if (color_input.size() > 0) Colors.push_back(myPlotInfo[i].Color);
+      else Colors[i] = myPlotInfo[i].Color;
+    }
+  }
+
+  //Sort Signals, with Titles and Colors
+  if (preserveSignalOrder == 0){
+    std::vector<PlotInfo> myPlotInfo;
+ 
+    for (unsigned int i = 0; i < Signals.size(); i++){
+      PlotInfo temp;
+      temp.Plot = Signals[i];
+      temp.Title = SignalTitles[i];
+      if (color_input.size() > 0){
+        temp.Color = color_input[i+Backgrounds.size()];
+      }
+      else{
+        temp.Color = Colors[i+Backgrounds.size()];
+      }
+      myPlotInfo.push_back(temp);
+    }
+
+    std::sort(myPlotInfo.begin(), myPlotInfo.end(), Integral);
+    Signals.clear();
+    SignalTitles.clear();
+
+    for (unsigned int i = 0; i < myPlotInfo.size(); i++){
+      Signals.push_back(myPlotInfo[i].Plot);
+      SignalTitles.push_back(myPlotInfo[i].Title);
+      if (color_input.size() > 0) Colors.push_back(myPlotInfo[i].Color);
+      else Colors[Backgrounds.size()+i] = myPlotInfo[i].Color;  
+    }
+  }
+
 
   //Draw histogram with two pads
   TCanvas c0("c0", "c0");
@@ -576,10 +579,10 @@ void dataMCplotMaker(TH1F* Data, std::vector <TH1F*> Backgrounds, std::vector <c
   if (!nostack) stack->Draw("hist");
   if (nostack) stack->Draw("nostack");
   float myMax = 0;
-  if (setMaximum != -1) myMax = setMaximum;
+  if (setMaximum != -1) myMax = setMaximum; 
   else if (setMaximum == -1 && !linear && stack->GetMinimum() > 0) myMax = pow(stack->GetMinimum(), -1.0/3.0) * pow(AdjustedMaximum(Backgrounds, Data, Signals), 4.0/3.0);
   else if (setMaximum == -1 && linear && noLegend)  myMax = (AdjustedMaximum(Backgrounds, Data, Signals))*(1.2) - (stack->GetMinimum())*(1.0/3.0);
-  else if (setMaximum == -1 && linear)  myMax = (AdjustedMaximum(Backgrounds, Data, Signals))*(4.0/3.0) - (stack->GetMinimum())*(1.0/3.0);
+  else if (setMaximum == -1 && linear) myMax = (AdjustedMaximum(Backgrounds, Data, Signals))*(4.0/3.0) - (stack->GetMinimum())*(1.0/3.0);  
   else if (!linear) myMax = stack->GetMaximum()*20.0;
   else myMax = stack->GetMaximum()*2;
   stack->SetMaximum(myMax);
