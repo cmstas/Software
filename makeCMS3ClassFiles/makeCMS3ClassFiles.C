@@ -44,7 +44,7 @@ void makeDriverFile(string fname, string treeName);
 
 
 //-------------------------------------------------------------------------------------------------
-void makeCMS3ClassFiles (const std::string& fname, const std::string& treeName="", const std::string& className="CMS3",
+void makeCMS3ClassFiles (const std::string& fname, const std::string& treeName="Events", const std::string& className="CMS3",
                          const std::string& nameSpace="tas", const std::string& objName="cms3", const bool paranoid = false) {
 
     using namespace std;
@@ -123,6 +123,7 @@ void makeHeaderFile(TFile *f, const string& treeName, bool paranoid, const strin
     headerf << "#include \"TFile.h\"" << endl;
     headerf << "#include \"TBits.h\"" << endl;
     headerf << "#include <vector> " << endl;
+    headerf << "#include <unistd.h> " << endl;
     headerf << "typedef ROOT::Math::LorentzVector<ROOT::Math::PxPyPzE4D<float> > LorentzVector;" << endl << endl;
     if (paranoid)
         headerf << "#define PARANOIA" << endl << endl;
