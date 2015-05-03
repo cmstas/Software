@@ -24,11 +24,13 @@ CNumBase:
 
 Tables:
   - Set a simple table with the following syntax:
+```
         CTable table;
         table.setTable() (         "col 1", "col 2",  "col 3")
                          ( "row1", Vud.data(), 0.22534,  0.00351)
                          ( "row2", 0.22520, 0.97344,   0.0412)
                          ( "row3", 0.00867,  0.0404, "0.999146");
+```
   - If you use CNumBase, you can use t1.SetPrecision(N) to get N units of precision.  
   - Add title with: table.setTitle("Table Title"), table.useTitle();
   - Remove horiz. lines between rows: table.useLines(0);
