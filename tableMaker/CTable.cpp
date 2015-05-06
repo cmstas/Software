@@ -111,7 +111,7 @@ void CTable::setCell(const TString& entryTS, size_t r, size_t c){
 
 void CTable::setCell(double entryd, size_t r, size_t c){
   std::stringstream ss;
-  ss<<entryd;
+  ss<<std::fixed<<std::setprecision(precision_)<<entryd;
   std::string entry;
   ss>>entry;
   setCell(entry,r,c);

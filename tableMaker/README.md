@@ -25,13 +25,15 @@ CNumBase:
 Tables:
   - Set a simple table with the following syntax:
 ```
+        CNumBase Vud;
+        Vud.setData(0.97427);
         CTable table;
         table.setTable() (         "col 1", "col 2",  "col 3")
                          ( "row1", Vud.data(), 0.22534,  0.00351)
                          ( "row2", 0.22520, 0.97344,   0.0412)
                          ( "row3", 0.00867,  0.0404, "0.999146");
 ```
-  - If you use CNumBase, you can use t1.SetPrecision(N) to get N units of precision.  
+  - You can use t1.SetPrecision(N) to get N units of precision.  This does NOT work if you type in the values, but works otherwise.
   - Add title with: table.setTitle("Table Title"), table.useTitle();
   - Remove horiz. lines between rows: table.useLines(0);
   - Print column labels vertically: table.useVertColLabels();
@@ -39,9 +41,5 @@ Tables:
 ###Cool Features
   - table.print() will print a nicely-formatted table
   - table.saveTex("output.tex") will create output.tex with the table.
-
-###Areas for Improvement
-  - SetPrecision seems to have zero effect except for CNumBase Objects
-  - I thought it was possible to add and subtract entire tables, maybe not?
 
 Send bugs, feature requests, etc., to no one.  This was originally written by Ian MacNeill and revived by Alex George, but I don't think anyone is willing to assume ownership at this point.  Accepting volunteers! Until then, use at your own peril.  
