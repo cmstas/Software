@@ -16,7 +16,7 @@ N.B. The branchNamesFile variable is hardcoded to null, and paranoid is an optio
 ###For a skeleton looper:
   Doing the above will also make ScanChain.C and doAll.C, which is a skeleton looper.  
 
-###or New Students:
+###For New Students:
   1.  Download this and run it.  For the first argument, use any sample in /hadoop/cms/store/group/snt/phys14 (ideally pick the most recent SMS sample you can find in that directory, but any sample really should work for most purposes).  This will produce CMS3.cc CMS3.h doAll.C and ScanChain.C.  
   2.  Test this by running "root doAll.C".  If you have troubles, your ROOT is probably installed incorrectly, ask smart people for help.
   3.  Now you write your code in looper.C and run it in doAll.C.  You can use this ScanChain to fill plots, make babies, whatever you want.  
