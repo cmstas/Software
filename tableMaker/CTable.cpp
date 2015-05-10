@@ -109,6 +109,16 @@ void CTable::setCell(const TString& entryTS, size_t r, size_t c){
   setCell(std::string(entryTS.Data()),r,c);
 }
 
+void CTable::printHLine(int row){
+  if (row != 0) hlines_.push_back(row);  
+}
+
+void CTable::printCLine(int row, int start, int end){
+  clines_row_.push_back(row);  
+  clines_start_.push_back(start);  
+  clines_end_.push_back(end);  
+}
+
 void CTable::setCell(double entryd, size_t r, size_t c){
   std::stringstream ss;
   ss<<std::fixed<<std::setprecision(precision_)<<entryd;
@@ -186,6 +196,40 @@ void CTable::printLine(char symbol, size_t length, bool endline) const {
   if(endline){(*out_)<<std::endl;}
 }
 
+std::string CTable::delineator(int i, int j) const {
+  for (unsigned int r = 0; r < multicolumn_row.size(); r++){
+    int row = multicolumn_row[r]; 
+    if (row != i) continue;
+    int start = multicolumn_start[r];
+    if (start > j) continue; 
+    int finish = multicolumn_finish[r]; 
+    if (finish <= j) continue; 
+    return "   "; 
+  }
+  return delineator_;
+}
+
+int CTable::isMultiColumn(int i, int j) const {
+  for (unsigned int r = 0; r < multicolumn_row.size(); r++){
+    int row = multicolumn_row[r]; 
+    if (row != i) continue;
+    int start = multicolumn_start[r];
+    if (start > j) continue; 
+    int finish = multicolumn_finish[r]; 
+    if (finish < j) continue; 
+    if (start == j) return finish-start; 
+    else return -1; 
+  }
+  return 0;
+
+}
+
+void CTable::multiColumn(int row, int start, int finish){
+  multicolumn_row.push_back(row);
+  multicolumn_start.push_back(start);
+  multicolumn_finish.push_back(finish);
+}
+
 void CTable::print() const {
   if(dispTitle_){printTitle();}
   if(height_>0 || width_>0){
@@ -193,12 +237,16 @@ void CTable::print() const {
 	printColLabels();
 	size_t line=calcLine();
     for(size_t i=0; i<height_; i++){
+      for (unsigned int j = 0; j < hlines_.size(); j++){
+        if (hlines_[j] == i) printLine('-', line);  
+      }
       if(dispLines_){printLine('-',line);}
       (*out_)<<" "<<std::setw(rowLabelWidth_)<<std::left<<rowLabels_[i]<<std::right;
       (*out_)<<delineator_;
       for(size_t j=0; j<width_; j++){
 	if(table_[i].size()>j){
-	  (*out_)<<std::setw(colWidth_[j])<<std::left<<table_[i][j]<<delineator_;
+	  if (isMultiColumn(i,j) >= 0) (*out_)<<std::setw(colWidth_[j])<<std::left<<table_[i][j]<<delineator(i,j);
+	  else (*out_)<<std::setw(colWidth_[j])<<std::left<<" "<<delineator(i,j);
 	}else{
 	  (*out_)<<std::setw(colWidth_[j])<<" "<<delineator_;
 	}
@@ -230,15 +278,16 @@ void CTable::printColLabels() const {
 	  if(j==colLabelHeight_-1){(*out_)<<delineator_<<std::endl;;}
 	  else{                   (*out_)<<"   "<<std::endl;;}
 	}
-  }else{
+  }
+  else{
 	for(size_t k=0; k<rowLabelWidth_+1; k++){
 	  (*out_)<<" ";
 	}
 	for(size_t i=0; i<colLabels_.size(); i++){
-	  if(colLabels_[i].length()>colWidth_[i]){colWidth_[i]=colLabels_[i].length();}
-	  (*out_)<<delineator_<<std::setw(colWidth_[i])<<colLabels_[i];
+	  if (colLabels_[i].length()>colWidth_[i]) colWidth_[i]=colLabels_[i].length();
+	  (*out_)<<delineator(-1,i-1)<<std::setw(colWidth_[i])<<colLabels_[i];
 	}
-		(*out_)<<delineator_<<std::endl;
+		(*out_)<<delineator_ <<std::endl;
   }
 }
 
@@ -295,6 +344,7 @@ void CTable::setRowLabel(const TString& labelTS, size_t r){
   setRowLabel(label,r);
 }
 
+
 void CTable::saveAs(const std::string& filename, bool overwrite){
   if(filename.length()>0){
     if(file_==NULL){file_=new ofstream;}
@@ -309,6 +359,16 @@ void CTable::saveAs(const std::string& filename, bool overwrite){
   }else{out_=&std::cout;}
 }
 
+void CTable::setColLine(int i){
+  colLines_.push_back(i); 
+}
+
+bool CTable::isColLine(int i){
+  bool result = false;
+  for (unsigned int j = 0; j < colLines_.size(); j++) if (i == colLines_[j]) result = true;
+  return result;
+}
+
 void CTable::saveTex(const std::string& filename){
   if(filename.length()>0){
     if(file_==NULL){file_=new ofstream;}
@@ -320,24 +380,34 @@ void CTable::saveTex(const std::string& filename){
       out_=&std::cout;
     }
   }else{out_=&std::cout;}
-  std::string cols="c|";
-  for(size_t i=0;i<colLabels_.size();i++){cols+="c";}
+  std::string cols= isColLine(0) ? "|c|" :  "c|";
+  for(size_t i=0;i<colLabels_.size();i++){(isColLine(i) && i != 0) ? cols+="c|" : cols+="c";}
   (*out_)<<"\\documentclass{article}"<<std::endl
+         << "\\usepackage{fullpage}"<<std::endl
          <<"\\begin{document}"<<std::endl
 	     <<"\\begin{table}[ht!]"<<std::endl
 	     <<"\\begin{center}"<<std::endl
          <<"\\begin{tabular}{"<<cols<<"}\\hline"<<std::endl
          <<" ";
   for(size_t i=0;i<colLabels_.size();i++){
-	(*out_)<<"&"<<colLabels_[i];
+	if (isMultiColumn(-1, i) > 0 ) (*out_) << Form("& \\multicolumn{%i}{%sc%s}{%s}", isMultiColumn(-1,i)+1, isColLine(i)  ? "|" : "", (isColLine(i+(isMultiColumn(-1,i)))) ? "|" : "", colLabels_[i].c_str()); 
+    if (isMultiColumn(-1, i) == 0) (*out_)<<"&"<<colLabels_[i];
   }
-  (*out_)<<"\\\\"<<std::endl<<"\\hline \\hline"<<std::endl;
+  if (rowLabels_[0] != "") (*out_)<<"\\\\"<<std::endl<<"\\hline \\hline"<<std::endl;
+  if (rowLabels_[0] == "") (*out_)<<"\\\\"<<std::endl<<"\\cline{2-" << width_+1 << "}" <<std::endl;
   if(height_>0 || width_>0){
     for(size_t i=0; i<height_; i++){
+      for (unsigned int j = 0; j < hlines_.size(); j++){
+        if (hlines_[j] == i) (*out_)<<"\\hline"<<std::endl;
+      }
+      for (unsigned int j = 0; j < clines_row_.size(); j++){
+        if (clines_row_[i] == i) (*out_) << "\\cline{" << clines_start_[i] << "," << clines_end_[i] << "}" << std::endl;
+      }
       (*out_)<<rowLabels_[i];
       for(size_t j=0; j<width_; j++){
 		if(table_[i].size()>j){
-		  (*out_)<<" & "<<table_[i][j];
+	      if (isMultiColumn(i,j) > 0 ) (*out_) << Form("& \\multicolumn{%i}{l}{%s}", isMultiColumn(i,j)+1, table_[i][j].c_str()); 
+		  if (isMultiColumn(i,j) == 0) (*out_) << " & " << table_[i][j];
 		}else{
 		  (*out_)<<" &  ";
 		}
@@ -366,7 +436,8 @@ void CTable::printTex() const {
   for(size_t i=0;i<colLabels_.size();i++){
 	cout   <<"&"<<colLabels_[i];
   }
-  cout   <<"\\\\"<<std::endl<<"\\hline \\hline"<<std::endl;
+  if (colLabels_[0] != "") cout   <<"\\\\"<<std::endl<<"\\hline \\hline"<<std::endl;
+  else cout   <<"\\\\"<<std::endl<<"\\cline{1-" << width_+1 << "}" <<std::endl;
   if(height_>0 || width_>0){
     for(size_t i=0; i<height_; i++){
       cout   <<rowLabels_[i];

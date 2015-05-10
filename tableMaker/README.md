@@ -37,6 +37,10 @@ Tables:
   - Add title with: table.setTitle("Table Title"), table.useTitle();
   - Remove horiz. lines between rows: table.useLines(0);
   - Print column labels vertically: table.useVertColLabels();
+  - Print \hline: table.printHLine(row); 
+  - Print \cline{a-b}: table.printCLine(row, a, b); 
+  - Multicolumn: table.multiColumn(row, column start, column finish); 
+  - Vertical lines: table.setColLine(col); 
 
 ###Cool Features
   - table.print() will print a nicely-formatted table

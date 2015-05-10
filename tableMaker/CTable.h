@@ -32,17 +32,28 @@ protected:
   std::string lend_;
   std::string rend_;
   std::string corner_;
+  std::vector<unsigned int> clines_row_;
+  std::vector<unsigned int> clines_start_;
+  std::vector<unsigned int> clines_end_;
   std::ostream *out_;
   std::ofstream *file_;
+  std::vector<unsigned int> hlines_; 
+  std::vector<int> multicolumn_start;
+  std::vector<int> multicolumn_finish;
+  std::vector<int> multicolumn_row;
+  std::vector<int> colLines_; 
+  std::string delineator(int, int) const;  
+  int isMultiColumn(int i, int j) const; 
 
   //configuration bools
   bool dispTitle_;
   bool dispLines_;
   bool useVertColLabels_;
 
-
-  size_t calcLine() const;
   void printLine(char symbol, size_t length, bool endline=true) const;
+  size_t calcLine() const;
+
+
 public:
   CTable();
   ~CTable();
@@ -56,6 +67,11 @@ public:
   void setCell(const TString& entryTS, size_t r, size_t c);
   void setCell(const CNumBase<float>& entryn, size_t r, size_t c);
   void setCell(const CNumBase<double>& entryn, size_t r, size_t c);
+  void printHLine(int row); 
+  void printCLine(int, int, int); 
+  void multiColumn(int row, int start, int finish);
+  void setColLine(int i); 
+  bool isColLine(int i);
   //void setCol(std::vector<std::string> col, size_t c);
   void setColLabel(const std::string& label, size_t c);
   void setColLabel(const char* labelc, size_t c);
