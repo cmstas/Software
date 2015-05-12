@@ -41,10 +41,10 @@ vector <std::string> GetParms(std::string blah){
 //Function to determine maximum of each histogram, including error bars.  Side = 1 left, 2 right, 3 both
 TH1F *null = new TH1F("", "", 1,0,1);
 float AdjustedMaximum(int side, std::vector <TH1F*> Plots, TH1F* data = null, std::vector <TH1F*> Signals = std::vector<TH1F*>()){
-  int lowerBound = 0;
-  if (side == 2) lowerBound = 0.5*Plots[0]->GetNbinsX();
-  int upperBound = Plots[0]->GetNbinsX()+2;
-  if (side == 1) upperBound = 0.5*Plots[0]->GetNbinsX();
+  int lowerBound = 1;
+  if (side == 2) lowerBound = 0.5*Plots[0]->GetNbinsX()+1;
+  int upperBound = Plots[0]->GetNbinsX();
+  if (side == 1) upperBound = 0.5*Plots[0]->GetNbinsX()+1;
   vector <float> heights;
   for (int i = lowerBound; i < upperBound; i++){
     float temp = 0;
@@ -52,7 +52,7 @@ float AdjustedMaximum(int side, std::vector <TH1F*> Plots, TH1F* data = null, st
     heights.push_back(temp);
   }
   if (Signals.size() > 0 && Signals[0]->GetEntries() > 0){
-    for (int i = 0; i < Signals[0]->GetNbinsX()+2; i++){
+    for (int i = 1; i < Signals[0]->GetNbinsX(); i++){
       float temp = 0;
       for (unsigned int j = 0; j < Signals.size(); j++){
         temp += Signals[j]->GetBinContent(i);
