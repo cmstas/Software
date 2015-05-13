@@ -393,7 +393,7 @@ void CTable::saveTex(const std::string& filename){
 	if (isMultiColumn(-1, i) > 0 ) (*out_) << Form("& \\multicolumn{%i}{%sc%s}{%s}", isMultiColumn(-1,i)+1, isColLine(i)  ? "|" : "", (isColLine(i+(isMultiColumn(-1,i)))) ? "|" : "", colLabels_[i].c_str()); 
     if (isMultiColumn(-1, i) == 0) (*out_)<<"&"<<colLabels_[i];
   }
-  if (rowLabels_[0] != "") (*out_)<<"\\\\"<<std::endl<<"\\hline \\hline"<<std::endl;
+  if (rowLabels_[0] != "") (*out_)<<"\\\\"<<std::endl<<"\\hline"<<std::endl;
   if (rowLabels_[0] == "") (*out_)<<"\\\\"<<std::endl<<"\\cline{2-" << width_+1 << "}" <<std::endl;
   if(height_>0 || width_>0){
     for(size_t i=0; i<height_; i++){
