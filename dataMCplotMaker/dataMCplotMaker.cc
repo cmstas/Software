@@ -508,7 +508,6 @@ void dataMCplotMaker(TH1F* Data, std::vector <TH1F*> Backgrounds, std::vector <s
   float leftMax = AdjustedMaximum(1, Backgrounds, Data, Signals);
   float rightMax = AdjustedMaximum(2, Backgrounds, Data, Signals);
   float overflow = AdjustedMaximum(4, Backgrounds, Data, Signals);
-  cout << leftMax <<  " " << rightMax << " " << overflow << endl;
   float myMin = 0.1;
   if (setMinimum != -1) myMin = setMinimum;
   if (setMinimum == -1 && !linear && Backgrounds[0]->GetMinimum() > 0) myMin = min(0.1, 0.9*Backgrounds[0]->GetMinimum());
@@ -521,9 +520,6 @@ void dataMCplotMaker(TH1F* Data, std::vector <TH1F*> Backgrounds, std::vector <s
   if (setMaximum != -1) myMax = setMaximum; 
   else if (setMaximum == -1 && !linear){
     myMax = pow(AdjustedMaximum(3, Backgrounds, Data, Signals), 1.0/0.69)*pow(myMin, (0.69-1)/0.69); 
-    cout << "max: " << myMax << endl;
-    cout << "min: " << myMin << endl;
-    cout << "adj max: " << AdjustedMaximum(3, Backgrounds, Data, Signals) << endl;
     if (leftMax > 5*rightMax) myMax = pow(AdjustedMaximum(3, Backgrounds, Data, Signals), 1.0/0.74)*pow(myMin, (0.74-1)/0.74);
     if (rightMax > leftMax)   myMax = myMax*10; 
   }
