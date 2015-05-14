@@ -38,13 +38,16 @@ vector <std::string> GetParms(std::string blah){
   return options;
 }
 
-//Function to determine maximum of each histogram, including error bars.  Side = 1 left, 2 right, 3 both
+//Function to determine maximum of each histogram, including error bars.  Side = 1 left, 2 right, 3 both, 4 = overflow
 TH1F *null = new TH1F("", "", 1,0,1);
 float AdjustedMaximum(int side, std::vector <TH1F*> Plots, TH1F* data = null, std::vector <TH1F*> Signals = std::vector<TH1F*>()){
   int lowerBound = 1;
   if (side == 2) lowerBound = 0.5*Plots[0]->GetNbinsX()+1;
   int upperBound = Plots[0]->GetNbinsX();
   if (side == 1) upperBound = 0.5*Plots[0]->GetNbinsX()+1;
+  if (side == 2) upperBound--;
+  if (side == 4) lowerBound = Plots[0]->GetNbinsX(); 
+  if (side == 4) upperBound = Plots[0]->GetNbinsX()+1; 
   vector <float> heights;
   for (int i = lowerBound; i < upperBound; i++){
     float temp = 0;
@@ -504,22 +507,25 @@ void dataMCplotMaker(TH1F* Data, std::vector <TH1F*> Backgrounds, std::vector <s
   //Minimum and maximum
   float leftMax = AdjustedMaximum(1, Backgrounds, Data, Signals);
   float rightMax = AdjustedMaximum(2, Backgrounds, Data, Signals);
-  if (setMinimum != -1) stack->SetMinimum(setMinimum);
-  if (setMinimum == -1 && !linear && Backgrounds[0]->GetMinimum() > 0) stack->SetMinimum(min(1.0, 0.9*Backgrounds[0]->GetMinimum()));
-  else if (setMinimum == -1 && !linear && stack->GetMinimum() > 0) stack->SetMinimum(min(1.0, 0.1*stack->GetMinimum()));
-  else if (setMinimum == -1 && !linear) stack->SetMinimum(0.5);
-  if (setMinimum == -1 && linear) stack->SetMinimum(0);
+  float overflow = AdjustedMaximum(4, Backgrounds, Data, Signals);
+  cout << leftMax <<  " " << rightMax << " " << overflow << endl;
+  float myMin = 0.1;
+  if (setMinimum != -1) myMin = setMinimum;
+  if (setMinimum == -1 && !linear && Backgrounds[0]->GetMinimum() > 0) myMin = min(0.1, 0.9*Backgrounds[0]->GetMinimum());
+  else if (setMinimum == -1 && !linear && stack->GetMinimum() > 0) myMin = min(0.1, 0.5*stack->GetMinimum());
+  else if (setMinimum == -1 && !linear) myMin = 0.1;
+  if (setMinimum == -1 && linear) myMin = 0; 
   if (!nostack) stack->Draw("hist");
   if (nostack) stack->Draw("nostack");
-  float myMax = 0;
+  float myMax = stack->GetMaximum();
   if (setMaximum != -1) myMax = setMaximum; 
-  else if (setMaximum == -1 && !linear && stack->GetMinimum() > 0){
-    myMax = pow(stack->GetMinimum(), -1.0/3.0) * pow(AdjustedMaximum(3, Backgrounds, Data, Signals), 4.0/3.0);
-    if (rightMax > leftMax){
-      myMax = myMax*6.0;
-      if (Backgrounds.size() + Signals.size() >= 4) myMax = myMax*5.0;
-    }
-    if (rightMax < leftMax) myMax = myMax*0.02;
+  else if (setMaximum == -1 && !linear){
+    myMax = pow(AdjustedMaximum(3, Backgrounds, Data, Signals), 1.0/0.69)*pow(myMin, (0.69-1)/0.69); 
+    cout << "max: " << myMax << endl;
+    cout << "min: " << myMin << endl;
+    cout << "adj max: " << AdjustedMaximum(3, Backgrounds, Data, Signals) << endl;
+    if (leftMax > 5*rightMax) myMax = pow(AdjustedMaximum(3, Backgrounds, Data, Signals), 1.0/0.74)*pow(myMin, (0.74-1)/0.74);
+    if (rightMax > leftMax)   myMax = myMax*10; 
   }
   else if (setMaximum == -1 && linear && noLegend)  myMax = (AdjustedMaximum(3, Backgrounds, Data, Signals))*(1.2) - (stack->GetMinimum())*(1.0/3.0);
   else if (setMaximum == -1 && linear){
@@ -532,9 +538,10 @@ void dataMCplotMaker(TH1F* Data, std::vector <TH1F*> Backgrounds, std::vector <s
       if (Backgrounds.size() + Signals.size() >= 4) myMax = myMax*1.2;
     }
   }
-  else if (!linear) myMax = stack->GetMaximum()*20.0;
-  else myMax = stack->GetMaximum()*2;
+  else if (!linear) myMax = myMax*20.0;
+  else myMax = myMax*2;
 
+  stack->SetMinimum(myMin);
   stack->SetMaximum(myMax);
 
   //Y-axis titles
@@ -623,17 +630,17 @@ void dataMCplotMaker(TH1F* Data, std::vector <TH1F*> Backgrounds, std::vector <s
   float type_y = .95;
   if (!noData) type_y = .96;
   tex->SetTextSize(0.028);
-  if (overrideHeader != "" && overrideHeader[0] == '\0') tex->DrawLatex(0.79,type_y,Form("%s fb^{-1} (%s TeV)", lumi.c_str(), energy.c_str()));
+  if (overrideHeader[0] == '\0') tex->DrawLatex(0.79,type_y,Form("%s fb^{-1} (%s TeV)", lumi.c_str(), energy.c_str()));
   tex->SetTextSize(0.035);
-  if (noData && overrideHeader != "" && overrideHeader[0] == '\0'){
+  if (noData && overrideHeader[0] == '\0'){
     tex->DrawLatex(0.16,type_y-.08, "CMS");
     tex->DrawLatex(0.16,type_y-.11, "#it{Preliminary}"); 
   }
-  if (!noData && overrideHeader != "" && overrideHeader[0] == '\0'){ 
+  if (!noData && overrideHeader[0] == '\0'){ 
     tex->DrawLatex(0.83,type_y-.08, "CMS");
     tex->DrawLatex(0.73,type_y-.13, "#it{Preliminary}"); 
   }
-  if (overrideHeader != "" && overrideHeader[0] != '\0') tex->DrawLatex(0.17,type_y,Form("%s", overrideHeader.c_str()));
+  if (overrideHeader[0] != '\0') tex->DrawLatex(0.17,type_y,Form("%s", overrideHeader.c_str()));
   if (!noData && stack->GetMaximum() > 80000 && linear) finPad[0]->SetPad(0.0, 0.0, 1.0, 0.84);
 
   //Set number of divisions on x-axis
