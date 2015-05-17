@@ -392,8 +392,8 @@ void dataMCplotMaker(TH1F* Data, std::vector <TH1F*> Backgrounds, std::vector <s
     Colors.push_back(kGreen+3);
     Colors.push_back(kYellow-7);
   }
-  else if (color_input.size() > Backgrounds.size()){
-    for (unsigned int i = Backgrounds.size(); i < color_input.size(); i++){
+  else if (color_input.size() != 0){
+    for (unsigned int i = 0; i < color_input.size(); i++){
       Colors.push_back(color_input[i]);
     }
   }
@@ -422,8 +422,7 @@ void dataMCplotMaker(TH1F* Data, std::vector <TH1F*> Backgrounds, std::vector <s
     for (unsigned int i = 0; i < myPlotInfo.size(); i++){
       Backgrounds.push_back(myPlotInfo[i].Plot);
       Titles.push_back(myPlotInfo[i].Title);
-      if (color_input.size() > 0) Colors.push_back(myPlotInfo[i].Color);
-      else Colors[i] = myPlotInfo[i].Color;
+      Colors[i] = myPlotInfo[i].Color;
     }
   }
 
