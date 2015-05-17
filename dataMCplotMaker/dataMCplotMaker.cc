@@ -254,6 +254,8 @@ void dataMCplotMaker(TH1F* Data, std::vector <TH1F*> Backgrounds, std::vector <s
   Int_t nDivisions = -1;
   bool noLegend = false;
   bool png = false;
+  bool dots = false;
+  std::string datacolor = "";
 
   //Loop over options and change default settings to user-defined settings
   for (unsigned int i = 0; i < Options.size(); i++){
@@ -278,6 +280,7 @@ void dataMCplotMaker(TH1F* Data, std::vector <TH1F*> Backgrounds, std::vector <s
     else if (Options[i].find("xAxisUnit") < Options[i].length()) xAxisUnit = getString(Options[i], "xAxisUnit");
     else if (Options[i].find("xAxisOverride") < Options[i].length()) xAxisOverride = getString(Options[i], "xAxisOverride");
     else if (Options[i].find("dataName") < Options[i].length()) dataName = getString(Options[i], "dataName");
+    else if (Options[i].find("dataColor") < Options[i].length()) datacolor = getString(Options[i], "dataColor");
     else if (Options[i].find("topYaxisTitle") < Options[i].length()) topYaxisTitle = getString(Options[i], "topYaxisTitle");
     else if (Options[i].find("type") < Options[i].length()) type = getString(Options[i], "type");
     else if (Options[i].find("overrideHeader") < Options[i].length()) overrideHeader = getString(Options[i], "overrideHeader");
@@ -290,7 +293,20 @@ void dataMCplotMaker(TH1F* Data, std::vector <TH1F*> Backgrounds, std::vector <s
     else if (Options[i].find("legendTextSize") < Options[i].length()) legendTextSize = atof( getString(Options[i], "legendTextSize").c_str() );
     else if (Options[i].find("setMinimum") < Options[i].length()) setMinimum = atof( getString(Options[i], "setMinimum").c_str() );
     else if (Options[i].find("nDivisions") < Options[i].length()) nDivisions = atoi( getString(Options[i], "nDivisions").c_str() );
+    else if (Options[i].find("drawDots") < Options[i].length()) dots = true; 
     else cout << "Warning: Option not recognized!  Option: " << Options[i] << endl;
+  }
+
+  //Decode data color
+  Color_t dataColor = kBlack;
+  if (datacolor != ""){
+    std::transform(datacolor.begin(), datacolor.end(), datacolor.begin(), ::tolower); 
+    if (datacolor == "kred" || datacolor == "red") dataColor = kRed;
+    if (datacolor == "kblue" || datacolor == "blue") dataColor = kBlue;
+    if (datacolor == "kgreen" || datacolor == "green") dataColor = kGreen;
+    if (datacolor == "korange" || datacolor == "orange") dataColor = kOrange;
+    if (datacolor == "kcyan" || datacolor == "cyan") dataColor = kCyan;
+    if (datacolor == "kmagenta" || datacolor == "magenta") dataColor = kMagenta;
   }
 
   //Set Style
@@ -489,7 +505,8 @@ void dataMCplotMaker(TH1F* Data, std::vector <TH1F*> Backgrounds, std::vector <s
     for (unsigned int i = 0; i < Backgrounds.size(); i++){
       Backgrounds[i]->UseCurrentStyle();
       if (!nostack) Backgrounds[i]->SetFillColor(Colors[i]);
-      if (nostack) Backgrounds[i]->SetLineColor(Colors[i]);
+      if (dots) Backgrounds[i]->SetMarkerColor(Colors[i]);
+      Backgrounds[i]->SetLineColor(Colors[i]);
       if (nostack && normalize) Backgrounds[i]->Scale(1.0/Backgrounds[i]->Integral());
       stack->Add(Backgrounds[i]);
     }
@@ -507,7 +524,6 @@ void dataMCplotMaker(TH1F* Data, std::vector <TH1F*> Backgrounds, std::vector <s
   //Minimum and maximum
   float leftMax = AdjustedMaximum(1, Backgrounds, Data, Signals);
   float rightMax = AdjustedMaximum(2, Backgrounds, Data, Signals);
-  float overflow = AdjustedMaximum(4, Backgrounds, Data, Signals);
   float myMin = 0.1;
   if (setMinimum != -1) myMin = setMinimum;
   if (setMinimum == -1 && !linear && Backgrounds[0]->GetMinimum() > 0) myMin = min(0.1, 0.9*Backgrounds[0]->GetMinimum());
@@ -561,9 +577,12 @@ void dataMCplotMaker(TH1F* Data, std::vector <TH1F*> Backgrounds, std::vector <s
   if (noData && linear) stack->GetYaxis()->SetTitleOffset(1.6);
 
   //Draw
-  if (!nostack) stack->Draw("hist");
+  if (!nostack && !dots) stack->Draw("hist");
+  if (dots) stack->Draw("PE"); 
   if (nostack) stack->Draw("nostack");
   THStack *stack2 = new THStack("stack2", "stack2"); 
+  Data->SetMarkerColor(dataColor);
+  Data->SetLineColor(dataColor);
   stack2->Add(Data);
   stack2->Draw("PSAMEE");
   vector<int> markerStyle;
@@ -577,7 +596,7 @@ void dataMCplotMaker(TH1F* Data, std::vector <TH1F*> Backgrounds, std::vector <s
   for (unsigned int i = 0; i < Signals.size(); i++){
     Signals[i]->Draw("SAMEP");
     if (Colors.size() >= i + Backgrounds.size() + 1) Signals[i]->SetMarkerColor(Colors[i + Backgrounds.size()]);
-    else Signals[i]->SetLineColor(kBlack);
+    Signals[i]->SetLineColor(kBlack);
     Signals[i]->SetLineWidth(3);
     Signals[i]->SetMarkerStyle(markerStyle[i%7]);
   }
@@ -585,11 +604,12 @@ void dataMCplotMaker(TH1F* Data, std::vector <TH1F*> Backgrounds, std::vector <s
   //Legend
   TLegend *leg;
   if ((Backgrounds.size()+Signals.size() == 1 || Backgrounds.size()+Signals.size() == 2) && noData) leg = new TLegend(0.7+legendRight,0.79+legendUp,0.92+legendRight,0.87+legendUp); 
-  else if ((Backgrounds.size()+Signals.size() == 1 || Backgrounds.size()+Signals.size() == 2) && !noData) leg = new TLegend(0.7+legendRight,0.64+legendUp,0.92+legendRight,0.72+legendUp); 
+  else if ((Backgrounds.size()+Signals.size() == 1 || Backgrounds.size()+Signals.size() == 2) && !noData) leg = new TLegend(0.7+legendRight,0.69+legendUp,0.92+legendRight,0.77+legendUp); 
   else leg = new TLegend(0.7+legendRight,0.59+legendUp,0.92+legendRight,0.87+legendUp);
   leg->SetTextSize(legendTextSize);
   if (noData == false) leg->AddEntry(Data, dataName.c_str(), "lp");
-  for (int i = Titles.size()-1; i > -1; i--) leg->AddEntry(Backgrounds[i], Titles[i].c_str(), "f");
+  if (!dots) for (int i = Titles.size()-1; i > -1; i--) leg->AddEntry(Backgrounds[i], Titles[i].c_str(), "f");
+  if (dots) for (int i = Titles.size()-1; i > -1; i--) leg->AddEntry(Backgrounds[i], Titles[i].c_str(), "LPE");
   if (use_signals) for (int i = SignalTitles.size()-1; i > -1; i--) leg->AddEntry(Signals[i], SignalTitles[i].c_str(), "P");
   leg->SetFillStyle(0);
   leg->SetBorderSize(0);
@@ -657,6 +677,8 @@ void dataMCplotMaker(TH1F* Data, std::vector <TH1F*> Backgrounds, std::vector <s
     TH1F* err_hist = (TH1F*)Backgrounds[0]->Clone(); 
     err_hist->SetTitle("");
     err_hist->Draw();
+    err_hist->SetLineColor(kBlack);
+    err_hist->SetMarkerColor(kBlack);
     err_hist->GetYaxis()->SetTitle("Data/MC");
     err_hist->GetYaxis()->SetTitleSize(0.08);
     err_hist->GetYaxis()->SetTitleOffset(1.8);
