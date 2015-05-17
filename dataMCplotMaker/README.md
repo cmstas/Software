@@ -32,8 +32,8 @@ Optional arguments:
 Supported flags for "options" string:
   - --outputName X: change the name of the pdf file produced from its default of "data_MC_plot"
   - --xAxisLabel X: change the x-axis label from its default of "M_T"
-  - --energy X: change the energy from its default of 8 TeV
-  - --lumi X: change the lumi from its default of 19.5 fb-1.
+  - --energy X: change the energy from its default of 13 TeV
+  - --lumi X: change the lumi from its default of 10.0 fb-1.
   - --noDivisionLabel: to remove the divisions label on the y-axis (ex: "Entries/30 GeV" becomes "Entries")
   - --noStack: to prevent backgrounds from being stacked (useful for comparisons)
   - --noFill: set all colors to white
