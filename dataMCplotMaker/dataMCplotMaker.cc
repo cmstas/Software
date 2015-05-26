@@ -29,6 +29,11 @@ float AdjustedMaximum(int side, std::vector <TH1F*> Plots, TH1F* data = null, st
   if (side == 2) upperBound--;
   if (side == 4) lowerBound = Plots[0]->GetNbinsX(); 
   if (side == 4) upperBound = Plots[0]->GetNbinsX()+1; 
+  int nbins = Plots[0]->GetNbinsX(); 
+  if (nbins < 6){
+    lowerBound = 1;
+    upperBound = nbins;
+  }
   vector <float> heights;
   for (int i = lowerBound; i < upperBound; i++){
     float temp = 0;
