@@ -1,21 +1,7 @@
 #ifndef MAKEPLOT_H
 #define MAKEPLOT_H
 
-#include <string>
-#include <iostream>
-#include <vector>
-#include <algorithm>
-#include <cstring>
-#include "TH1F.h"
-#include "TCanvas.h"
-#include "THStack.h"
-#include "TStyle.h"
-#include "TLegend.h"
-#include "TLine.h"
-#include "TLatex.h"
-#include "TChain.h"
-#include "TCut.h"
-#include "TROOT.h"
+#include "PlotMakingTools.h"
 
 struct PlotInfo {
   TH1F* Plot;

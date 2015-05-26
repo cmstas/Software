@@ -19,25 +19,6 @@ void DrawVerticalLine(Double_t x){
   l.DrawLineNDC(xndc,bm,xndc,tm);
 }
 
-//Parse Parameters from options input string
-vector <std::string> GetParms(std::string blah){
-  int a = -1;
-  int length = blah.length();
-  vector <std::string> options;
-  while (a < length){
-    int temp = a;
-    a = blah.find("--", temp+1);
-    if (a <= temp) break;
-    int b = blah.find("--", a+3)-1;
-    unsigned int myLength = b - a - 2;
-    string mySubstring;
-    if (a + 2 + myLength > blah.length()) mySubstring = blah.substr(a+2);
-    else mySubstring = blah.substr(a+2, b-a-2);
-    options.push_back(mySubstring);
-  }
-  return options;
-}
-
 //Function to determine maximum of each histogram, including error bars.  Side = 1 left, 2 right, 3 both, 4 = overflow
 TH1F *null = new TH1F("", "", 1,0,1);
 float AdjustedMaximum(int side, std::vector <TH1F*> Plots, TH1F* data = null, std::vector <TH1F*> Signals = std::vector<TH1F*>()){
@@ -72,22 +53,6 @@ float AdjustedMaximum(int side, std::vector <TH1F*> Plots, TH1F* data = null, st
   std::sort( heights.begin(), heights.end() );
   float data_height = heights[heights.size()-1];
   return max(data_height, bkgd_height);
-}
-
-//Turn parsed argument from string into const char*.  Remove leading and trailing whitespace
-string getString(std::string initial, std::string result){
-  int temp = initial.find(result); 
-  std::string substring = initial.substr(temp+result.length());
-  while (substring[0] == ' '){
-    std::string temp2 = substring.substr(1,substring.length()-1); 
-    substring = temp2;
-  }
-  while (substring[substring.length()-1] == ' '){
-    std::string temp2 = substring.substr(0,substring.length()-1); 
-    substring = temp2;
-  }
-  if (substring.length() > 4 && substring.substr(substring.length()-4, substring.length()-1) == ".pdf") substring = substring.substr(0, substring.length()-4);
-  return substring;
 }
 
 //Set style -- this is completely ripped off from TDRStyle.cc
