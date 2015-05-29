@@ -1,5 +1,20 @@
 #include "alexBeamer.h"
 
+std::string getSize(int size){
+  std::string output;
+  if (size == -5) output = "tiny"; 
+  if (size == -4) output = "scriptsize"; 
+  if (size == -3) output = "footnotesize"; 
+  if (size == -2) output = "small"; 
+  if (size == -1) output = "normalsize"; 
+  if (size ==  0) output = "large"; 
+  if (size ==  1) output = "Large"; 
+  if (size ==  2) output = "LARGE"; 
+  if (size ==  3) output = "Huge"; 
+  if (size ==  4) output = "HUGE"; 
+  return output;
+}
+
 void pres::KeyColor(std::string color){
   keyColor = color; 
 }
@@ -70,6 +85,7 @@ void pres::TitleSlide(std::string title){
 void pres::NewSlide(){
   myfile 
     << "\\begin{frame}\n";
+  titleTwoLines = -1;
 
 }
 
@@ -95,7 +111,45 @@ pres::pres(bool center){
     if (center)  myfile << "\\setbeamerfont{frametitle}{size=\\LARGE \\bfseries \\centering}\n";
     if (!center) myfile << "\\setbeamerfont{frametitle}{size=\\LARGE \\bfseries}\n";
     myfile << "\\setbeamertemplate{footline}{\\raisebox{5pt}{\\makebox[\\paperwidth]{\\hfill\\makebox[10pt]{\\scriptsize\\textcolor{white}{\\insertframenumber\\hspace{2mm}}}}}}";
+    myfile << "\\setbeamersize{text margin left=10pt,text margin right=10pt}";
+    myfile << "\\scriptsize \\let\\small\\scriptsize" << endl;
+    myfile << "\\scriptsize \\let\\footnotesize\\scriptsize" << endl;
+    myfile << "\\scriptsize \\let\\scriptsize\\scriptsize" << endl;
+    myfile << "\\footnotesize \\let\\small\\footnotesize" << endl;
+    myfile << "\\footnotesize \\let\\footnotesize\\scriptsize" << endl;
+    myfile << "\\footnotesize \\let\\scriptsize\\scriptsize" << endl;
+    myfile << "\\small \\let\\small\\small" << endl;
+    myfile << "\\small \\let\\footnotesize\\footnotesize" << endl;
+    myfile << "\\small \\let\\scriptsize\\scriptsize" << endl;
 
+}
+
+void pres::DoubleCompare(std::string plot1, std::string plot2){
+  slideType = 2;
+  myfile
+  <<  "  \\begin{textblock*}{2.7cm}(0.5cm, 3.1cm)\n"
+  <<  "  \\includegraphics[width=5.5cm]{" << plot1 << "}\n"
+  <<  "  \\end{textblock*}\n"
+  <<  "  \\begin{textblock*}{2.7cm}(6.3cm, 3.1cm)\n"
+  <<  "  \\includegraphics[width=5.5cm]{" << plot2 << "}\n"
+  <<  "  \\end{textblock*}\n";
+}
+
+void pres::Text(string text, int size){
+  if (titleTwoLines == -1) cout << "Error!!  Need Title on slide X before you can call 'text'." << endl;
+  std::string size_ = getSize(size);
+  if (slideType == 2){
+    if (titleTwoLines == 1) myfile <<  "  \\begin{textblock*}{10.8cm}[0,0.5](0.35cm, 2.3cm)\n" << endl;
+    if (titleTwoLines == 0) myfile <<  "  \\begin{textblock*}{10.8cm}[0,0.5](0.35cm, 1.9cm)\n" << endl;
+    myfile
+    <<  "  \\begin{" << size_ << "} " 
+    <<  text
+    <<  "  \\end{" << size_ << "}"
+    <<  "  \\end{textblock*}\n";
+  }
+  else{
+    cout << "Error!!  Not sure what to do with 'text' on slide X.  Call other functions first." << endl;
+  }
 }
 
 pres::~pres(){
@@ -119,6 +173,28 @@ void pres::Title(std::string title){
   myfile
   << "\\frametitle{" 
   << title
-  << "}";
+  << "}\n";
+  if (title.size() > 30) titleTwoLines = 1;
+  else titleTwoLines = 0;
 }
 
+
+void pres::AllText(std::string text, int size){
+  std::string size_ = getSize(size);
+  myfile
+  << "\\begin{" << size_ << "}" 
+  << "\\vspace{2mm}" 
+  << text  
+  << "\\end{" << size_ << "}" << endl;
+}
+
+void pres::FreeText(float x, float y, std::string text, float width, int size, std::string color){
+  std::string size_ = getSize(size);
+  myfile 
+  << "\\begin{textblock*}{" << width*12.8 << "cm}(" << x*12.8 << "cm, " << y*9.6 << "cm)\n"
+  << "\\begin{" << size_ << "}\n"; 
+  if (color == "keyColor") myfile << "\\textcolor{" << keyColor << "}{"<< text << "}\n";
+  else myfile << "\\textcolor{" << color << "}{"<< text << "}\n";
+  myfile << "\\end{" << size_ << "}\n"
+  << "\\end{textblock*}\n"; 
+} 
