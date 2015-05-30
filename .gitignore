@@ -1,3 +1,13 @@
 *.d
 *.so
 *.o
+*.out
+*.nav
+*.log
+*.snm
+*.toc
+makeCMS3ClassFiles/*.cc
+makeCMS3ClassFiles/*.h
+*.aux
+*.pcm
+alexBeamer/*.tex

@@ -2,8 +2,7 @@
 
 void test(){
 
-  pres myTest; 
-  myTest.KeyColor("blue");
+  pres myTest("darkgreen"); 
   myTest.Underline("Alex");
   myTest.TitleSlide("This is my Title Slide for this Great Presentation");
 
@@ -41,10 +40,40 @@ void test(){
 
   //Third slide
   myTest.NewSlide();
-  myTest.Title("This is my Awesome Third Slide with a Really Long Name.");
-  myTest.DoubleCompare("result_elec.pdf", "result_muon.pdf"); 
-  myTest.Text(R"(Error bars represent errors \underline{in MC}, with binomial uncertainty formula.)", 0);
-  myTest.FreeText(0.92, 0.8, "FO1"); 
+  myTest.Title("Third Slide Short Title");
+  myTest.TextPlotPlot("result_elec.pdf", "result_muon.pdf", "--label1 electron --label2 muon --labelColor red --tall"); 
+  myTest.Text(R"(Error bars represent errors \underline{in MC}, with binomial uncertainty formula.)", "--size 0");
+  myTest.FreeText(0.92, 0.8, "FO1", "--color darkgreen --bold"); 
+  myTest.FinishSlide();
+
+  //Fourth slide
+  myTest.NewSlide();
+  myTest.Title("This is my Awesome Fourth Slide with a Really Long Name.");
+  myTest.TextPlotPlot("result_elec2.pdf", "result_muon2.pdf", "--label1 electrons --label2 muons --labelColor purple --tall"); 
+  myTest.Text(R"(Error bars represent errors \underline{in data}, with binomial uncertainty formula.)", "--size 0");
+  myTest.FreeText(0.92, 0.8, "FO1", "--color darkgreen --bold"); 
+  myTest.FinishSlide();
+
+  //Fifth slide
+  myTest.NewSlide();
+  myTest.Title("Fifth Slide Short Title");
+  myTest.TextPlotPlot("gt_elec.pdf", "gt_muon.pdf", ""); 
+  myTest.Text(R"(Error bars represent errors \underline{in data}, with binomial uncertainty formula. \\
+              \textcolor{gray}{(called Sumw2 after filling numer and denom but before dividing)})", "--size -1");
+  myTest.Text(R"(\textcolor{gray}{See backup for this with SIP3D $<$ 4})", "--down");
+  myTest.FreeText(0.82, 0.87, "FO1", "--color darkgreen --bold"); 
+  myTest.FinishSlide();
+
+  //Sixth slide
+  myTest.NewSlide();
+  myTest.Title("This is my awesome sixth slide with a Really Long Name"); 
+  myTest.TextPlotPlot("gt_elec.pdf", "gt_muon.pdf", "--label1 3 invfb --label2 10 invfb --labelUnderline --labelColor red"); 
+  myTest.Text(R"(
+    Error bars represent errors \underline{in data}, with binomial uncertainty formula. \\
+    \textcolor{gray}{(called Sumw2 after filling numer and denom but before dividing)}
+    )", "--size -1");
+  myTest.Text(R"(\textcolor{gray}{See backup for this with SIP3D $<$ 4})", "");
+  myTest.FreeText(0.82, 0.87, "FO1", "--color darkgreen --bold"); 
   myTest.FinishSlide();
 
 }
