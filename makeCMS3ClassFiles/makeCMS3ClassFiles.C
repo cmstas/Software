@@ -672,7 +672,7 @@ void makeHeaderFile(TFile *f, const string& treeName, bool paranoid, const strin
 	  headerf << "\t\t\t" << "cout << \"Cannot find b discriminator \" << bDiscriminatorName << endl; " << endl;
 	  headerf << "\t\t\t" << "return 0;" << endl;
 	  headerf << "\t\t" << "}" << endl << endl;
-	  headerf << "\t\t" << "if (bDiscriminatorIndx < pfjets_bDiscriminators().size()) " << endl;
+	  headerf << "\t\t" << "if (jetIndx < pfjets_bDiscriminators().size()) " << endl;
 	  headerf << "\t\t\t" << "return pfjets_bDiscriminators().at(jetIndx).at(bDiscriminatorIndx);" << endl;
 	  headerf << "\t\t" << "else {" << endl;
 	  headerf << "\t\t\t" << "cout << \"Cannot find jet # \"<< jetIndx << endl;" << endl;
