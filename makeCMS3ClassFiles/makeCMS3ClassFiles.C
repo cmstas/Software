@@ -533,6 +533,7 @@ void makeHeaderFile(TFile *f, const string& treeName, bool paranoid, const strin
     bool haveL1Info  = false;
     bool haveHLT8E29Info = false;
     bool haveTauIDInfo = false;
+    bool havebtagInfo = false;
     for(int i = 0; i < aliasarray->GetSize(); i++) {
         TString aliasname(aliasarray->At(i)->GetName());
         if(aliasname=="hlt_trigNames") 
@@ -543,6 +544,8 @@ void makeHeaderFile(TFile *f, const string& treeName, bool paranoid, const strin
             haveHLT8E29Info = true;
         if(aliasname=="taus_pf_IDnames") 
             haveTauIDInfo = true;
+        if(aliasname=="pfjets_bDiscriminatorNames") 
+		    havebtagInfo = true;
     }
    
     if(haveHLTInfo) {
@@ -631,7 +634,9 @@ void makeHeaderFile(TFile *f, const string& treeName, bool paranoid, const strin
         }
         headerf << "\t" << "return 0;" << endl;
         headerf << "\t" << "}" << endl;
+        headerf << "" << endl;
     }//if(haveL1Info)
+
     if(haveTauIDInfo) {
         //functions to return whether or not trigger fired - HLT
         headerf << "\t" << "float passTauID(TString idName, unsigned int tauIndx) {" << endl;
@@ -652,6 +657,28 @@ void makeHeaderFile(TFile *f, const string& treeName, bool paranoid, const strin
 	headerf << "\t\t\t" << "return 0;" << endl;
 	headerf << "\t\t"   << "}" << endl;
         headerf << "\t" << "}" << endl;
+    }//if(haveTauIDInfo)
+    
+    if(havebtagInfo) {
+	  //functions to return whether or not trigger fired - HLT
+	  headerf << "\t" << "float passbtag(TString bDiscriminatorName, unsigned int jetIndx) {" << endl;
+	  headerf << "\t\t" << "size_t bDiscriminatorIndx;" << endl;
+	  headerf << "\t\t" << "vector<TString>::const_iterator begin_it = pfjets_bDiscriminatorNames().begin();" << endl;
+	  headerf << "\t\t" << "vector<TString>::const_iterator end_it = pfjets_bDiscriminatorNames().end();" << endl;
+	  headerf << "\t\t" << "vector<TString>::const_iterator found_it = find(begin_it, end_it, bDiscriminatorName);" << endl;
+	  headerf << "\t\t" << "if(found_it != end_it)" << endl;
+	  headerf << "\t\t\t" << "bDiscriminatorIndx = found_it - begin_it;" << endl;
+	  headerf << "\t\t" << "else {" << endl;
+	  headerf << "\t\t\t" << "cout << \"Cannot find b discriminator \" << bDiscriminatorName << endl; " << endl;
+	  headerf << "\t\t\t" << "return 0;" << endl;
+	  headerf << "\t\t" << "}" << endl << endl;
+	  headerf << "\t\t" << "if (jetIndx < pfjets_bDiscriminators().size()) " << endl;
+	  headerf << "\t\t\t" << "return pfjets_bDiscriminators().at(jetIndx).at(bDiscriminatorIndx);" << endl;
+	  headerf << "\t\t" << "else {" << endl;
+	  headerf << "\t\t\t" << "cout << \"Cannot find jet # \"<< jetIndx << endl;" << endl;
+	  headerf << "\t\t\t" << "return 0;" << endl;
+	  headerf << "\t\t" << "}" << endl;
+	  headerf << "\t" << "}" << endl;
     }//if(haveTauIDInfo)
     
     headerf << endl;
@@ -763,6 +790,11 @@ void makeHeaderFile(TFile *f, const string& treeName, bool paranoid, const strin
         //functions to return whether or not trigger fired - HLT
         headerf << "\t" << "float passTauID(TString idName, unsigned int tauIndx);" << endl;
         implf   << "\t" << "float passTauID(TString idName, unsigned int tauIndx) { return " << objName << ".passTauID(idName, tauIndx); }" << endl;
+    }//if(haveTauIDInfo) 
+    if(havebtagInfo) {
+        //functions to return whether or not trigger fired - HLT
+        headerf << "\t" << "float passbtag(TString bDiscriminatorName, unsigned int jetIndx);" << endl;
+        implf   << "\t" << "float passbtag(TString bDiscriminatorName, unsigned int jetIndx) { return " << objName << ".passbtag( bDiscriminatorName, jetIndx); }" << endl;
     }//if(haveTauIDInfo) 
  
 }
