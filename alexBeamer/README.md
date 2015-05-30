@@ -15,6 +15,7 @@ This package generates beamer presentations with minimal effort.
   6.  If your template has a text box, feed it with name->Text(R"(  blah  )"), where blah is your text in regular LaTeX format.  You can use multiple lines, etc., this is just normal LaTeX.  For multiple text boxes, just call this command twice -- they get filled from top to bottom. 
 
 ###Templates
-  -TextPlotPlot("plot1", "plot2", "options");
-    -This gives you two plots on the bottom of the slide, and one text bex between that and the title -- unless your plots are very wide, in which case it will usually put the plots in the middle of the slide, and give you two text boxes, one below and one above.  In this latter case, you can override this setting with --position bottom (put the wide plots at the bottom of the plot) or --position top. 
-
+  - TextPlotPlot("plot1", "plot2", "options");
+    - This gives you two plots on the bottom of the slide, and one text bex between that and the title.
+    - Exception is if your plots are very wide, in which case it will usually put the plots in the middle of the slide, and give you two text boxes, one below and one above.  In this case, you can override this setting with --position bottom (put the wide plots at the bottom of the slide) or --position top. 
+  - More templates will go here
