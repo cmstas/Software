@@ -194,6 +194,8 @@ void pres::Text(string text, std::string options_string){
   if (nTextBoxes > top.size()){ cout << "ERROR.  Too many text boxes." << endl; abort(); }
   float top_ = top[nTextBoxes-1]; 
   float bottom_ = bottom[nTextBoxes-1]; 
+  float width_ = 12.0;
+  if (slideType == 4) width_ = width[0];  
 
   //Parse options
   std::vector <std::string> Options = GetParms(options_string);  
@@ -208,7 +210,7 @@ void pres::Text(string text, std::string options_string){
   std::string size_ = getSize(size);
  
   if (titleTwoLines == -1) cout << "Error!!  Need Title on slide X before you can call 'text'." << endl;
-  myfile <<  "  \\begin{textblock*}{12.0cm}[0.0,0.0](0.35cm, " << top_ << "cm)\n" << endl;
+  myfile <<  "  \\begin{textblock*}{" << width_ << "cm}[0.0,0.0](0.35cm, " << top_ << "cm)\n" << endl;
   myfile
   <<  "  \\begin{" << size_ << "} " 
   <<  text
@@ -427,6 +429,65 @@ void pres::PlotType3(std::string plot1, std::string plot2, std::string options_s
     top.push_back(yplot + 0.5*std::max(ar1, ar2)*width + 0.2);
     bottom.push_back(9.6);
   }
-    
+
+}
+
+void pres::TextPlot(std::string plot, std::string options_string){
+  slideType = 4;
+  pres::PlotType4(plot, options_string); 
+} 
+
+void pres::PlotType4(std::string plot, std::string options_string){
+  //Deal with Options
+  std::vector <std::string> Options = GetParms(options_string);  
+  std::string label = "";
+  std::string labelColor = "black";
+  bool labelUnderline = false;
+  for (unsigned int i = 0; i < Options.size(); i++){
+    if (Options[i].find("label ") < Options[i].length()) label = getString(Options[i], "label");
+    if (Options[i].find("labelUnderline") < Options[i].length()) labelUnderline = true;
+    if (Options[i].find("labelColor") < Options[i].length()) labelColor = getString(Options[i], "labelColor");
+  }
+  if (label.find("invfb") < label.length()) label.replace(label.find("invfb"), 5, "$\\textrm{fb}^{-1}$");
+
+  //Aspect ratio
+  float ar = aspectRatio(plot); 
+  if (ar <= 0){ cout << "ERROR!  Aspect ratio makes no sense." << endl; abort(); }
+
+  //Title bottom
+  float titlebottom = 0.7;
+  if (titleTwoLines) titlebottom = 2.0;
+
+  //Natural height and width
+  float naturalheight = 9.6 - titlebottom - 0.5; 
+  float naturalwidth = naturalheight/ar;
+
+  //Actual height and width
+  float width_ = 12.8/2.0;
+  if (naturalwidth < width_) width_ = naturalwidth;
+
+  //Place image
+  float center_of_figure = titlebottom + (9.6-titlebottom-0.8)/2.0;
+  myfile
+  <<  "  \\begin{textblock*}{" << width_ << "cm}[0.0,0.5](" << 12.8-width_ << "cm," << center_of_figure << "cm)\n"
+  <<  "  \\includegraphics[width=" << width_ << "cm]{" << plot << "}\n"
+  <<  "  \\end{textblock*}\n";
+
+  //Place text box
+  top.push_back(titlebottom); 
+  bottom.push_back(9.6); 
+  width.push_back(12.8-width_-0.3); 
+
+  //Determine top of figures
+  float top_of_figure = center_of_figure - width_*ar/2.0;
+
+  //Label on figures, if requested
+  myfile <<  "\\begin{textblock*}{" << width_ << "cm}[0.0,1.0](" << 12.8 - width_ << "cm, " << top_of_figure + 0.3 << "cm) \\begin{center}";
+  if (labelUnderline) myfile << " \\textcolor{" << labelColor << "}{ \\underline{" << label << "}} " << endl;
+  else myfile << "\\textcolor{" << labelColor << "}{" << label << "}";
+  myfile << "\\end{center} \\end{textblock*}" << endl;
+
+
+
 
 }

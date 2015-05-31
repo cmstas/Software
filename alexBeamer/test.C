@@ -76,4 +76,14 @@ void test(){
   myTest.FreeText(0.82, 0.87, "FO1", "--color darkgreen --bold"); 
   myTest.FinishSlide();
 
+  //Seventh slide
+  myTest.NewSlide();
+  myTest.Title("This is my awesome seventh slide with a Really Long Name"); 
+  myTest.TextPlot("gt_elec.pdf", "--label 3 invfb --labelUnderline --labelColor red"); 
+  myTest.Text(R"(
+    Error bars represent errors \underline{in data}, with binomial uncertainty formula. \\
+    \textcolor{gray}{(called Sumw2 after filling numer and denom but before dividing)}
+    )", "--size -1");
+  myTest.FinishSlide();
+
 }

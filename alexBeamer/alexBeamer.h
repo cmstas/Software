@@ -21,6 +21,7 @@ class pres{
     //Templates
     void AllText(std::string options_string = ""); 
     void TextPlotPlot(std::string plot1, std::string plot2, std::string options = ""); 
+    void TextPlot(std::string plot, std::string options_string = ""); 
 
   private:
     std::string keyColor;
@@ -32,10 +33,12 @@ class pres{
     float move_up;
     vector <float> top; 
     vector <float> bottom;
-    int nTextBoxes;
+    vector <float> width;
+    unsigned int nTextBoxes;
     void PlotType1(std::string options_string);
     void PlotType2(std::string plot1, std::string plot2, std::string options_string, float ar1, float ar2);
     void PlotType3(std::string plot1, std::string plot2, std::string options_string, float ar1, float ar2);
+    void PlotType4(std::string plot, std::string options_string);
 
 };
 
