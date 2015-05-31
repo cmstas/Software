@@ -9,7 +9,8 @@ void test(){
   //Second slide
   myTest.NewSlide();
   myTest.Title("This is my Awesome Second Slide with a Really Long Name.");
-  myTest.AllText(R"(
+  myTest.AllText(); 
+  myTest.Text(R"(
   \begin{itemize} 
   \item This is orthogonal to our search region, which has SIP3D $<$ 4 
   \item Derived only on events with: 
@@ -34,8 +35,7 @@ void test(){
   \end{itemize}
   \end{itemize}
   \end{itemize} 
-  )", 0);
-
+  )");
   myTest.FinishSlide();
 
   //Third slide

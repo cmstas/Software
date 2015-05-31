@@ -18,4 +18,5 @@ This package generates beamer presentations with minimal effort.
   - TextPlotPlot("plot1", "plot2", "options");
     - This gives you two plots on the bottom of the slide, and one text bex between that and the title.
     - Exception is if your plots are very wide, in which case it will usually put the plots in the middle of the slide, and give you two text boxes, one below and one above.  In this case, you can override this setting with --position bottom (put the wide plots at the bottom of the slide) or --position top. 
-  - More templates will go here
+  - AllText("options")
+    - This gives you text only.  I can't figure out how to detect when there's too much text (without a huge, error-prone function), but you can manually change the size with option --size N, where N can be anywhere from -5 to +4).

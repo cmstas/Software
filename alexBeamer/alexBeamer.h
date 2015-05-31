@@ -15,12 +15,12 @@ class pres{
     void NewSlide();
     void FinishSlide();
     void Title(std::string title); 
-    void AllText(std::string text, int size); 
     void Text(std::string, std::string options_string = ""); 
     void FreeText(float x, float y, std::string text, std::string options_string = "");
+
+    //Templates
+    void AllText(std::string options_string = ""); 
     void TextPlotPlot(std::string plot1, std::string plot2, std::string options = ""); 
-    void PlotType2(std::string plot1, std::string plot2, std::string options_string, float ar1, float ar2);
-    void PlotType3(std::string plot1, std::string plot2, std::string options_string, float ar1, float ar2);
 
   private:
     std::string keyColor;
@@ -33,6 +33,9 @@ class pres{
     vector <float> top; 
     vector <float> bottom;
     int nTextBoxes;
+    void PlotType1(std::string options_string);
+    void PlotType2(std::string plot1, std::string plot2, std::string options_string, float ar1, float ar2);
+    void PlotType3(std::string plot1, std::string plot2, std::string options_string, float ar1, float ar2);
 
 };
 

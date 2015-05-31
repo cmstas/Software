@@ -207,16 +207,13 @@ void pres::Text(string text, std::string options_string){
   //Get size
   std::string size_ = getSize(size);
  
-  //Slide Type 2 (2 plots + text)
-  if (slideType == 2 || slideType == 3){
-    if (titleTwoLines == -1) cout << "Error!!  Need Title on slide X before you can call 'text'." << endl;
-    myfile <<  "  \\begin{textblock*}{12.0cm}[0.0,0.0](0.35cm, " << top_ << "cm)\n" << endl;
-    myfile
-    <<  "  \\begin{" << size_ << "} " 
-    <<  text
-    <<  "  \\end{" << size_ << "}"
-    <<  "  \\end{textblock*}\n";
-  }
+  if (titleTwoLines == -1) cout << "Error!!  Need Title on slide X before you can call 'text'." << endl;
+  myfile <<  "  \\begin{textblock*}{12.0cm}[0.0,0.0](0.35cm, " << top_ << "cm)\n" << endl;
+  myfile
+  <<  "  \\begin{" << size_ << "} " 
+  <<  text
+  <<  "  \\end{" << size_ << "}"
+  <<  "  \\end{textblock*}\n";
 
 }
 
@@ -247,13 +244,16 @@ void pres::Title(std::string title){
 }
 
 
-void pres::AllText(std::string text, int size){
-  std::string size_ = getSize(size);
-  myfile
-  << "\\begin{" << size_ << "}" 
-  << "\\vspace{2mm}" 
-  << text  
-  << "\\end{" << size_ << "}" << endl;
+void pres::AllText(std::string options){
+  slideType = 1; 
+  PlotType1(options); 
+}
+
+void pres::PlotType1(std::string options){
+  float top_ = 0.7;
+  if (titleTwoLines) top_ = 2.0;
+  top.push_back(top_); 
+  bottom.push_back(9.6); 
 }
 
 void pres::FreeText(float x, float y, std::string text, std::string options_string){ 
@@ -330,7 +330,7 @@ void pres::PlotType2(std::string plot1, std::string plot2, std::string options_s
   <<  "  \\end{textblock*}\n";
 
   //Coordinates of text box
-  float top_ = 0.7;
+  float top_ = 1.1;
   if (titleTwoLines) top_ = 2.0;
   float bottom_ = 9.6-5.8*std::max(ar1, ar2);  
   if (label1 != "" || label2 != "") bottom_ -= 0.7; 
@@ -358,7 +358,6 @@ void pres::PlotType3(std::string plot1, std::string plot2, std::string options_s
   if (titleTwoLines) titlebottom = 2.0;
   float width = 12.8/2.0;
   float yeaten = titlebottom + width*std::max(ar1, ar2); 
-  cout << yeaten << endl;
 
   //Deal with Options
   std::vector <std::string> Options = GetParms(options_string);  
@@ -427,7 +426,6 @@ void pres::PlotType3(std::string plot1, std::string plot2, std::string options_s
     bottom.push_back(std::max(top_of_figure_1, top_of_figure_2));
     top.push_back(yplot + 0.5*std::max(ar1, ar2)*width + 0.2);
     bottom.push_back(9.6);
-    cout << top[0] << " " << top[1] << " " << bottom[0] << " " << bottom[1] << endl;
   }
     
 
