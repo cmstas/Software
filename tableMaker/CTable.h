@@ -93,7 +93,8 @@ public:
   void printColLabels() const;
   void print() const;
   void saveAs(const std::string& filename, bool overwrite=true);
-  void saveTex(const std::string& filename);
+  void saveTex(const std::string& filename, bool standalone=true, bool withtitle=false);
+  void forSlideMaker(const std::string& filename){ saveTex(filename, false, true); }
   void printTex() const;
 };
 

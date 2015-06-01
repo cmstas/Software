@@ -369,7 +369,7 @@ bool CTable::isColLine(int i){
   return result;
 }
 
-void CTable::saveTex(const std::string& filename){
+void CTable::saveTex(const std::string& filename, bool standalone, bool withtitle){
   if(filename.length()>0){
     if(file_==NULL){file_=new ofstream;}
     if(file_->good()){file_->close();}
@@ -382,12 +382,16 @@ void CTable::saveTex(const std::string& filename){
   }else{out_=&std::cout;}
   std::string cols= isColLine(0) ? "|c|" :  "c|";
   for(size_t i=0;i<colLabels_.size();i++){(isColLine(i) && i != 0) ? cols+="c|" : cols+="c";}
-  (*out_)<<"\\documentclass{article}"<<std::endl
-         << "\\usepackage{fullpage}"<<std::endl
-         <<"\\begin{document}"<<std::endl
-	     <<"\\begin{table}[ht!]"<<std::endl
-	     <<"\\begin{center}"<<std::endl
-         <<"\\begin{tabular}{"<<cols<<"}\\hline"<<std::endl
+  if (standalone) (*out_)<<"\\documentclass{article}"<<std::endl
+                         << "\\usepackage{fullpage}"<<std::endl
+                         << "\\usepackage{multicolumn}"<<std::endl
+                         <<"\\begin{document}"<<std::endl
+                        <<"\\begin{table}[ht!]"<<std::endl;
+  if (!standalone) (*out_)<<"\\begin{table}"<<std::endl;
+  if (standalone) (*out_)<<"\\begin{center}"<<std::endl;
+    (*out_) <<"\\begin{tabular}{"<<cols<<"}";
+  if (withtitle) (*out_) << "\\multicolumn{" << colLabels_.size()+1 << "}{c}{" << title_ << "} \\\\ ";  
+    (*out_) << "\\hline"<<std::endl 
          <<" ";
   for(size_t i=0;i<colLabels_.size();i++){
 	if (isMultiColumn(-1, i) > 0 ) (*out_) << Form("& \\multicolumn{%i}{%sc%s}{%s}", isMultiColumn(-1,i)+1, isColLine(i)  ? "|" : "", (isColLine(i+(isMultiColumn(-1,i)))) ? "|" : "", colLabels_[i].c_str()); 
@@ -417,9 +421,10 @@ void CTable::saveTex(const std::string& filename){
   }else{
     (*out_)<<" & ->  Table Empty  <-"<<std::endl;
   }  
-  (*out_)<<"\\hline"<<std::endl<<"\\end{tabular}"<<std::endl
-         <<"\\end{center}"<<std::endl<<"\\end{table}"<<std::endl
-         <<"\\end{document}"<<std::endl;
+  (*out_)<<"\\hline"<<std::endl<<"\\end{tabular}"<<std::endl;
+  if (standalone) (*out_) <<"\\end{center}"<<std::endl;
+  (*out_) <<"\\end{table}"<<std::endl;
+  if (standalone) (*out_) <<"\\end{document}"<<std::endl;
 }
 
 void CTable::printTex() const {
@@ -429,7 +434,7 @@ void CTable::printTex() const {
 //  cout   <<"\\documentclass{article}"<<std::endl
 //         <<"\\begin{document}"<<std::endl
 //	     <<"\\begin{table}[ht!]"<<std::endl
-  cout   <<"\\begin{table}[ht!]"<<std::endl
+  cout   <<"\\begin{table}"<<std::endl
 	     <<"\\begin{center}"<<std::endl
          <<"\\begin{tabular}{"<<cols<<"}\\hline"<<std::endl
          <<" ";
