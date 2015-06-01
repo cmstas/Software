@@ -2,7 +2,7 @@
 
 void test(){
 
-  pres myTest("darkgreen"); 
+  pres myTest("red"); 
   myTest.Underline("Alex");
   myTest.TitleSlide("This is my Title Slide for this Great Presentation");
 
@@ -84,6 +84,17 @@ void test(){
     Error bars represent errors \underline{in data}, with binomial uncertainty formula. \\
     \textcolor{gray}{(called Sumw2 after filling numer and denom but before dividing)}
     )", "--size -1");
+  myTest.FinishSlide();
+
+  //Eighth slide
+  myTest.NewSlide();
+  myTest.Title("This is my awesome eighth slide with a Really Really Long Name"); 
+  myTest.Plot("gt_elec.pdf", "--label 3 invfb --labelUnderline --labelColor red"); 
+  myTest.FinishSlide();
+
+  //Ninth slide
+  myTest.NewSlide();
+  myTest.Plot("result_elec.pdf");
   myTest.FinishSlide();
 
 }

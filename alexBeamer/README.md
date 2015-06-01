@@ -11,9 +11,9 @@ This package generates beamer presentations with minimal effort.
   2. "name.Underline('Alex')" to get your name bolded and underlined.  Right now only supported for Alex; add your name in the same way.
   3.  Make title slide with name.TitleSlide("Presentation Name").
   4.  All other sides should be started with name.NewSlide() and finished with name.FinishSlide()
-  5.  Add a title to the slide with name.Title("The Title");
+  5.  Add a title to the slide with name.Title("The Title") -- if you want a title on your slide
   5.  Then choose the template you want and feed it the necessary arguments.
-  6.  If your template has a text box, feed it with name->Text(R"(  blah  )"), where blah is your text in regular LaTeX format.  You can use multiple lines, etc., this is just normal LaTeX.  For multiple text boxes, just call this command twice -- they get filled from top to bottom. 
+  6.  If your template has a text box, feed it with name->Text(R"(  blah  )"), where blah is your text in regular LaTeX format.  You can use multiple lines, etc., this is just normal LaTeX.  If your template supports multiple text boxes, just call this command twice -- they get filled from upper left to bottom right.
 
 ###Templates
   - TextPlotPlot("plot1", "plot2", "options");
@@ -23,6 +23,9 @@ This package generates beamer presentations with minimal effort.
     - This gives you text only.  I can't figure out how to detect when there's too much text (without a huge, error-prone function), but you can manually change the size with option --size N, where N can be anywhere from -5 to +4).
   - TextPlot("plot", "options"); 
     - This gives you text on the left (fill with name->Text()) and an image on the right.  
+    - Options are --label X, --labelColor red, and --labelUnderline, to label the figure
+  - Plot("plot", "options"); 
+    - This gives you an image only.  You can add a title in the usual way if you want a title as well (most images will be larger if no title).
     - Options are --label X, --labelColor red, and --labelUnderline, to label the figure
 
 ###Other options

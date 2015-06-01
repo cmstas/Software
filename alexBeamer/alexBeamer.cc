@@ -161,6 +161,9 @@ pres::pres(std::string keyColor_, bool center){
     << "\\definecolor{gray}{RGB}{128,128,128}\n"
     << "\\definecolor{grey}{RGB}{128,128,128}\n"
     << "\\setbeamercolor{frametitle}{fg=" << keyColor << "}\n";
+    //<< "\\setbeamertemplate{itemize item}{\\small\\raise1.75pt\\color{" << keyColor << "}$\\blacktriangleright$}\n"
+    //<< "\\setbeamertemplate{itemize subitem}{\\footnotesize\\raise1.5pt\\color{" << keyColor << "}$\\blacktriangleright$}\n"
+    //<< "\\setbeamertemplate{itemize subsubitem}{\\scriptsize\\raise1.5pt\\color{" << keyColor << "}$\\blacktriangleright$}\n";
     if (center)  myfile << "\\setbeamerfont{frametitle}{size=\\LARGE \\bfseries \\centering}\n";
     if (!center) myfile << "\\setbeamerfont{frametitle}{size=\\LARGE \\bfseries}\n";
     myfile << "\\setbeamertemplate{footline}{\\raisebox{5pt}{\\makebox[\\paperwidth]{\\hfill\\makebox[10pt]{\\scriptsize\\textcolor{white}{\\insertframenumber\\hspace{2mm}}}}}}";
@@ -487,7 +490,57 @@ void pres::PlotType4(std::string plot, std::string options_string){
   else myfile << "\\textcolor{" << labelColor << "}{" << label << "}";
   myfile << "\\end{center} \\end{textblock*}" << endl;
 
+}
 
+void pres::Plot(std::string plot, std::string options_string){
+  slideType = 5;
+  pres::PlotType5(plot, options_string); 
+} 
 
+void pres::PlotType5(std::string plot, std::string options_string){
+  //Deal with Options
+  std::vector <std::string> Options = GetParms(options_string);  
+  std::string label = "";
+  std::string labelColor = "black";
+  bool labelUnderline = false;
+  for (unsigned int i = 0; i < Options.size(); i++){
+    if (Options[i].find("label ") < Options[i].length()) label = getString(Options[i], "label");
+    if (Options[i].find("labelUnderline") < Options[i].length()) labelUnderline = true;
+    if (Options[i].find("labelColor") < Options[i].length()) labelColor = getString(Options[i], "labelColor");
+  }
+  if (label.find("invfb") < label.length()) label.replace(label.find("invfb"), 5, "$\\textrm{fb}^{-1}$");
+
+  //Aspect ratio
+  float ar = aspectRatio(plot); 
+  if (ar <= 0){ cout << "ERROR!  Aspect ratio makes no sense." << endl; abort(); }
+
+  //Title bottom
+  float titlebottom = 0.7;
+  if (titleTwoLines < 0) titlebottom = 0; 
+  if (titleTwoLines == 1) titlebottom = 2.0;
+
+  //Natural height and width
+  float naturalheight = 9.6 - titlebottom - (label == "" ? 0.2 : (titleTwoLines < 0 ? 0.8: 0.4)); 
+  float naturalwidth = naturalheight/ar;
+
+  //Actual height and width
+  float width_ = 12.8;
+  if (naturalwidth < width_) width_ = naturalwidth;
+
+  //Place image
+  float center_of_figure = titlebottom + (9.6-titlebottom-0.8 + (label == "" ? (titleTwoLines < 0 ? 0.9 : 0.3) : (titleTwoLines < 0 ? 1.4 : 1.0)))/2.0;
+  myfile
+  <<  "  \\begin{textblock*}{" << width_ << "cm}[0.5,0.5](" << 12.8/2.0 << "cm," << center_of_figure << "cm)\n"
+  <<  "  \\includegraphics[width=" << width_ << "cm]{" << plot << "}\n"
+  <<  "  \\end{textblock*}\n";
+
+  //Determine top of figures
+  float top_of_figure = center_of_figure - width_*ar/2.0;
+
+  //Label on figures, if requested
+  myfile <<  "\\begin{textblock*}{" << width_ << "cm}[0.5,1.0](" << 12.8/2.0 << "cm, " << top_of_figure + 0.3 << "cm) \\begin{center}";
+  if (labelUnderline) myfile << " \\textcolor{" << labelColor << "}{ \\underline{" << label << "}} " << endl;
+  else myfile << "\\textcolor{" << labelColor << "}{" << label << "}";
+  myfile << "\\end{center} \\end{textblock*}" << endl;
 
 }
