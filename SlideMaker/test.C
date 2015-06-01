@@ -1,4 +1,4 @@
-#include "alexBeamer.h"
+#include "SlideMaker.h"
 
 void test(){
 

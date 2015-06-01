@@ -193,7 +193,10 @@ float aspectRatio(std::string pdfFile){
 
 
 void pres::Text(string text, std::string options_string){
-
+  if (slideType == 1){
+    myfile << text << endl;  
+    return;
+  }
   nTextBoxes++;
   if (nTextBoxes > top.size()){ cout << "ERROR.  Too many text boxes." << endl; abort(); }
   float top_ = top[nTextBoxes-1]; 
