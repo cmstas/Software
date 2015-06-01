@@ -1,4 +1,4 @@
-#AlexBeamer
+#SlideMaker
 This package generates beamer presentations with minimal effort.
 
 ###How to run
