@@ -123,7 +123,7 @@ void pres::TitleSlide(std::string title){
   <<  "\\frame[plain]{\\titlepage}\n"
   <<  "\\usebackgroundtemplate{\n"
   <<  "\\begin{tikzpicture}[thick]\n"
-  <<  "\\draw[fill=" << keyColor << "](0cm,0.0cm) -- (21.3cm,0.0cm) -- (21.3cm,21.3cm) -- (0.0cm,0.0cm);\n"
+  <<  "\\draw[fill=" << keyColor << ", draw=" << keyColor << "](0cm,0.0cm) -- (21.3cm,0.0cm) -- (21.3cm,21.3cm) -- (0.0cm,0.0cm);\n"
   <<  "\\end{tikzpicture}\n"
   <<  "}\n";
 
@@ -136,6 +136,7 @@ void pres::NewSlide(){
   nTextBoxes = 0; 
   top.clear();
   bottom.clear(); 
+  width.clear();
 
 }
 
@@ -197,23 +198,24 @@ void pres::Text(string text, std::string options_string){
   if (nTextBoxes > top.size()){ cout << "ERROR.  Too many text boxes." << endl; abort(); }
   float top_ = top[nTextBoxes-1]; 
   float bottom_ = bottom[nTextBoxes-1]; 
-  float width_ = 12.0;
-  if (slideType == 4) width_ = width[0];  
+  float width_ = (width.size() == top.size()) ? width[nTextBoxes-1] : 12.0;
 
   //Parse options
   std::vector <std::string> Options = GetParms(options_string);  
   int size = 0;
-  int pos = 1;
+  float moveDown = -9999; 
   for (unsigned int i = 0; i < Options.size(); i++){
-    if (Options[i].find("down") < Options[i].length()) pos = 2;
     if (Options[i].find("size") < Options[i].length()) size = atoi( getString(Options[i], "size").c_str() ) ;
+    if (Options[i].find("moveDown") < Options[i].length()) moveDown = atof( getString(Options[i], "moveDown").c_str() ) ;
   }
+  moveDown = (moveDown < -9998 ? 0 : moveDown*12.8); 
  
+
   //Get size
   std::string size_ = getSize(size);
  
   if (titleTwoLines == -1) cout << "Error!!  Need Title on slide X before you can call 'text'." << endl;
-  myfile <<  "  \\begin{textblock*}{" << width_ << "cm}[0.0,0.0](0.35cm, " << top_ << "cm)\n" << endl;
+  myfile <<  "  \\begin{textblock*}{" << width_ << "cm}[0.0,0.0](0.35cm, " << top_ + moveDown*9.6 << "cm)\n" << endl;
   myfile
   <<  "  \\begin{" << size_ << "} " 
   <<  text
@@ -543,4 +545,56 @@ void pres::PlotType5(std::string plot, std::string options_string){
   else myfile << "\\textcolor{" << labelColor << "}{" << label << "}";
   myfile << "\\end{center} \\end{textblock*}" << endl;
 
+}
+
+void pres::Table(std::string table, std::string options_string){ 
+  slideType = 6;
+  PlotType6(table, options_string); 
+}
+
+void pres::PlotType6(std::string table, std::string options_string){
+  myfile << "\\input{" << table << "}" << endl;
+}
+
+void pres::TableText(std::string table, std::string options_string){ 
+  slideType = 7;
+  PlotType7(table, options_string); 
+}
+
+void pres::PlotType7(std::string table, std::string options_string){
+  //Options
+  std::vector <std::string> Options = GetParms(options_string);  
+  int tableTextSize = 0;
+  float width_ = -1;
+  float moveDown = -9999; 
+  for (unsigned int i = 0; i < Options.size(); i++){
+    if (Options[i].find("tableTextSize") < Options[i].length()) tableTextSize = atoi( getString(Options[i], "tableTextSize").c_str() );
+    if (Options[i].find("width") < Options[i].length()) width_ = atof( getString(Options[i], "width").c_str() );
+    if (Options[i].find("moveDown") < Options[i].length()) moveDown = atof( getString(Options[i], "moveDown").c_str() ); 
+  }
+  width_ = (width_ < 0 ? 5 : width_*12.8);
+  moveDown = (moveDown < -9998 ? 0 : moveDown*12.8); 
+
+  //Title
+  float titlebottom = 0.7;
+  if (titleTwoLines < 0) titlebottom = 0.0;
+  if (titleTwoLines == 1) titlebottom = 2.0;
+
+  //Size
+  std::string size_ = getSize(tableTextSize);
+
+  //Table
+  float y = titlebottom + (9.6-titlebottom)/2.0 - 0.2 + moveDown;
+  myfile << "\\begin{textblock*}{" << 12.8 << "cm}[1.0,0.5](" << 12.8 << "cm, " << y << "cm)";
+  myfile << "\\begin{" << size_ << "} " << endl;
+  myfile << "\\begin{" << "flushright" << "} " << endl;
+  myfile << "\\input{" << table << "}" << endl;
+  myfile << "\\end{" << "flushright" << "} " << endl;
+  myfile << "\\end{" << size_ << "} "  << endl;
+  myfile << "\\end{textblock*}" << endl;
+
+  //Set up text box
+  top.push_back( (titleTwoLines ? 2.0 : 0.7) ); 
+  bottom.push_back( 9.6 ); 
+  width.push_back( width_ ); 
 }

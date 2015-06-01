@@ -23,7 +23,8 @@ class pres{
     void TextPlotPlot(std::string plot1, std::string plot2, std::string options = ""); 
     void TextPlot(std::string plot, std::string options_string = ""); 
     void Plot(std::string plot, std::string options_string = ""); 
-    void PlotOnly(std::string plot, std::string options_string = ""); 
+    void Table(std::string table, std::string options_string = ""); 
+    void TableText(std::string table, std::string options_string = ""); 
 
   private:
     std::string keyColor;
@@ -42,6 +43,8 @@ class pres{
     void PlotType3(std::string plot1, std::string plot2, std::string options_string, float ar1, float ar2);
     void PlotType4(std::string plot, std::string options_string);
     void PlotType5(std::string plot, std::string options_string);
+    void PlotType6(std::string table, std::string options_string);
+    void PlotType7(std::string table, std::string options_string);
 
 };
 

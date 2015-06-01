@@ -27,6 +27,14 @@ This package generates beamer presentations with minimal effort.
   - Plot("plot", "options"); 
     - This gives you an image only.  You can add a title in the usual way if you want a title as well (most images will be larger if no title).
     - Options are --label X, --labelColor red, and --labelUnderline, to label the figure
+  - Table("table", "options"); 
+    - This gives you a slide with a table centered on it (beamer defaults).  You can add a title in the usual way if you want a title as well (most images will be larger if no title).
+  - TableText("table", "options")
+    - This gives you a slide with text on the left and a table on the right.
+    - Some effort is made to vertically center the table, but you can fine tune with the --moveDown X option, where X is a fraction
+    - For particularly wide or narrow tables, you should use the --width X option, where X is a fraction, to specify the width of the TEXT.
+    - Captions and titles for the tables should be added to the table directly.  Hint: if you use the SNT Table Maker, the table->ForSlideMaker method will add your title in the appropriate place. 
+
 
 ###Other options
   - To add free text, the command is FreeText(x, y, text, options); 

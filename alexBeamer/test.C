@@ -97,4 +97,26 @@ void test(){
   myTest.Plot("result_elec.pdf");
   myTest.FinishSlide();
 
+  //Tenth slide
+  myTest.NewSlide();
+  myTest.Plot("result_elec2.pdf");
+  myTest.FinishSlide();
+
+  //Eleventh slide
+  myTest.NewSlide();
+  myTest.Title("This is my awesome eleventh slide with a Really Really Long Name"); 
+  myTest.Table("table.tex", "--tableTextSize -2");
+  myTest.FinishSlide();
+
+  //Twelfth slide
+  myTest.NewSlide();
+  myTest.Title("This is my awesome twelfth slide with a Really Really Long Name"); 
+  myTest.TableText("table.tex", "--tableTextSize -2 --width 0.3125 --moveDown -0.15");
+  myTest.Text(R"(
+    \underline{\textbf{Observed}}: number of numer events with SIP $<$ 4 \\  \vspace{5mm} 
+    \underline{\textbf{Predicted}}: number of exclusive denom events with SIP $< 4 \times \frac{FR}{(1-FR)}$
+  )", ""); 
+  myTest.FreeText(0.82, 0.87, "FO1", "--color darkgreen --bold"); 
+  myTest.FinishSlide();
+
 }
