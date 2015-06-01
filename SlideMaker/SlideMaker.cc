@@ -1,4 +1,4 @@
-#include "alexBeamer.h"
+#include "SlideMaker.h"
 
 //General function to allow you to run bash
 std::string exec(const char* cmd) {
