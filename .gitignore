@@ -11,3 +11,6 @@ makeCMS3ClassFiles/*.h
 *.aux
 *.pcm
 alexBeamer/*.tex
+makeCMS3ClassFiles/doAll.C
+makeCMS3ClassFiles/ScanChain.C
+tableMaker/SimpleTableDict.cpp
