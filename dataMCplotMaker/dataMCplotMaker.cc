@@ -19,38 +19,29 @@ void DrawVerticalLine(Double_t x){
   l.DrawLineNDC(xndc,bm,xndc,tm);
 }
 
-//Parse Parameters from options input string
-vector <std::string> GetParms(std::string blah){
-  int a = -1;
-  int length = blah.length();
-  vector <std::string> options;
-  while (a < length){
-    int temp = a;
-    a = blah.find("--", temp+1);
-    if (a <= temp) break;
-    int b = blah.find("--", a+3)-1;
-    unsigned int myLength = b - a - 2;
-    string mySubstring;
-    if (a + 2 + myLength > blah.length()) mySubstring = blah.substr(a+2);
-    else mySubstring = blah.substr(a+2, b-a-2);
-    options.push_back(mySubstring);
-  }
-  return options;
-}
-
-//Function to determine maximum of each histogram, including error bars
+//Function to determine maximum of each histogram, including error bars.  Side = 1 left, 2 right, 3 both, 4 = overflow
 TH1F *null = new TH1F("", "", 1,0,1);
-float AdjustedMaximum(std::vector <TH1F*> Plots, TH1F* data = null, std::vector <TH1F*> Signals = std::vector<TH1F*>()){
+float AdjustedMaximum(int side, std::vector <TH1F*> Plots, TH1F* data = null, std::vector <TH1F*> Signals = std::vector<TH1F*>()){
+  int lowerBound = 1;
+  if (side == 2) lowerBound = 0.5*Plots[0]->GetNbinsX()+1;
+  int upperBound = Plots[0]->GetNbinsX();
+  if (side == 1) upperBound = 0.5*Plots[0]->GetNbinsX()+1;
+  if (side == 2) upperBound--;
+  if (side == 4) lowerBound = Plots[0]->GetNbinsX(); 
+  if (side == 4) upperBound = Plots[0]->GetNbinsX()+1; 
+  int nbins = Plots[0]->GetNbinsX(); 
+  if (nbins < 6){
+    lowerBound = 1;
+    upperBound = nbins;
+  }
   vector <float> heights;
-  for (int i = 0; i < Plots[0]->GetNbinsX()+2; i++){
+  for (int i = lowerBound; i < upperBound; i++){
     float temp = 0;
-    for (unsigned int j = 0; j < Plots.size(); j++){
-      temp += Plots[j]->GetBinContent(i)+Plots[j]->GetBinError(i);
-    }
+    for (unsigned int j = 0; j < Plots.size(); j++) temp += Plots[j]->GetBinContent(i);
     heights.push_back(temp);
   }
   if (Signals.size() > 0 && Signals[0]->GetEntries() > 0){
-    for (int i = 0; i < Signals[0]->GetNbinsX()+2; i++){
+    for (int i = 1; i < Signals[0]->GetNbinsX(); i++){
       float temp = 0;
       for (unsigned int j = 0; j < Signals.size(); j++){
         temp += Signals[j]->GetBinContent(i);
@@ -61,28 +52,12 @@ float AdjustedMaximum(std::vector <TH1F*> Plots, TH1F* data = null, std::vector 
   std::sort( heights.begin(), heights.end() );
   float bkgd_height = heights[heights.size()-1];
   heights.clear();
-  for (int i = 0; i < data->GetNbinsX()+2; i++){
+  for (int i = lowerBound; i < upperBound; i++){
     heights.push_back(data->GetBinContent(i)+data->GetBinError(i));
   }
   std::sort( heights.begin(), heights.end() );
   float data_height = heights[heights.size()-1];
   return max(data_height, bkgd_height);
-}
-
-//Turn parsed argument from string into const char*.  Remove leading and trailing whitespace
-const char* getString(std::string initial, std::string result){
-  int temp = initial.find(result); 
-  std::string substring = initial.substr(temp+result.length());
-  while (substring[0] == ' '){
-    std::string temp2 = substring.substr(1,substring.length()-1); 
-    substring = temp2;
-  }
-  while (substring[substring.length()-1] == ' '){
-    std::string temp2 = substring.substr(0,substring.length()-1); 
-    substring = temp2;
-  }
-  if (substring.length() > 4 && substring.substr(substring.length()-4, substring.length()-1) == ".pdf") substring = substring.substr(0, substring.length()-4);
-  return substring.c_str();
 }
 
 //Set style -- this is completely ripped off from TDRStyle.cc
@@ -197,7 +172,7 @@ void SetTDRStyle(){
   tdrStyleAG->cd();
 }
 
-void dataMCplotMaker(TH1F* Data, std::vector <TH1F*> Backgrounds, std::vector <char*> Titles, std::string titleIn, std::string title2In, std::string options_string, std::vector <TH1F*> Signals, std::vector <char*> SignalTitles, std::vector <Color_t> color_input){
+void dataMCplotMaker(TH1F* Data, std::vector <TH1F*> Backgrounds, std::vector <string> Titles, std::string titleIn, std::string title2In, std::string options_string, std::vector <TH1F*> Signals, std::vector <string> SignalTitles, std::vector <Color_t> color_input){
 
   char* title = (char *)alloca(titleIn.size() + 1);
   memcpy(title, titleIn.c_str(), titleIn.size() + 1);
@@ -222,32 +197,19 @@ void dataMCplotMaker(TH1F* Data, std::vector <TH1F*> Backgrounds, std::vector <c
   bool normalize = 0;
   bool doOverflow = 1;
   bool showXaxisUnit = 1;
-  char* energy = new char[strlen("8")+2];
-  std::strcpy(energy, "8");
-  char* lumi = new char[strlen("19.5")+2];
-  std::strcpy(lumi, "19.5");
-  char* yAxisLabel = new char[strlen("Entries")+2];
-  std::strcpy(yAxisLabel, "Entries");
-  char* yAxisUnit = new char[strlen("")+2];
-  std::strcpy(yAxisUnit, "");
-  char* yAxisOverride = new char[strlen("")+1];
-  std::strcpy(yAxisOverride, "");
-  char* xAxisLabel = new char[strlen("M_{T}")+2];
-  std::strcpy(xAxisLabel, "M_{T}");
-  char* xAxisUnit = new char[strlen("GeV")+2];
-  std::strcpy(xAxisUnit, "GeV");
-  char* xAxisOverride = new char[strlen("")+2];
-  std::strcpy(xAxisOverride, "");
-  char* dataName = new char[strlen("data")+2];
-  std::strcpy(dataName, "data");
-  char* topYaxisTitle = new char[strlen("data/SM")+2];
-  std::strcpy(topYaxisTitle, "data/SM");
-  char* overrideHeader = new char[strlen("")+2];
-  std::strcpy(overrideHeader, "");
-  char* type = new char[strlen("CMS Preliminary ")+2];
-  std::strcpy(type, "CMS Preliminary ");
-  char* outputName = new char[strlen("data_MC_plot")+2];
-  std::strcpy(outputName, "data_MC_plot");
+  std::string xAxisLabel = "M_{T}";
+  std::string energy = "13";
+  std::string lumi = "10.0";
+  std::string yAxisLabel = "Entries";
+  std::string yAxisUnit = "";
+  std::string yAxisOverride = "";
+  std::string xAxisUnit = "GeV";
+  std::string xAxisOverride = "";
+  std::string dataName = "data";
+  std::string topYaxisTitle = "data/SM";
+  std::string overrideHeader = "";
+  std::string type = "CMS Preliminary ";
+  std::string outputName = "data_MC_plot";
   bool preserveBackgroundOrder = 0;
   bool preserveSignalOrder = 0;
   bool showDivisionLabel = 1;
@@ -262,6 +224,8 @@ void dataMCplotMaker(TH1F* Data, std::vector <TH1F*> Backgrounds, std::vector <c
   Int_t nDivisions = -1;
   bool noLegend = false;
   bool png = false;
+  bool dots = false;
+  std::string datacolor = "";
 
   //Loop over options and change default settings to user-defined settings
   for (unsigned int i = 0; i < Options.size(); i++){
@@ -277,85 +241,42 @@ void dataMCplotMaker(TH1F* Data, std::vector <TH1F*> Backgrounds, std::vector <c
     else if (Options[i].find("noOverflow") < Options[i].length()) doOverflow = 0; 
     else if (Options[i].find("noXaxisUnit") < Options[i].length()) showXaxisUnit = 0; 
     else if (Options[i].find("divHalf") < Options[i].length()) doHalf = 1; 
-    else if (Options[i].find("energy") < Options[i].length()){
-      energy = new char[strlen(getString(Options[i], "energy")) + 1];
-      std::strcpy(energy, getString(Options[i], "energy"));
-    }
-    else if (Options[i].find("lumi") < Options[i].length()){
-      lumi = new char[strlen(getString(Options[i], "lumi")) + 1];
-      std::strcpy(lumi, getString(Options[i], "lumi"));
-    }
-    else if (Options[i].find("yAxisLabel") < Options[i].length()){
-      yAxisLabel = new char[strlen(getString(Options[i], "yAxisLabel")) + 1];
-      std::strcpy(yAxisLabel, getString(Options[i], "yAxisLabel"));
-    }
-    else if (Options[i].find("yAxisUnit") < Options[i].length()){
-      yAxisUnit = new char[strlen(getString(Options[i], "yAxisUnit")) + 1];
-      std::strcpy(yAxisUnit, getString(Options[i], "yAxisUnit"));
-    }
-    else if (Options[i].find("yAxisOverride") < Options[i].length()){
-      yAxisOverride = new char[strlen(getString(Options[i], "yAxisOverride")) + 1];
-      std::strcpy(yAxisOverride, getString(Options[i], "yAxisOverride"));
-      strcat( yAxisOverride, "  " );
-    }
-    else if (Options[i].find("xAxisLabel") < Options[i].length()){
-      xAxisLabel = new char[strlen(getString(Options[i], "xAxisLabel")) + 1];
-      std::strcpy(xAxisLabel, getString(Options[i], "xAxisLabel"));
-    }
-    else if (Options[i].find("xAxisUnit") < Options[i].length()){
-      xAxisUnit = new char[strlen(getString(Options[i], "xAxisUnit")) + 1];
-      std::strcpy(xAxisUnit, getString(Options[i], "xAxisUnit"));
-    }
-    else if (Options[i].find("xAxisOverride") < Options[i].length()){
-      xAxisOverride = new char[strlen(getString(Options[i], "xAxisOverride")) + 1];
-      strcat( xAxisOverride, "  " );
-      std::strcpy(xAxisOverride, getString(Options[i], "xAxisOverride"));
-    }
-    else if (Options[i].find("dataName") < Options[i].length()){
-      dataName = new char[strlen(getString(Options[i], "dataName")) + 1];
-      std::strcpy(dataName, getString(Options[i], "dataName"));
-    }
-    else if (Options[i].find("topYaxisTitle") < Options[i].length()){
-      topYaxisTitle = new char[strlen(getString(Options[i], "topYaxisTitle")) + 1];
-      std::strcpy(topYaxisTitle, getString(Options[i], "topYaxisTitle"));
-    }
-    else if (Options[i].find("type") < Options[i].length()){
-      type = new char[strlen(getString(Options[i], "type")) + 1];
-      std::strcpy(type, getString(Options[i], "type"));
-    }
-    else if (Options[i].find("overrideHeader") < Options[i].length()){
-      overrideHeader = new char[strlen(getString(Options[i], "overrideHeader")) + 1];
-      std::strcpy(overrideHeader, getString(Options[i], "overrideHeader"));
-    }
-    else if (Options[i].find("outputName") < Options[i].length()){
-      outputName = new char[strlen(getString(Options[i], "outputName")) + 1];
-      std::strcpy(outputName, getString(Options[i], "outputName"));
-    }
-    else if (Options[i].find("vLine") < Options[i].length()){
-      vLines.push_back(atof( getString(Options[i], "vLine") ));
-    }
-    else if (Options[i].find("hLine") < Options[i].length()){
-      hLines.push_back(atof( getString(Options[i], "hLine") ));
-    }
-    else if (Options[i].find("setMaximum") < Options[i].length()){
-      setMaximum = atof( getString(Options[i], "setMaximum") );
-    }
-    else if (Options[i].find("legendUp") < Options[i].length()){
-      legendUp = atof( getString(Options[i], "legendUp") );
-    }
-    else if (Options[i].find("legendRight") < Options[i].length()){
-      legendRight = atof( getString(Options[i], "legendRight") );
-    }
-    else if (Options[i].find("legendTextSize") < Options[i].length()){
-      legendTextSize = atof( getString(Options[i], "legendTextSize") );
-    }
-    else if (Options[i].find("setMinimum") < Options[i].length()){
-      setMinimum = atof( getString(Options[i], "setMinimum") );
-    }
-    else if (Options[i].find("nDivisions") < Options[i].length()){
-      nDivisions = atoi( getString(Options[i], "nDivisions") );
-    }
+    else if (Options[i].find("energy") < Options[i].length()) energy = getString(Options[i], "energy");
+    else if (Options[i].find("lumi") < Options[i].length()) lumi = getString(Options[i], "lumi");
+    else if (Options[i].find("yAxisLabel") < Options[i].length()) yAxisLabel = getString(Options[i], "yAxisLabel");
+    else if (Options[i].find("yAxisUnit") < Options[i].length()) yAxisUnit = getString(Options[i], "yAxisUnit");
+    else if (Options[i].find("yAxisOverride") < Options[i].length()) yAxisOverride = getString(Options[i], "yAxisOverride");
+    else if (Options[i].find("xAxisLabel") < Options[i].length()) xAxisLabel = getString(Options[i], "xAxisLabel");
+    else if (Options[i].find("xAxisUnit") < Options[i].length()) xAxisUnit = getString(Options[i], "xAxisUnit");
+    else if (Options[i].find("xAxisOverride") < Options[i].length()) xAxisOverride = getString(Options[i], "xAxisOverride");
+    else if (Options[i].find("dataName") < Options[i].length()) dataName = getString(Options[i], "dataName");
+    else if (Options[i].find("dataColor") < Options[i].length()) datacolor = getString(Options[i], "dataColor");
+    else if (Options[i].find("topYaxisTitle") < Options[i].length()) topYaxisTitle = getString(Options[i], "topYaxisTitle");
+    else if (Options[i].find("type") < Options[i].length()) type = getString(Options[i], "type");
+    else if (Options[i].find("overrideHeader") < Options[i].length()) overrideHeader = getString(Options[i], "overrideHeader");
+    else if (Options[i].find("outputName") < Options[i].length()) outputName = getString(Options[i], "outputName");
+    else if (Options[i].find("vLine") < Options[i].length()) vLines.push_back(atof( getString(Options[i], "vLine").c_str() ));
+    else if (Options[i].find("hLine") < Options[i].length()) hLines.push_back(atof( getString(Options[i], "hLine").c_str() ));
+    else if (Options[i].find("setMaximum") < Options[i].length()) setMaximum = atof( getString(Options[i], "setMaximum").c_str() );
+    else if (Options[i].find("legendUp") < Options[i].length()) legendUp = atof( getString(Options[i], "legendUp").c_str() );
+    else if (Options[i].find("legendRight") < Options[i].length()) legendRight = atof( getString(Options[i], "legendRight").c_str() );
+    else if (Options[i].find("legendTextSize") < Options[i].length()) legendTextSize = atof( getString(Options[i], "legendTextSize").c_str() );
+    else if (Options[i].find("setMinimum") < Options[i].length()) setMinimum = atof( getString(Options[i], "setMinimum").c_str() );
+    else if (Options[i].find("nDivisions") < Options[i].length()) nDivisions = atoi( getString(Options[i], "nDivisions").c_str() );
+    else if (Options[i].find("drawDots") < Options[i].length()) dots = true; 
     else cout << "Warning: Option not recognized!  Option: " << Options[i] << endl;
+  }
+
+  //Decode data color
+  Color_t dataColor = kBlack;
+  if (datacolor != ""){
+    std::transform(datacolor.begin(), datacolor.end(), datacolor.begin(), ::tolower); 
+    if (datacolor == "kred" || datacolor == "red") dataColor = kRed;
+    if (datacolor == "kblue" || datacolor == "blue") dataColor = kBlue;
+    if (datacolor == "kgreen" || datacolor == "green") dataColor = kGreen;
+    if (datacolor == "korange" || datacolor == "orange") dataColor = kOrange;
+    if (datacolor == "kcyan" || datacolor == "cyan") dataColor = kCyan;
+    if (datacolor == "kmagenta" || datacolor == "magenta") dataColor = kMagenta;
   }
 
   //Set Style
@@ -416,62 +337,6 @@ void dataMCplotMaker(TH1F* Data, std::vector <TH1F*> Backgrounds, std::vector <c
 
   std::vector <Color_t> Colors;
 
-  //Sort Backgrounds, with Titles and Colors
-  if (preserveBackgroundOrder == 0){
-    std::vector<PlotInfo> myPlotInfo;
- 
-    for (unsigned int i = 0; i < Backgrounds.size(); i++){
-      PlotInfo temp;
-      temp.Plot = Backgrounds[i];
-      temp.Title = Titles[i];
-      if (color_input.size() > 0){
-        temp.Color = color_input[i];
-      }
-      else{
-        temp.Color = kWhite;
-      }
-      myPlotInfo.push_back(temp);
-    }
-
-    std::sort(myPlotInfo.begin(), myPlotInfo.end(), Integral);
-    Backgrounds.clear();
-    Titles.clear();
-
-    for (unsigned int i = 0; i < myPlotInfo.size(); i++){
-      Backgrounds.push_back(myPlotInfo[i].Plot);
-      Titles.push_back(myPlotInfo[i].Title);
-      if (color_input.size() > 0) Colors.push_back(myPlotInfo[i].Color);
-    }
-  }
-
-  //Sort Signals, with Titles and Colors
-  if (preserveSignalOrder == 0){
-    std::vector<PlotInfo> myPlotInfo;
- 
-    for (unsigned int i = 0; i < Signals.size(); i++){
-      PlotInfo temp;
-      temp.Plot = Signals[i];
-      temp.Title = SignalTitles[i];
-      if (color_input.size() > 0){
-        temp.Color = color_input[i+Backgrounds.size()];
-      }
-      else{
-        temp.Color = kBlack;
-      }
-      myPlotInfo.push_back(temp);
-    }
-
-    std::sort(myPlotInfo.begin(), myPlotInfo.end(), Integral);
-    Signals.clear();
-    SignalTitles.clear();
-
-    for (unsigned int i = 0; i < myPlotInfo.size(); i++){
-      Signals.push_back(myPlotInfo[i].Plot);
-      SignalTitles.push_back(myPlotInfo[i].Title);
-      if (color_input.size() > 0) Colors.push_back(myPlotInfo[i].Color);
-    }
-  }
-
   //Set colors for histograms (this is my color scheme, probably needs changed for publishable plots)
   if (color_input.size() == 0 && use_signals == 0 && nostack == 0){ 
     Colors.push_back(kGreen+3);   
@@ -497,9 +362,66 @@ void dataMCplotMaker(TH1F* Data, std::vector <TH1F*> Backgrounds, std::vector <c
     Colors.push_back(kGreen+3);
     Colors.push_back(kYellow-7);
   }
-  else if (color_input.size() > Backgrounds.size()){
-    for (unsigned int i = Backgrounds.size(); i < color_input.size(); i++){
+  else if (color_input.size() != 0){
+    for (unsigned int i = 0; i < color_input.size(); i++){
       Colors.push_back(color_input[i]);
+    }
+  }
+
+  //Sort Backgrounds, with Titles and Colors
+  if (preserveBackgroundOrder == 0){
+    std::vector<PlotInfo> myPlotInfo;
+ 
+    for (unsigned int i = 0; i < Backgrounds.size(); i++){
+      PlotInfo temp;
+      temp.Plot = Backgrounds[i];
+      temp.Title = Titles[i];
+      if (color_input.size() > 0){
+        temp.Color = color_input[i];
+      }
+      else{
+        temp.Color = Colors[i];
+      }
+      myPlotInfo.push_back(temp);
+    }
+
+    std::sort(myPlotInfo.begin(), myPlotInfo.end(), Integral);
+    Backgrounds.clear();
+    Titles.clear();
+
+    for (unsigned int i = 0; i < myPlotInfo.size(); i++){
+      Backgrounds.push_back(myPlotInfo[i].Plot);
+      Titles.push_back(myPlotInfo[i].Title);
+      Colors[i] = myPlotInfo[i].Color;
+    }
+  }
+
+  //Sort Signals, with Titles and Colors
+  if (preserveSignalOrder == 0){
+    std::vector<PlotInfo> myPlotInfo;
+ 
+    for (unsigned int i = 0; i < Signals.size(); i++){
+      PlotInfo temp;
+      temp.Plot = Signals[i];
+      temp.Title = SignalTitles[i];
+      if (color_input.size() > 0){
+        temp.Color = color_input[i+Backgrounds.size()];
+      }
+      else{
+        temp.Color = Colors[i+Backgrounds.size()];
+      }
+      myPlotInfo.push_back(temp);
+    }
+
+    std::sort(myPlotInfo.begin(), myPlotInfo.end(), Integral);
+    Signals.clear();
+    SignalTitles.clear();
+
+    for (unsigned int i = 0; i < myPlotInfo.size(); i++){
+      Signals.push_back(myPlotInfo[i].Plot);
+      SignalTitles.push_back(myPlotInfo[i].Title);
+      if (color_input.size() > 0) Colors.push_back(myPlotInfo[i].Color);
+      else Colors[Backgrounds.size()+i] = myPlotInfo[i].Color;  
     }
   }
 
@@ -552,7 +474,8 @@ void dataMCplotMaker(TH1F* Data, std::vector <TH1F*> Backgrounds, std::vector <c
     for (unsigned int i = 0; i < Backgrounds.size(); i++){
       Backgrounds[i]->UseCurrentStyle();
       if (!nostack) Backgrounds[i]->SetFillColor(Colors[i]);
-      if (nostack) Backgrounds[i]->SetLineColor(Colors[i]);
+      if (dots) Backgrounds[i]->SetMarkerColor(Colors[i]);
+      Backgrounds[i]->SetLineColor(Colors[i]);
       if (nostack && normalize) Backgrounds[i]->Scale(1.0/Backgrounds[i]->Integral());
       stack->Add(Backgrounds[i]);
     }
@@ -568,44 +491,67 @@ void dataMCplotMaker(TH1F* Data, std::vector <TH1F*> Backgrounds, std::vector <c
 }
 
   //Minimum and maximum
-  if (setMinimum != -1) stack->SetMinimum(setMinimum);
-  if (setMinimum == -1 && !linear && Backgrounds[0]->GetMinimum() > 0) stack->SetMinimum(min(1.0, 0.9*Backgrounds[0]->GetMinimum()));
-  else if (setMinimum == -1 && !linear && stack->GetMinimum() > 0) stack->SetMinimum(min(1.0, 0.1*stack->GetMinimum()));
-  else if (setMinimum == -1 && !linear) stack->SetMinimum(0.5);
-  if (setMinimum == -1 && linear) stack->SetMinimum(0);
+  float leftMax = AdjustedMaximum(1, Backgrounds, Data, Signals);
+  float rightMax = AdjustedMaximum(2, Backgrounds, Data, Signals);
+  float myMin = 0.1;
+  if (setMinimum != -1) myMin = setMinimum;
+  if (setMinimum == -1 && !linear && Backgrounds[0]->GetMinimum() > 0) myMin = min(0.1, 0.9*Backgrounds[0]->GetMinimum());
+  else if (setMinimum == -1 && !linear && stack->GetMinimum() > 0) myMin = min(0.1, 0.5*stack->GetMinimum());
+  else if (setMinimum == -1 && !linear) myMin = 0.1;
+  if (setMinimum == -1 && linear) myMin = 0; 
   if (!nostack) stack->Draw("hist");
   if (nostack) stack->Draw("nostack");
-  float myMax = 0;
-  if (setMaximum != -1) myMax = setMaximum;
-  else if (setMaximum == -1 && !linear && stack->GetMinimum() > 0) myMax = pow(stack->GetMinimum(), -1.0/3.0) * pow(AdjustedMaximum(Backgrounds, Data, Signals), 4.0/3.0);
-  else if (setMaximum == -1 && linear && noLegend)  myMax = (AdjustedMaximum(Backgrounds, Data, Signals))*(1.2) - (stack->GetMinimum())*(1.0/3.0);
-  else if (setMaximum == -1 && linear)  myMax = (AdjustedMaximum(Backgrounds, Data, Signals))*(4.0/3.0) - (stack->GetMinimum())*(1.0/3.0);
-  else if (!linear) myMax = stack->GetMaximum()*20.0;
-  else myMax = stack->GetMaximum()*2;
+  float myMax = stack->GetMaximum();
+  if (setMaximum != -1) myMax = setMaximum; 
+  else if (setMaximum == -1 && !linear){
+    myMax = pow(AdjustedMaximum(3, Backgrounds, Data, Signals), 1.0/0.69)*pow(myMin, (0.69-1)/0.69); 
+    if (leftMax > 5*rightMax) myMax = pow(AdjustedMaximum(3, Backgrounds, Data, Signals), 1.0/0.74)*pow(myMin, (0.74-1)/0.74);
+    if (rightMax > leftMax)   myMax = myMax*10; 
+  }
+  else if (setMaximum == -1 && linear && noLegend)  myMax = (AdjustedMaximum(3, Backgrounds, Data, Signals))*(1.2) - (stack->GetMinimum())*(1.0/3.0);
+  else if (setMaximum == -1 && linear){
+    myMax = (AdjustedMaximum(3, Backgrounds, Data, Signals))*1.46 - (stack->GetMinimum())*(1.0/3.0);  
+    if (rightMax < 0.7*leftMax){
+      myMax = myMax*0.88;
+      if (strcmp(title2, "") == 0) myMax = myMax*0.94; 
+    }
+    else if (rightMax > leftMax){ 
+      if (Backgrounds.size() + Signals.size() >= 4) myMax = myMax*1.2;
+    }
+  }
+  else if (!linear) myMax = myMax*20.0;
+  else myMax = myMax*2;
+
+  stack->SetMinimum(myMin);
   stack->SetMaximum(myMax);
 
   //Y-axis titles
   float bin_width = Backgrounds[0]->GetXaxis()->GetBinWidth(1);
-  if (yAxisOverride && yAxisOverride[0] != '\0') stack->GetYaxis()->SetTitle(Form("%s", yAxisOverride));
-  else if (yAxisOverride[0] == '\0' && showDivisionLabel && yAxisUnit[0] != '\0') stack->GetYaxis()->SetTitle(Form("%s [%s] / %.0f %s  ", yAxisLabel, yAxisUnit, bin_width, xAxisUnit));
-  else if (yAxisOverride[0] == '\0' && showDivisionLabel && yAxisUnit[0] == '\0' && bin_width >= 2) stack->GetYaxis()->SetTitle(Form("%s / %.0f %s  ", yAxisLabel, bin_width, xAxisUnit)); 
-  else if (yAxisOverride[0] == '\0' && showDivisionLabel && yAxisUnit[0] == '\0' && bin_width < 2) stack->GetYaxis()->SetTitle(Form("%s / %.2f %s  ", yAxisLabel, bin_width, xAxisUnit)); 
-  else if (yAxisOverride[0] == '\0' && !showDivisionLabel && yAxisUnit[0] != '\0')stack->GetYaxis()->SetTitle(Form("%s [%s]  ", yAxisLabel, yAxisUnit)); 
-  else if (yAxisOverride[0] == '\0' && !showDivisionLabel && yAxisUnit[0] == '\0')stack->GetYaxis()->SetTitle(Form("%s  ", yAxisLabel));
+  if (yAxisOverride != "" && yAxisOverride[0] != '\0') stack->GetYaxis()->SetTitle(Form("%s", yAxisOverride.c_str()));
+  else if (yAxisOverride[0] == '\0' && showDivisionLabel && yAxisUnit[0] != '\0') stack->GetYaxis()->SetTitle(Form("%s [%s] / %.0f %s  ", yAxisLabel.c_str(), yAxisUnit.c_str(), bin_width, xAxisUnit.c_str()));
+  else if (yAxisOverride[0] == '\0' && showDivisionLabel && yAxisUnit[0] == '\0' && bin_width >= 2) stack->GetYaxis()->SetTitle(Form("%s / %.0f %s  ", yAxisLabel.c_str(), bin_width, xAxisUnit.c_str())); 
+  else if (yAxisOverride[0] == '\0' && showDivisionLabel && yAxisUnit[0] == '\0' && bin_width < 2) stack->GetYaxis()->SetTitle(Form("%s / %.2f %s  ", yAxisLabel.c_str(), bin_width, xAxisUnit.c_str())); 
+  else if (yAxisOverride[0] == '\0' && !showDivisionLabel && yAxisUnit[0] != '\0')stack->GetYaxis()->SetTitle(Form("%s [%s]  ", yAxisLabel.c_str(), yAxisUnit.c_str())); 
+  else if (yAxisOverride[0] == '\0' && !showDivisionLabel && yAxisUnit[0] == '\0')stack->GetYaxis()->SetTitle(Form("%s  ", yAxisLabel.c_str()));
   else cout << "nothing" << endl;
 
   //X-axis titles
-  if (xAxisOverride[0] == '\0' && showXaxisUnit == 0) stack->GetXaxis()->SetTitle(Form("%s", xAxisLabel));
-  if (xAxisOverride[0] == '\0' && showXaxisUnit == 1) stack->GetXaxis()->SetTitle(Form("%s [%s]", xAxisLabel, xAxisUnit));
-  if (xAxisOverride[0] != '\0') stack->GetXaxis()->SetTitle(Form("%s", xAxisOverride));
+  if (xAxisLabel == "HT" || xAxisLabel == "ht" || xAxisLabel == "Ht") xAxisLabel = "H_{T}"; 
+  if (xAxisLabel == "MT" || xAxisLabel == "mt" || xAxisLabel == "Mt") xAxisLabel = "M_{T}"; 
+  if (xAxisOverride[0] == '\0' && showXaxisUnit == 0) stack->GetXaxis()->SetTitle(Form("%s", xAxisLabel.c_str()));
+  if (xAxisOverride[0] == '\0' && showXaxisUnit == 1) stack->GetXaxis()->SetTitle(Form("%s [%s]", xAxisLabel.c_str(), xAxisUnit.c_str()));
+  if (xAxisOverride[0] != '\0') stack->GetXaxis()->SetTitle(Form("%s", xAxisOverride.c_str()));
   if (!noData) stack->GetYaxis()->SetTitleOffset(1.5);
   if (noData) stack->GetYaxis()->SetTitleOffset(1.4);
   if (noData && linear) stack->GetYaxis()->SetTitleOffset(1.6);
 
   //Draw
-  if (!nostack) stack->Draw("hist");
+  if (!nostack && !dots) stack->Draw("hist");
+  if (dots) stack->Draw("PE"); 
   if (nostack) stack->Draw("nostack");
   THStack *stack2 = new THStack("stack2", "stack2"); 
+  Data->SetMarkerColor(dataColor);
+  Data->SetLineColor(dataColor);
   stack2->Add(Data);
   stack2->Draw("PSAMEE");
   vector<int> markerStyle;
@@ -619,7 +565,7 @@ void dataMCplotMaker(TH1F* Data, std::vector <TH1F*> Backgrounds, std::vector <c
   for (unsigned int i = 0; i < Signals.size(); i++){
     Signals[i]->Draw("SAMEP");
     if (Colors.size() >= i + Backgrounds.size() + 1) Signals[i]->SetMarkerColor(Colors[i + Backgrounds.size()]);
-    else Signals[i]->SetLineColor(kBlack);
+    Signals[i]->SetLineColor(kBlack);
     Signals[i]->SetLineWidth(3);
     Signals[i]->SetMarkerStyle(markerStyle[i%7]);
   }
@@ -627,12 +573,13 @@ void dataMCplotMaker(TH1F* Data, std::vector <TH1F*> Backgrounds, std::vector <c
   //Legend
   TLegend *leg;
   if ((Backgrounds.size()+Signals.size() == 1 || Backgrounds.size()+Signals.size() == 2) && noData) leg = new TLegend(0.7+legendRight,0.79+legendUp,0.92+legendRight,0.87+legendUp); 
-  else if ((Backgrounds.size()+Signals.size() == 1 || Backgrounds.size()+Signals.size() == 2) && !noData) leg = new TLegend(0.7+legendRight,0.64+legendUp,0.92+legendRight,0.72+legendUp); 
+  else if ((Backgrounds.size()+Signals.size() == 1 || Backgrounds.size()+Signals.size() == 2) && !noData) leg = new TLegend(0.7+legendRight,0.69+legendUp,0.92+legendRight,0.77+legendUp); 
   else leg = new TLegend(0.7+legendRight,0.59+legendUp,0.92+legendRight,0.87+legendUp);
   leg->SetTextSize(legendTextSize);
-  if (noData == false) leg->AddEntry(Data, dataName, "lp");
-  for (int i = Titles.size()-1; i > -1; i--) leg->AddEntry(Backgrounds[i], Titles[i], "f");
-  if (use_signals) for (int i = SignalTitles.size()-1; i > -1; i--) leg->AddEntry(Signals[i], SignalTitles[i], "P");
+  if (noData == false) leg->AddEntry(Data, dataName.c_str(), "lp");
+  if (!dots) for (int i = Titles.size()-1; i > -1; i--) leg->AddEntry(Backgrounds[i], Titles[i].c_str(), "f");
+  if (dots) for (int i = Titles.size()-1; i > -1; i--) leg->AddEntry(Backgrounds[i], Titles[i].c_str(), "LPE");
+  if (use_signals) for (int i = SignalTitles.size()-1; i > -1; i--) leg->AddEntry(Signals[i], SignalTitles[i].c_str(), "P");
   leg->SetFillStyle(0);
   leg->SetBorderSize(0);
   if (!noLegend) leg->Draw();
@@ -668,17 +615,17 @@ void dataMCplotMaker(TH1F* Data, std::vector <TH1F*> Backgrounds, std::vector <c
   float type_y = .95;
   if (!noData) type_y = .96;
   tex->SetTextSize(0.028);
-  if (overrideHeader && overrideHeader[0] == '\0') tex->DrawLatex(0.79,type_y,Form("%s fb^{-1} (%s TeV)", lumi, energy));
+  if (overrideHeader[0] == '\0') tex->DrawLatex(0.79,type_y,Form("%s fb^{-1} (%s TeV)", lumi.c_str(), energy.c_str()));
   tex->SetTextSize(0.035);
-  if (noData && overrideHeader && overrideHeader[0] == '\0'){
+  if (noData && overrideHeader[0] == '\0'){
     tex->DrawLatex(0.16,type_y-.08, "CMS");
     tex->DrawLatex(0.16,type_y-.11, "#it{Preliminary}"); 
   }
-  if (!noData && overrideHeader && overrideHeader[0] == '\0'){ 
+  if (!noData && overrideHeader[0] == '\0'){ 
     tex->DrawLatex(0.83,type_y-.08, "CMS");
     tex->DrawLatex(0.73,type_y-.13, "#it{Preliminary}"); 
   }
-  if (overrideHeader && overrideHeader[0] != '\0') tex->DrawLatex(0.17,type_y,Form("%s", overrideHeader));
+  if (overrideHeader[0] != '\0') tex->DrawLatex(0.17,type_y,Form("%s", overrideHeader.c_str()));
   if (!noData && stack->GetMaximum() > 80000 && linear) finPad[0]->SetPad(0.0, 0.0, 1.0, 0.84);
 
   //Set number of divisions on x-axis
@@ -699,6 +646,8 @@ void dataMCplotMaker(TH1F* Data, std::vector <TH1F*> Backgrounds, std::vector <c
     TH1F* err_hist = (TH1F*)Backgrounds[0]->Clone(); 
     err_hist->SetTitle("");
     err_hist->Draw();
+    err_hist->SetLineColor(kBlack);
+    err_hist->SetMarkerColor(kBlack);
     err_hist->GetYaxis()->SetTitle("Data/MC");
     err_hist->GetYaxis()->SetTitleSize(0.08);
     err_hist->GetYaxis()->SetTitleOffset(1.8);
@@ -722,7 +671,7 @@ void dataMCplotMaker(TH1F* Data, std::vector <TH1F*> Backgrounds, std::vector <c
     blah->SetTextFont(42);
     blah->SetTextSize(0.17);
     blah->SetTextAngle(90);
-    blah->DrawTextNDC(0.045,0.15,topYaxisTitle);
+    blah->DrawTextNDC(0.045,0.15,topYaxisTitle.c_str());
     TLine line;
     line.SetLineColor(kGray+2);
     line.SetLineWidth(2);
@@ -737,6 +686,6 @@ void dataMCplotMaker(TH1F* Data, std::vector <TH1F*> Backgrounds, std::vector <c
   //--------------------------------
 
   //Print plot as pdf 
-  if (png) c0.Print(Form("%s.png", outputName));
-  else c0.Print(Form("%s.pdf", outputName));
+  if (png) c0.Print(Form("%s.png", outputName.c_str()));
+  else c0.Print(Form("%s.pdf", outputName.c_str()));
 }

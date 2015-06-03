@@ -12,7 +12,9 @@ To run:
   3.  In root, compile the .cc file (.L path/dataMCplotMaker.cc+) before loading and compiling your file.
 
 To call the function:
-  - dataMCplotMaker(TH1F* data, std::vector < TH1F* > Backgrounds, std::vector < char* > Titles, char* title, char* Title2, std::string Options, std::vector < TH1F* > Signals, std::vector < char* > SignalTitles, std::vector < Color_t > colors)
+````
+  dataMCplotMaker(TH1F* data, std::vector < TH1F* > Backgrounds, std::vector < string > Titles, string title, string Title2, std::string Options, std::vector < TH1F* > Signals, std::vector < string > SignalTitles, std::vector < Color_t > colors)
+````
 
 Mandatory arguments:
   - data: a histogram of the data.  If you have no data, set this equal to a null histogram [TH1F* null = new TH1F("","",1,0,1) ].  The code is smart enough to give you a good-looking plot.  
@@ -24,14 +26,14 @@ Mandatory arguments:
 Optional arguments:
   - options: a string with any optional flags you want (see supported options below)
   - signals: a vector of histograms, each representing a signal (enter std::vector <TH1F*>() if you have no signal but want to specify colors)
-  - signal title: the name of each signal, in the same order as the signals vector (enter std::vector <char*>() if you have no signal but want to specify colors)
+  - signal title: the name of each signal, in the same order as the signals vector (enter std::vector <string>() if you have no signal but want to specify colors)
   - colors: a vector of kColors that you want to use instead of the defaults [ex: vector.push_back(kRed)], starting with the backgrounds and ending with signals
 
 Supported flags for "options" string:
   - --outputName X: change the name of the pdf file produced from its default of "data_MC_plot"
   - --xAxisLabel X: change the x-axis label from its default of "M_T"
-  - --energy X: change the energy from its default of 8 TeV
-  - --lumi X: change the lumi from its default of 19.5 fb-1.
+  - --energy X: change the energy from its default of 13 TeV
+  - --lumi X: change the lumi from its default of 10.0 fb-1.
   - --noDivisionLabel: to remove the divisions label on the y-axis (ex: "Entries/30 GeV" becomes "Entries")
   - --noStack: to prevent backgrounds from being stacked (useful for comparisons)
   - --noFill: set all colors to white
@@ -60,15 +62,19 @@ Supported flags for "options" string:
   - --nDivisions X: change the number of x-axis divisions to X, where X = number of primary divisions + 100*number of secondary divisions + 10000*number of tertiary divisions; positive to allow it to optimize (strongly recommended), negative to require it to use your values
   - --noLegend: to suppress the legend
   - --png: to make output as png rather than pdf (must specify output name)
+  - --dataColor: to change the data color to something other than black
+  - --drawDots: to draw the backgrounds as dots rather than lines (recommended only for ratios like fake or flip rates) 
 
 Example:
-  - std::vector < TH1F* > myVector;
-  - myVector.push_back(CR1_ttsl);
-  - myVector.push_back(CR1_ttdl);
-  - std::vector < char* > myTitles;
-  - myTitles.push_back("ttsl");
-  - myTitles.push_back("ttdl");
-  - dataMCplotMaker(CR1_data, myVector, myTitles, "#tilde{t} #rightarrow t#tilde{#chi} _ {1}^{0} ISR", "CR-0b", "--vLine 120 --outputName test _ plot");
+````
+  std::vector <TH1F*> myVector;
+  myVector.push_back(CR1_ttsl);
+  myVector.push_back(CR1_ttdl);
+  std::vector <string> myTitles;
+  myTitles.push_back("ttsl");
+  myTitles.push_back("ttdl");
+  dataMCplotMaker(CR1_data, myVector, myTitles, "#tilde{t} #rightarrow t#tilde{#chi} _ {1}^{0} ISR", "CR-0b", "--vLine 120 --outputName test _ plot");
+````
 
 Advanced Usage
   - If you run with more than 5 signals, it will automatically set your backgrounds to gray and striped.
