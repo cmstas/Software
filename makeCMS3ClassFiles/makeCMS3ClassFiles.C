@@ -189,6 +189,7 @@ void makeHeaderFile(TFile *f, const string& treeName, bool paranoid, const strin
         TString branchclass(branch->GetClassName());
         if(!branchname.BeginsWith("int") && 
            !branchname.BeginsWith("uint") && 
+           !branchname.BeginsWith("ull") && 
            !branchname.BeginsWith("ullong") && 
            !branchname.BeginsWith("bool") && 
            !branchname.BeginsWith("float") &&
