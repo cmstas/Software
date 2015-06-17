@@ -1,7 +1,14 @@
 #include "PlotMaker2D.h"
 #include "PlotMakingTools.h"
 
+void PlotMaker2D(TH2D* hist, std::string options_string){
+  cout << "HERE" << endl;
+  TH2F* blah = (TH2F*)hist->Clone();
+  PlotMaker2D(blah, options_string); 
+}
+
 void PlotMaker2D(TH2F* hist, std::string options_string){
+  cout << "here2" << endl;
 
   //Turn "options" string into vector of strings, one parm each
   std::vector <std::string> Options = GetParms(options_string);  
