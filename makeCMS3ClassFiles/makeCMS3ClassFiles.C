@@ -661,7 +661,7 @@ void makeHeaderFile(TFile *f, const string& treeName, bool paranoid, const strin
     
     if(havebtagInfo) {
 	  //functions to return whether or not trigger fired - HLT
-	  headerf << "\t" << "float passbtag(TString bDiscriminatorName, unsigned int jetIndx) {" << endl;
+	  headerf << "\t" << "float getbtagvalue(TString bDiscriminatorName, unsigned int jetIndx) {" << endl;
 	  headerf << "\t\t" << "size_t bDiscriminatorIndx;" << endl;
 	  headerf << "\t\t" << "vector<TString>::const_iterator begin_it = pfjets_bDiscriminatorNames().begin();" << endl;
 	  headerf << "\t\t" << "vector<TString>::const_iterator end_it = pfjets_bDiscriminatorNames().end();" << endl;
@@ -793,8 +793,8 @@ void makeHeaderFile(TFile *f, const string& treeName, bool paranoid, const strin
     }//if(haveTauIDInfo) 
     if(havebtagInfo) {
         //functions to return whether or not trigger fired - HLT
-        headerf << "\t" << "float passbtag(TString bDiscriminatorName, unsigned int jetIndx);" << endl;
-        implf   << "\t" << "float passbtag(TString bDiscriminatorName, unsigned int jetIndx) { return " << objName << ".passbtag( bDiscriminatorName, jetIndx); }" << endl;
+        headerf << "\t" << "float getbtagvalue(TString bDiscriminatorName, unsigned int jetIndx);" << endl;
+        implf   << "\t" << "float getbtagvalue(TString bDiscriminatorName, unsigned int jetIndx) { return " << objName << ".getbtagvalue( bDiscriminatorName, jetIndx); }" << endl;
     }//if(haveTauIDInfo) 
  
 }
