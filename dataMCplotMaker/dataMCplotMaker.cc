@@ -5,6 +5,11 @@ bool Integral(PlotInfo plot1, PlotInfo plot2){
   return plot1.Plot->Integral(0,plot1.Plot->GetNbinsX()) < plot2.Plot->Integral(0,plot2.Plot->GetNbinsX());
 }
 
+//Comparison between pair in order to make sort on index 
+bool pairCompare(const std::pair<float, int> & a, const std::pair<float, int> & b) {
+  return a.first > b.first;
+}
+
 //Needed for freaking vertical lines
 void DrawVerticalLine(Double_t x){
   TLine l;
@@ -206,7 +211,7 @@ void dataMCplotMaker(TH1F* Data, std::vector <TH1F*> Backgrounds, std::vector <s
   std::string xAxisUnit = "GeV";
   std::string xAxisOverride = "";
   std::string dataName = "data";
-  std::string topYaxisTitle = "data/SM";
+  std::string topYaxisTitle = "data/MC";
   std::string overrideHeader = "";
   std::string type = "CMS Preliminary ";
   std::string outputName = "data_MC_plot";
@@ -225,6 +230,9 @@ void dataMCplotMaker(TH1F* Data, std::vector <TH1F*> Backgrounds, std::vector <s
   bool noLegend = false;
   bool png = false;
   bool dots = false;
+  bool showPercentage = false;
+  bool errHistAtBottom = false;
+  std::vector<int> percent;
   std::string datacolor = "";
 
   //Loop over options and change default settings to user-defined settings
@@ -264,6 +272,8 @@ void dataMCplotMaker(TH1F* Data, std::vector <TH1F*> Backgrounds, std::vector <s
     else if (Options[i].find("setMinimum") < Options[i].length()) setMinimum = atof( getString(Options[i], "setMinimum").c_str() );
     else if (Options[i].find("nDivisions") < Options[i].length()) nDivisions = atoi( getString(Options[i], "nDivisions").c_str() );
     else if (Options[i].find("drawDots") < Options[i].length()) dots = true; 
+    else if (Options[i].find("percentage") < Options[i].length()) showPercentage = true; 
+    else if (Options[i].find("errHistAtBottom") < Options[i].length()) errHistAtBottom = true; 
     else cout << "Warning: Option not recognized!  Option: " << Options[i] << endl;
   }
 
@@ -430,12 +440,18 @@ void dataMCplotMaker(TH1F* Data, std::vector <TH1F*> Backgrounds, std::vector <s
   TPad* finPad[2];
   if (noData == false){
     c0.SetCanvasSize(600, 700);
-    finPad[0] = new TPad("1", "1", 0.0, 0.0, 1.0, 0.84);
+    if (errHistAtBottom == false){
+      finPad[0] = new TPad("1", "1", 0.0, 0.0, 1.0, 0.84);
+      finPad[1] = new TPad("2", "2", 0.0, 0.83, 1.0, 1.0);
+    }
+    else{
+      finPad[0] = new TPad("1", "1", 0.0, 0.16, 1.0, 1.0);
+      finPad[1] = new TPad("2", "2", 0.0, 0.0, 1.0, 0.17);
+    }
     if (!linear) finPad[0]->SetLogy();
     finPad[0]->SetTopMargin(0.05);
     finPad[0]->SetLeftMargin(0.12);
     finPad[0]->SetBottomMargin(0.11);
-    finPad[1] = new TPad("2", "2", 0.0, 0.83, 1.0, 1.0);
     finPad[1]->SetLeftMargin(0.12);
     finPad[0]->Draw();
     finPad[1]->Draw();
@@ -545,6 +561,27 @@ void dataMCplotMaker(TH1F* Data, std::vector <TH1F*> Backgrounds, std::vector <s
   if (noData) stack->GetYaxis()->SetTitleOffset(1.4);
   if (noData && linear) stack->GetYaxis()->SetTitleOffset(1.6);
 
+  //Show Percentage
+  if(showPercentage == 1){
+    std::vector<double> each;
+    float total = 0;
+    for(unsigned int i=0; i<Backgrounds.size(); i++){
+      each.push_back(Backgrounds[i]->Integral());
+      total += each.back();
+    }
+    for(unsigned int i=0; i<Backgrounds.size(); i++){
+      each[i] = each[i]/total*100;
+      percent.push_back((int) each[i]);
+    }
+    // Get the rounded percentage add up to 100
+    int ptotal = 0;
+    for(unsigned int i=0; i<percent.size(); i++)  ptotal += percent[i];
+    std::vector< std::pair<float,int> > roundings;
+    for(unsigned int i=0; i< percent.size(); i++) roundings.push_back(std::make_pair((each[i]-percent[i]),i));
+    std::sort(roundings.begin(), roundings.end(), pairCompare);
+    for(int i=0; i< (100-ptotal); i++) percent[roundings[i].second] += 1;
+  }
+
   //Draw
   if (!nostack && !dots) stack->Draw("hist");
   if (dots) stack->Draw("PE"); 
@@ -577,6 +614,7 @@ void dataMCplotMaker(TH1F* Data, std::vector <TH1F*> Backgrounds, std::vector <s
   else leg = new TLegend(0.7+legendRight,0.59+legendUp,0.92+legendRight,0.87+legendUp);
   leg->SetTextSize(legendTextSize);
   if (noData == false) leg->AddEntry(Data, dataName.c_str(), "lp");
+  if (showPercentage) for (int i = Titles.size()-1; i > -1; i--) Titles[i] = Titles[i] + " (" + std::to_string(percent[i]) +"\%)";
   if (!dots) for (int i = Titles.size()-1; i > -1; i--) leg->AddEntry(Backgrounds[i], Titles[i].c_str(), "f");
   if (dots) for (int i = Titles.size()-1; i > -1; i--) leg->AddEntry(Backgrounds[i], Titles[i].c_str(), "LPE");
   if (use_signals) for (int i = SignalTitles.size()-1; i > -1; i--) leg->AddEntry(Signals[i], SignalTitles[i].c_str(), "P");
@@ -615,7 +653,10 @@ void dataMCplotMaker(TH1F* Data, std::vector <TH1F*> Backgrounds, std::vector <s
   float type_y = .95;
   if (!noData) type_y = .96;
   tex->SetTextSize(0.028);
-  if (overrideHeader[0] == '\0') tex->DrawLatex(0.79,type_y,Form("%s fb^{-1} (%s TeV)", lumi.c_str(), energy.c_str()));
+  if (overrideHeader[0] == '\0'){
+    if (noData) tex->DrawLatex(0.78,type_y,Form("%s fb^{-1} (%s TeV)", lumi.c_str(), energy.c_str()));
+    else tex->DrawLatex(0.76,type_y,Form("%s fb^{-1} (%s TeV)", lumi.c_str(), energy.c_str()));
+  }
   tex->SetTextSize(0.035);
   if (noData && overrideHeader[0] == '\0'){
     tex->DrawLatex(0.16,type_y-.08, "CMS");

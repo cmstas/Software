@@ -64,6 +64,8 @@ Supported flags for "options" string:
   - --png: to make output as png rather than pdf (must specify output name)
   - --dataColor: to change the data color to something other than black
   - --drawDots: to draw the backgrounds as dots rather than lines (recommended only for ratios like fake or flip rates) 
+  - --percentage: to show the percentage of the integral of each MC plot contributing to the total background
+  - --errHistAtBottom: to make the Data/MC comparison histogram at the bottom
 
 Example:
 ````
