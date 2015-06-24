@@ -222,7 +222,7 @@ void dataMCplotMaker(TH1F* Data, std::vector <TH1F*> Backgrounds, std::vector <s
   float setMinimum = -1;
   float legendUp = 0;
   float legendRight = 0;
-  float legendTextSize = 0.04;
+  float legendTextSize = 0.03;
   vector <float> vLines;
   vector <float> hLines;
   bool doHalf = 0;
