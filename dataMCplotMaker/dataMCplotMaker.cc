@@ -273,7 +273,7 @@ void dataMCplotMaker(TH1F* Data, std::vector <TH1F*> Backgrounds, std::vector <s
     else if (Options[i].find("setMinimum") < Options[i].length()) setMinimum = atof( getString(Options[i], "setMinimum").c_str() );
     else if (Options[i].find("nDivisions") < Options[i].length()) nDivisions = atoi( getString(Options[i], "nDivisions").c_str() );
     else if (Options[i].find("drawDots") < Options[i].length()) dots = true; 
-    else if (Options[i].find("percentage") < Options[i].length()) showPercentage = true; 
+    else if (Options[i].find("showPercentage") < Options[i].length()) showPercentage = true; 
     else if (Options[i].find("errHistAtBottom") < Options[i].length()) errHistAtBottom = true; 
     else if (Options[i].find("noOutput") < Options[i].length()) noOutput = true; 
     else cout << "Warning: Option not recognized!  Option: " << Options[i] << endl;
