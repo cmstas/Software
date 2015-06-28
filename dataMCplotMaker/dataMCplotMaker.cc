@@ -222,7 +222,7 @@ void dataMCplotMaker(TH1F* Data, std::vector <TH1F*> Backgrounds, std::vector <s
   float setMinimum = -1;
   float legendUp = 0;
   float legendRight = 0;
-  float legendTextSize = 0.032;
+  float legendTextSize = 0.035;
   vector <float> vLines;
   vector <float> hLines;
   bool doHalf = 0;
@@ -234,6 +234,7 @@ void dataMCplotMaker(TH1F* Data, std::vector <TH1F*> Backgrounds, std::vector <s
   bool errHistAtBottom = false;
   std::vector<int> percent;
   std::string datacolor = "";
+  bool noOutput = false;
 
   //Loop over options and change default settings to user-defined settings
   for (unsigned int i = 0; i < Options.size(); i++){
@@ -243,6 +244,7 @@ void dataMCplotMaker(TH1F* Data, std::vector <TH1F*> Backgrounds, std::vector <s
     else if (Options[i].find("noFill") < Options[i].length()) noFill = 1;
     else if (Options[i].find("normalize") < Options[i].length()) normalize = 1; 
     else if (Options[i].find("preserveSignalOrder") < Options[i].length()) preserveSignalOrder = 1; 
+    else if (Options[i].find("outputName") < Options[i].length()) outputName = getString(Options[i], "outputName");
     else if (Options[i].find("png") < Options[i].length()) png = true;
     else if (Options[i].find("noDivisionLabel") < Options[i].length()) showDivisionLabel = 0; 
     else if (Options[i].find("noLegend") < Options[i].length()) noLegend = 1; 
@@ -262,7 +264,6 @@ void dataMCplotMaker(TH1F* Data, std::vector <TH1F*> Backgrounds, std::vector <s
     else if (Options[i].find("topYaxisTitle") < Options[i].length()) topYaxisTitle = getString(Options[i], "topYaxisTitle");
     else if (Options[i].find("type") < Options[i].length()) type = getString(Options[i], "type");
     else if (Options[i].find("overrideHeader") < Options[i].length()) overrideHeader = getString(Options[i], "overrideHeader");
-    else if (Options[i].find("outputName") < Options[i].length()) outputName = getString(Options[i], "outputName");
     else if (Options[i].find("vLine") < Options[i].length()) vLines.push_back(atof( getString(Options[i], "vLine").c_str() ));
     else if (Options[i].find("hLine") < Options[i].length()) hLines.push_back(atof( getString(Options[i], "hLine").c_str() ));
     else if (Options[i].find("setMaximum") < Options[i].length()) setMaximum = atof( getString(Options[i], "setMaximum").c_str() );
@@ -274,6 +275,7 @@ void dataMCplotMaker(TH1F* Data, std::vector <TH1F*> Backgrounds, std::vector <s
     else if (Options[i].find("drawDots") < Options[i].length()) dots = true; 
     else if (Options[i].find("percentage") < Options[i].length()) showPercentage = true; 
     else if (Options[i].find("errHistAtBottom") < Options[i].length()) errHistAtBottom = true; 
+    else if (Options[i].find("noOutput") < Options[i].length()) noOutput = true; 
     else cout << "Warning: Option not recognized!  Option: " << Options[i] << endl;
   }
 
@@ -727,6 +729,9 @@ void dataMCplotMaker(TH1F* Data, std::vector <TH1F*> Backgrounds, std::vector <s
   //--------------------------------
 
   //Print plot as pdf 
-  if (png) c0.Print(Form("%s.png", outputName.c_str()));
-  else c0.Print(Form("%s.pdf", outputName.c_str()));
+  if (!noOutput){
+    if (outputName.find(".") < outputName.length()) c0.Print(outputName.c_str());
+    else if (png) c0.Print(Form("%s.png", outputName.c_str()));
+    else c0.Print(Form("%s.pdf", outputName.c_str()));
+  }
 }

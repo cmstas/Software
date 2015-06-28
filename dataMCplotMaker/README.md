@@ -30,7 +30,7 @@ Optional arguments:
   - colors: a vector of kColors that you want to use instead of the defaults [ex: vector.push_back(kRed)], starting with the backgrounds and ending with signals
 
 Supported flags for "options" string:
-  - --outputName X: change the name of the pdf file produced from its default of "data_MC_plot"
+  - --outputName X: change the name of the output file produced from its default of "data_MC_plot" in pdf (you may also specify other file type like xxx.ps)
   - --xAxisLabel X: change the x-axis label from its default of "M_T"
   - --energy X: change the energy from its default of 13 TeV
   - --lumi X: change the lumi from its default of 10.0 fb-1.
@@ -43,7 +43,7 @@ Supported flags for "options" string:
   - --noOverflow: do not make the last bin an overflow bin (important if your last bin is already an overflow bin)
   - --yAxisLabel X: change the y-axis label from its default of "Entries"
   - --yAxisUnit X: change the y-axis unit from its default of ""
-  - --yAxisOverride X: replace the entire y-axis label with the X
+  - --yAxisOverride X: replace the entire y-axis label with X
   - --noXaxisUnit: do not display a unit for the x-axis
   - --xAxisUnit X: change the x-axis unit from its default of ""
   - --xAxisOverride X: override the entire x-axis label to the user-defined value
@@ -57,15 +57,16 @@ Supported flags for "options" string:
   - --setMinimum X: change the y-axis minimum from its default value (originally chosen to be 90% of the smallest bin's height on the bottom background)
   - --legendUp X: move the legend up by X (number from 0 to 1; you probably want around 0.05), negative numbers to move it down
   - --legendRight X: move the legend to the right by X (number from 0 to 1; you probably want around 0.05), negative numbers to move it to the left
-  - --legendTextSize X: change the legend text size from its default value of 0.04
+  - --legendTextSize X: change the legend text size from its default value of 0.035
   - --divHalf: reduce the number of x-axis divisions by half
   - --nDivisions X: change the number of x-axis divisions to X, where X = number of primary divisions + 100*number of secondary divisions + 10000*number of tertiary divisions; positive to allow it to optimize (strongly recommended), negative to require it to use your values
   - --noLegend: to suppress the legend
   - --png: to make output as png rather than pdf (must specify output name)
   - --dataColor: to change the data color to something other than black
   - --drawDots: to draw the backgrounds as dots rather than lines (recommended only for ratios like fake or flip rates) 
-  - --percentage: to show the percentage of the integral of each MC plot contributing to the total background
+  - --showPercentage: to show the percentage of the integral of each MC plot contributing to the total background
   - --errHistAtBottom: to make the Data/MC comparison histogram at the bottom
+  - --noOutput: if by any chance you don't want an output to file 
 
 Example:
 ````
