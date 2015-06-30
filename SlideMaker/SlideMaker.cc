@@ -649,6 +649,8 @@ void pres::TextTableTable(std::string table1, std::string table2, std::string op
 
 void pres::TwoTable(std::string table1, std::string table2, std::string options){
   slideType = 10;
+  top.push_back(2.0);
+  bottom.push_back(4.0);
   PlotType10(table1, table2, options); 
 }
 
