@@ -17,6 +17,7 @@ class pres{
     void Title(std::string title); 
     void Text(std::string, std::string options_string = ""); 
     void FreeText(float x, float y, std::string text, std::string options_string = "");
+    void StartBackup(); 
 
     //Templates
     void AllText(std::string options_string = ""); 
@@ -25,6 +26,10 @@ class pres{
     void Plot(std::string plot, std::string options_string = ""); 
     void Table(std::string table, std::string options_string = ""); 
     void TableText(std::string table, std::string options_string = ""); 
+    void FourPlot(std::string plot1, std::string plot2, std::string plot3, std::string plot4, std::string options = ""); 
+    void ThreeTable(std::string table1, std::string table2, std::string table3);
+    void TextTableTable(std::string table1, std::string table2, std::string options = ""); 
+    void TwoTable(std::string table1, std::string table2, std::string options = "");
 
   private:
     std::string keyColor;
@@ -45,7 +50,9 @@ class pres{
     void PlotType5(std::string plot, std::string options_string);
     void PlotType6(std::string table, std::string options_string);
     void PlotType7(std::string table, std::string options_string);
-
+    void PlotType8(std::string plot1, std::string plot2, std::string plot3, std::string plot4, std::string options_string); 
+    void PlotType9(std::string table1, std::string table2, std::string table3); 
+    void PlotType10(std::string table1, std::string table2, std::string options_string);
 };
 
 #endif

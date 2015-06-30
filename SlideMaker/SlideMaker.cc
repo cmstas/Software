@@ -94,11 +94,12 @@ void pres::TitleSlide(std::string title){
   <<  "  \\end{center}\n"
   <<  "  \\begin{textblock*}{12.8cm}(0cm,4.0cm)\n"
   <<  "  \\begin{center}\n"
-  <<  "  N. Amin, C. Campagnari, " << alex << ", F. Golf, J. Gran, I. Suarez\\\\ \n"
+  <<  "  N. Amin, C. Campagnari, " << alex << ", F. Golf, J. Gran, \\\\ \n"
+  <<  "  B. Marsh, I. Suarez, S. Wang\\\\ \n"
   <<  "  (UCSB)\\\\ \n"
   <<  "  \\vspace{0.4cm} \n"
-  <<  "  G. Cerati, I. Dyckes, D. Klein, I. MacNeill, D. Olivito, \\\\ \n"
-  <<  "  G. Zevi Della Porta, C. Welke, J. Wood, F. W\\\"urthwein, A. Yagil \\\\ \n"
+  <<  "  G. Cerati, D. Klein, D. Olivito, G. Zevi Della Porta\\\\ \n"
+  <<  "  C. Welke, J. Wood, F. W\\\"urthwein, A. Yagil \\\\ \n"
   <<  "  (UCSD)\\\\ \n"
   <<  "  \\vspace{0.4cm} \n"
   <<  "  L. Bauerdick, K. Burkett, O. Gutsche, S. Jindariani, \\\\\n"
@@ -107,10 +108,10 @@ void pres::TitleSlide(std::string title){
   <<  "  \\end{center}\n"
   <<  "  \\end{textblock*}\n"
   <<  "  \\begin{textblock*}{2.7cm}(0cm, 0.1cm)\n"
-  <<  "  \\includegraphics[width=2.7cm]{ucsb.pdf}\n"
+  <<  "  \\includegraphics[width=2.7cm]{/home/users/cgeorge/software/SlideMaker/ucsb.pdf}\n"
   <<  "  \\end{textblock*}\n"
   <<  "  \\begin{textblock*}{2.2cm}(10.3cm, 0.2cm)\n"
-  <<  "  \\includegraphics[width=2.2cm]{CMS.pdf}\n"
+  <<  "  \\includegraphics[width=2.2cm]{/home/users/cgeorge/software/SlideMaker/CMS.pdf}\n"
   <<  "  \\end{textblock*}\n"
   <<  "}\n"
   <<  "\n" 
@@ -169,26 +170,20 @@ pres::pres(std::string keyColor_, bool center){
     if (!center) myfile << "\\setbeamerfont{frametitle}{size=\\LARGE \\bfseries}\n";
     myfile << "\\setbeamertemplate{footline}{\\raisebox{5pt}{\\makebox[\\paperwidth]{\\hfill\\makebox[10pt]{\\scriptsize\\textcolor{white}{\\insertframenumber\\hspace{2mm}}}}}}";
     myfile << "\\setbeamersize{text margin left=10pt,text margin right=10pt}";
-    myfile << "\\scriptsize \\let\\small\\scriptsize" << endl;
-    myfile << "\\scriptsize \\let\\footnotesize\\scriptsize" << endl;
-    myfile << "\\scriptsize \\let\\scriptsize\\scriptsize" << endl;
-    myfile << "\\footnotesize \\let\\small\\footnotesize" << endl;
-    myfile << "\\footnotesize \\let\\footnotesize\\scriptsize" << endl;
-    myfile << "\\footnotesize \\let\\scriptsize\\scriptsize" << endl;
-    myfile << "\\small \\let\\small\\small" << endl;
-    myfile << "\\small \\let\\footnotesize\\footnotesize" << endl;
-    myfile << "\\small \\let\\scriptsize\\scriptsize" << endl;
 
 }
 
 float aspectRatio(std::string pdfFile){
-  const char* command = ("./aspect_ratio.sh " + pdfFile).c_str();
-  string data = exec(command);
-  std::vector <std::string> result = GetParms(data);  
-  if (atof(result[2].c_str()) == 0) return atof(result[1].c_str())/atof(result[0].c_str()); 
-  else if (atof(result[2].c_str()) == 90) return atof(result[0].c_str())/atof(result[1].c_str()); 
-  else cout << "Problem with aspect ratio.  Value was: " << result[0] << " " << result[1] << " " << result[2] << endl;
-  return 0;
+  //system("cp ~/software/SlideMaker/aspect_ratio.sh ."); 
+  //const char* command = (". aspect_ratio.sh " + pdfFile).c_str();
+  //cout << command << endl;
+  //string data = exec(command);
+  //cout << "data: " << data << endl;
+  //std::vector <std::string> result = GetParms(data);  
+  //if (atof(result[2].c_str()) == 0) return atof(result[1].c_str())/atof(result[0].c_str()); 
+  //else if (atof(result[2].c_str()) == 90) return atof(result[0].c_str())/atof(result[1].c_str()); 
+  //else cout << "Problem with aspect ratio.  Value was: " << result[0] << " " << result[1] << " " << result[2] << endl;
+  return 0.7;
 }
 
 
@@ -198,6 +193,7 @@ void pres::Text(string text, std::string options_string){
     return;
   }
   nTextBoxes++;
+  //Don't remove the below, will cause seg fault.
   if (nTextBoxes > top.size()){ cout << "ERROR.  Too many text boxes." << endl; abort(); }
   float top_ = top[nTextBoxes-1]; 
   float bottom_ = bottom[nTextBoxes-1]; 
@@ -253,6 +249,13 @@ void pres::Title(std::string title){
   else titleTwoLines = 0;
 }
 
+void pres::StartBackup(){
+  NewSlide();
+  myfile <<  "  \\begin{textblock*}{" << 10 << "cm}[0.0,0.0](1.0cm, " << 6.0 << "cm)\n" << endl;
+  myfile << "\\begin{LARGE} \\textcolor{blue}{\\textbf{Backup}} \\end{LARGE}" << endl;
+  myfile <<  "  \\end{textblock*}" << endl;
+  FinishSlide(); 
+}
 
 void pres::AllText(std::string options){
   slideType = 1; 
@@ -291,11 +294,15 @@ void pres::FreeText(float x, float y, std::string text, std::string options_stri
 } 
 
 void pres::TextPlotPlot(std::string plot1, std::string plot2, std::string options){
+  cout << __LINE__ << endl;
   float ar1 = aspectRatio(plot1); 
+  cout << __LINE__ << endl;
   float ar2 = aspectRatio(plot2); 
+  cout << __LINE__ << endl;
   float ar = std::max(ar1, ar2); 
   if (ar > 1.05) slideType = 2; 
   else slideType = 3;
+  cout << "ar: " << ar << endl;
   if (slideType == 2) pres::PlotType2(plot1, plot2, options, ar1, ar2); 
   if (slideType == 3) pres::PlotType3(plot1, plot2, options, ar1, ar2); 
 }
@@ -600,4 +607,80 @@ void pres::PlotType7(std::string table, std::string options_string){
   top.push_back( (titleTwoLines ? 2.0 : 0.7) ); 
   bottom.push_back( 9.6 ); 
   width.push_back( width_ ); 
+}
+
+void pres::FourPlot(std::string plot1, std::string plot2, std::string plot3, std::string plot4, std::string options){ 
+  slideType = 8;
+  PlotType8(plot1, plot2, plot3, plot4, options);
+}
+
+void pres::PlotType8(std::string plot1, std::string plot2, std::string plot3, std::string plot4, std::string options){ 
+  myfile << "\\begin{columns}[t]" << endl;
+  myfile << "\\column{0.5\\textwidth}" << endl;
+  myfile << "\\centering" << endl;
+  myfile << "\\includegraphics[width=5.5cm,height=3.8cm]{" << plot1 << "} \\" << endl;
+  myfile << "\\includegraphics[width=5.5cm,height=3.8cm]{" << plot2 << "}" << endl;
+  myfile << "\\column{0.5\\textwidth}" << endl;
+  myfile << "\\centering" << endl;
+  myfile << "\\includegraphics[width=5.5cm,height=3.8cm]{" << plot3 << "} \\" << endl;
+  myfile << "\\includegraphics[width=5.5cm,height=3.8cm]{" << plot4 << "}" << endl;
+  myfile << "\\end{columns}" << endl;
+}
+
+void pres::ThreeTable(std::string table1, std::string table2, std::string table3){
+  slideType = 9;
+  PlotType9(table1, table2, table3); 
+}
+
+void pres::PlotType9(std::string table1, std::string table2, std::string table3){
+  myfile << "\\scriptsize" << endl;
+  myfile << "\\input{" << table1 << "} \\hfill\\ " << endl; 
+  myfile << "\\input{" << table2 << "} \\hfill\\ " << endl;
+  myfile << "\\input{" << table3 << "} \\hfill\\ " << endl;
+  myfile << "\\normalsize" << endl;
+}
+
+void pres::TextTableTable(std::string table1, std::string table2, std::string options){
+  slideType = 10;
+  top.push_back( 2.0 ); 
+  bottom.push_back( 9.6 ); 
+  PlotType10(table1, table2, options); 
+}
+
+void pres::TwoTable(std::string table1, std::string table2, std::string options){
+  slideType = 10;
+  PlotType10(table1, table2, options); 
+}
+
+void pres::PlotType10(std::string table1, std::string table2, std::string options_string){
+  //Options
+  std::vector <std::string> Options = GetParms(options_string);  
+  int tableTextSize = 0;
+  float width_ = -1;
+  float moveDown = -9999; 
+  for (unsigned int i = 0; i < Options.size(); i++){
+    if (Options[i].find("tableTextSize") < Options[i].length()) tableTextSize = atoi( getString(Options[i], "tableTextSize").c_str() );
+    if (Options[i].find("width") < Options[i].length()) width_ = atof( getString(Options[i], "width").c_str() );
+    if (Options[i].find("moveDown") < Options[i].length()) moveDown = atof( getString(Options[i], "moveDown").c_str() ); 
+  }
+  width_ = (width_ < 0 ? 5 : width_*12.8);
+  moveDown = (moveDown < -9998 ? 0 : moveDown*12.8); 
+
+  //Title
+  float titlebottom = 0.7;
+  if (titleTwoLines < 0) titlebottom = 0.0;
+  if (titleTwoLines == 1) titlebottom = 2.0;
+
+  //Size
+  std::string size_ = getSize(tableTextSize);
+
+  //Plot
+  myfile << "\\begin{textblock*}{" << 12.8 << "cm}[0.0,1.0](" << 0 << "cm, " << 9.8 << "cm)";
+  myfile << "\\begin{" << size_ << "} " << endl;
+  myfile << "\\begin{" << "flushleft" << "} " << endl;
+  myfile << "\\input{" << table1 << "}" << endl;
+  myfile << "\\input{" << table2<< "}" << endl;
+  myfile << "\\end{" << "flushleft" << "} " << endl;
+  myfile << "\\end{" << size_ << "} "  << endl;
+  myfile << "\\end{textblock*}" << endl;
 }

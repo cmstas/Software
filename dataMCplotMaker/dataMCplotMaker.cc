@@ -22,7 +22,7 @@ void DrawVerticalLine(Double_t x){
   Double_t bm = gPad->GetBottomMargin();
   Double_t xndc = (rm-lm)*((x-gPad->GetUxmin())/(gPad->GetUxmax()-gPad->GetUxmin()))+lm;
   l.DrawLineNDC(xndc,bm,xndc,tm);
-}
+
 
 //Function to determine maximum of each histogram, including error bars.  Side = 1 left, 2 right, 3 both, 4 = overflow
 TH1F *null = new TH1F("", "", 1,0,1);
@@ -97,9 +97,8 @@ void SetTDRStyle(){
   tdrStyleAG->SetFrameLineWidth(1);
 
   //For the histo:
-  tdrStyleAG->SetHistLineColor(1);
+  tdrStyleAG->SetHistLineColor(kBlack);
   tdrStyleAG->SetHistLineWidth(2);
-
   tdrStyleAG->SetEndErrorSize(2);
   tdrStyleAG->SetMarkerStyle(20);
 
@@ -236,11 +235,13 @@ void dataMCplotMaker(TH1F* Data, std::vector <TH1F*> Backgrounds, std::vector <s
   std::string datacolor = "";
   bool noOutput = false;
   bool noErrBars = false;
+  bool noBlackLines = false;
 
   //Loop over options and change default settings to user-defined settings
   for (unsigned int i = 0; i < Options.size(); i++){
     if (Options[i].find("isLinear") < Options[i].length()) linear = 1; 
     else if (Options[i].find("preserveBackgroundOrder") < Options[i].length()) preserveBackgroundOrder = 1; 
+    else if (Options[i].find("noBlackLines") < Options[i].length()) noBlackLines = 1; 
     else if (Options[i].find("noStack") < Options[i].length()) nostack = 1; 
     else if (Options[i].find("noFill") < Options[i].length()) noFill = 1;
     else if (Options[i].find("normalize") < Options[i].length()) normalize = 1; 
@@ -495,7 +496,8 @@ void dataMCplotMaker(TH1F* Data, std::vector <TH1F*> Backgrounds, std::vector <s
       Backgrounds[i]->UseCurrentStyle();
       if (!nostack) Backgrounds[i]->SetFillColor(Colors[i]);
       if (dots) Backgrounds[i]->SetMarkerColor(Colors[i]);
-      Backgrounds[i]->SetLineColor(Colors[i]);
+      if ( noBlackLines) Backgrounds[i]->SetLineColor(Colors[i]);
+      if (!noBlackLines) Backgrounds[i]->SetLineColor(kBlack);
       if (nostack && normalize) Backgrounds[i]->Scale(1.0/Backgrounds[i]->Integral());
       stack->Add(Backgrounds[i]);
     }

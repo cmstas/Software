@@ -68,6 +68,7 @@ Supported flags for "options" string:
   - --errHistAtBottom: to make the Data/MC comparison histogram at the bottom
   - --noOutput: if by any chance you don't want an output to file
   - --noErrBars: if by any chance you don't want the data points to have error bars (it may be annoying when error bars are too big) (effective at both main hist and err hist)
+  - --noBlackLines: don't put a black line between the various backgrounds
 
 Example:
 ````
