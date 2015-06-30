@@ -67,6 +67,7 @@ Supported flags for "options" string:
   - --showPercentage: to show the percentage of the integral of each MC plot contributing to the total background
   - --errHistAtBottom: to make the Data/MC comparison histogram at the bottom
   - --noOutput: if by any chance you don't want an output to file 
+  - --noBlackLines: don't put a black line between the various backgrounds
 
 Example:
 ````
