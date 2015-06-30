@@ -48,7 +48,7 @@ Supported flags for "options" string:
   - --xAxisUnit X: change the x-axis unit from its default of ""
   - --xAxisOverride X: override the entire x-axis label to the user-defined value
   - --dataName X: replace the name for "data" in the legend with the user-defined value
-  - --topYaxisTitle X: change the y-axis label in the top histogram from its default of "data/SM"
+  - --topYaxisTitle X: change the y-axis label in the top histogram from its default of "data/MC"
   - --type X: change the top-left label from its default of "CMS Preliminary"
   - --overrideHeader X: override the entire top line to the user-defined value
   - --vLine X: insert a vectical line where the x-axis = X
@@ -66,7 +66,8 @@ Supported flags for "options" string:
   - --drawDots: to draw the backgrounds as dots rather than lines (recommended only for ratios like fake or flip rates) 
   - --showPercentage: to show the percentage of the integral of each MC plot contributing to the total background
   - --errHistAtBottom: to make the Data/MC comparison histogram at the bottom
-  - --noOutput: if by any chance you don't want an output to file 
+  - --noOutput: if by any chance you don't want an output to file
+  - --noErrBars: if by any chance you don't want the data points to have error bars (it may be annoying when error bars are too big) (effective at both main hist and err hist)
 
 Example:
 ````

@@ -235,6 +235,7 @@ void dataMCplotMaker(TH1F* Data, std::vector <TH1F*> Backgrounds, std::vector <s
   std::vector<int> percent;
   std::string datacolor = "";
   bool noOutput = false;
+  bool noErrBars = false;
 
   //Loop over options and change default settings to user-defined settings
   for (unsigned int i = 0; i < Options.size(); i++){
@@ -276,6 +277,7 @@ void dataMCplotMaker(TH1F* Data, std::vector <TH1F*> Backgrounds, std::vector <s
     else if (Options[i].find("showPercentage") < Options[i].length()) showPercentage = true; 
     else if (Options[i].find("errHistAtBottom") < Options[i].length()) errHistAtBottom = true; 
     else if (Options[i].find("noOutput") < Options[i].length()) noOutput = true; 
+    else if (Options[i].find("noErrBars") < Options[i].length()) noErrBars = true; 
     else cout << "Warning: Option not recognized!  Option: " << Options[i] << endl;
   }
 
@@ -592,7 +594,8 @@ void dataMCplotMaker(TH1F* Data, std::vector <TH1F*> Backgrounds, std::vector <s
   Data->SetMarkerColor(dataColor);
   Data->SetLineColor(dataColor);
   stack2->Add(Data);
-  stack2->Draw("PSAMEE");
+  if(noErrBars) stack2->Draw("PSAME");
+  else stack2->Draw("PSAMEE");
   vector<int> markerStyle;
   markerStyle.push_back(20);
   markerStyle.push_back(21);
@@ -706,10 +709,11 @@ void dataMCplotMaker(TH1F* Data, std::vector <TH1F*> Backgrounds, std::vector <s
       err_hist->SetBinContent(ib, value);
       float MC_err = sqrt(MC_error_2);
       float data_err = Data->GetBinError(ib);
-      err_hist->SetBinError(ib, value * sqrt( pow(MC_err/MC_value, 2) + pow(data_err/data_value, 2) ));
+      if(!noErrBars) err_hist->SetBinError(ib, value * sqrt( pow(MC_err/MC_value, 2) + pow(data_err/data_value, 2) ));
     }
     err_hist->SetMarkerStyle(20);
-    err_hist->Draw("PE");
+    if(noErrBars) err_hist->Draw("P");
+    else err_hist->Draw("PE");
     TText *blah = new TText();
     blah->SetTextFont(42);
     blah->SetTextSize(0.17);
@@ -720,7 +724,8 @@ void dataMCplotMaker(TH1F* Data, std::vector <TH1F*> Backgrounds, std::vector <s
     line.SetLineWidth(2);
     int maxbin = err_hist->GetXaxis()->GetNbins();
     line.DrawLine(err_hist->GetXaxis()->GetBinLowEdge(1),1,err_hist->GetXaxis()->GetBinUpEdge(maxbin),1);
-    err_hist->Draw("PESAME");
+    if(noErrBars)err_hist->Draw("PSAME");
+    else err_hist->Draw("PESAME");
     err_hist->GetXaxis()->SetLabelSize(0);
     err_hist->GetYaxis()->SetLabelSize(0.2);
     err_hist->GetYaxis()->SetRangeUser(0., 2.);
