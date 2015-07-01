@@ -22,7 +22,7 @@ void DrawVerticalLine(Double_t x){
   Double_t bm = gPad->GetBottomMargin();
   Double_t xndc = (rm-lm)*((x-gPad->GetUxmin())/(gPad->GetUxmax()-gPad->GetUxmin()))+lm;
   l.DrawLineNDC(xndc,bm,xndc,tm);
-
+}
 
 //Function to determine maximum of each histogram, including error bars.  Side = 1 left, 2 right, 3 both, 4 = overflow
 TH1F *null = new TH1F("", "", 1,0,1);
