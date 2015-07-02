@@ -49,6 +49,8 @@ Supported flags for "options" string:
   - --noXaxisUnit: do not display a unit for the x-axis
   - --xAxisUnit X: change the x-axis unit from its default of ""
   - --xAxisOverride X: override the entire x-axis label to the user-defined value
+  - --xAxisBinLabels X: replace x-axis bin labels with comma-separated list of strings
+  - --xAxisVerticalBinLabels: if using xAxisBinLabels, specify vertical orientation (default is diagonal)
   - --dataName X: replace the name for "data" in the legend with the user-defined value
   - --topYaxisTitle X: change the y-axis label in the top histogram from its default of "data/MC"
   - --type X: change the top-left label from its default of "CMS Preliminary"
