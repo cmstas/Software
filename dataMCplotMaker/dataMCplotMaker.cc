@@ -24,7 +24,6 @@ void DrawVerticalLine(Double_t x){
   l.DrawLineNDC(xndc,bm,xndc,tm);
 }
 
-
 //Function to determine maximum of each histogram, including error bars.  Side = 1 left, 2 right, 3 both, 4 = overflow
 TH1F *null = new TH1F("", "", 1,0,1);
 float AdjustedMaximum(int side, std::vector <TH1F*> Plots, TH1F* data = null, std::vector <TH1F*> Signals = std::vector<TH1F*>()){
