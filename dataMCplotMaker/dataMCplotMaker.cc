@@ -209,6 +209,7 @@ void dataMCplotMaker(TH1F* Data, std::vector <TH1F*> Backgrounds, std::vector <s
   std::string yAxisOverride = "";
   std::string xAxisUnit = "GeV";
   std::string xAxisOverride = "";
+  std::string xAxisBinLabels = "";
   std::string dataName = "data";
   std::string topYaxisTitle = "data/MC";
   std::string overrideHeader = "";
@@ -217,6 +218,7 @@ void dataMCplotMaker(TH1F* Data, std::vector <TH1F*> Backgrounds, std::vector <s
   bool preserveBackgroundOrder = 0;
   bool preserveSignalOrder = 0;
   bool showDivisionLabel = 1;
+  bool xAxisVerticalBinLabels = 0;
   float setMaximum = -1;
   float setMinimum = -1;
   float legendUp = 0;
@@ -261,6 +263,8 @@ void dataMCplotMaker(TH1F* Data, std::vector <TH1F*> Backgrounds, std::vector <s
     else if (Options[i].find("xAxisLabel") < Options[i].length()) xAxisLabel = getString(Options[i], "xAxisLabel");
     else if (Options[i].find("xAxisUnit") < Options[i].length()) xAxisUnit = getString(Options[i], "xAxisUnit");
     else if (Options[i].find("xAxisOverride") < Options[i].length()) xAxisOverride = getString(Options[i], "xAxisOverride");
+    else if (Options[i].find("xAxisBinLabels") < Options[i].length()) xAxisBinLabels = getString(Options[i], "xAxisBinLabels");
+    else if (Options[i].find("xAxisVerticalBinLabels") < Options[i].length()) xAxisVerticalBinLabels = 1; 
     else if (Options[i].find("dataName") < Options[i].length()) dataName = getString(Options[i], "dataName");
     else if (Options[i].find("dataColor") < Options[i].length()) datacolor = getString(Options[i], "dataColor");
     else if (Options[i].find("topYaxisTitle") < Options[i].length()) topYaxisTitle = getString(Options[i], "topYaxisTitle");
@@ -577,6 +581,17 @@ void dataMCplotMaker(TH1F* Data, std::vector <TH1F*> Backgrounds, std::vector <s
   if (!noData) stack->GetYaxis()->SetTitleOffset(1.5);
   if (noData) stack->GetYaxis()->SetTitleOffset(1.4);
   if (noData && linear) stack->GetYaxis()->SetTitleOffset(1.6);
+
+  //X-axis string bin labels
+  TString ts = ""+xAxisBinLabels;
+  TObjArray *tx = ts.Tokenize(",");
+  if (xAxisBinLabels[0] != '\0') {
+      for (Int_t i = 0; i < tx->GetEntries(); i++) {
+          stack->GetXaxis()->SetBinLabel(i+1, ((TObjString *)(tx->At(i)))->String());
+      }
+      if(xAxisVerticalBinLabels) stack->GetXaxis()->LabelsOption("v");
+      else stack->GetXaxis()->LabelsOption("u");
+  }
 
   //Show Percentage
   if(showPercentage == 1){
