@@ -22,6 +22,7 @@ void DrawVerticalLine(Double_t x){
   Double_t bm = gPad->GetBottomMargin();
   Double_t xndc = (rm-lm)*((x-gPad->GetUxmin())/(gPad->GetUxmax()-gPad->GetUxmin()))+lm;
   l.DrawLineNDC(xndc,bm,xndc,tm);
+}
 
 
 //Function to determine maximum of each histogram, including error bars.  Side = 1 left, 2 right, 3 both, 4 = overflow
@@ -350,6 +351,17 @@ void dataMCplotMaker(TH1F* Data, std::vector <TH1F*> Backgrounds, std::vector <s
     if (!noData) Data->SetBinContent(Data->GetNbinsX(), Data->GetBinContent(Data->GetNbinsX())+Data->GetBinContent(Data->GetNbinsX()+1) );
   }
 
+  //Do Underflow
+  if (doOverflow == 1){
+    for (unsigned int i = 0; i < Backgrounds.size(); i++){
+      Backgrounds[i]->SetBinContent(1, Backgrounds[i]->GetBinContent(1)+Backgrounds[i]->GetBinContent(0) );
+    }
+    for (unsigned int i = 0; i < Signals.size(); i++){
+      Signals[i]->SetBinContent(1, Signals[i]->GetBinContent(1)+Signals[i]->GetBinContent(0) );
+    }
+    if (!noData) Data->SetBinContent(1, Data->GetBinContent(1)+Data->GetBinContent(0) );
+  }
+
   std::vector <Color_t> Colors;
 
   //Set colors for histograms (this is my color scheme, probably needs changed for publishable plots)
@@ -661,8 +673,10 @@ void dataMCplotMaker(TH1F* Data, std::vector <TH1F*> Backgrounds, std::vector <s
   if (!noData) type_y = .96;
   tex->SetTextSize(0.028);
   if (overrideHeader[0] == '\0'){
-    if (noData) tex->DrawLatex(0.78,type_y,Form("%s fb^{-1} (%s TeV)", lumi.c_str(), energy.c_str()));
-    else tex->DrawLatex(0.76,type_y,Form("%s fb^{-1} (%s TeV)", lumi.c_str(), energy.c_str()));
+    tex->SetTextAlign(31);
+    if (noData) tex->DrawLatex(0.98,type_y,Form("%s fb^{-1} (%s TeV)", lumi.c_str(), energy.c_str()));
+    else tex->DrawLatex(0.96,type_y,Form("%s fb^{-1} (%s TeV)", lumi.c_str(), energy.c_str()));
+    tex->SetTextAlign(11);
   }
   tex->SetTextSize(0.035);
   if (noData && overrideHeader[0] == '\0'){

@@ -1,15 +1,17 @@
 dataMCplotMaker
 ===============
 
-Function to quickly make nice data/MC plots or data plots, with or without signal.  In addition to formatting, it automatically makes an overflow bin for your data, automatically puts the smallest backgrounds on the bottom, and automatically chooses a reasonable maximum and minimum.  
+Function to quickly make nice data/MC plots or data plots, with or without signal.  In addition to formatting, it automatically makes overflow/underflow bins, automatically puts the smallest backgrounds on the bottom, and automatically chooses a reasonable maximum and minimum.  
 
 To download this:
-git clone https://github.com/cmstas/software.git
+git clone ssh://git@github.com/cmstas/software.git
 
 To run:
-  1.  Put both .cc and .h files in the same directory as your macro
+  1.  Put both .cc and .h files in the same directory as your macro.  dataMCplotMaker for 1D plots; PlotMaker2D for 2D plots.
   2.  "Include" the .h file (#include "path/dataMCplotMaker.h") in your file
   3.  In root, compile the .cc file (.L path/dataMCplotMaker.cc+) before loading and compiling your file.
+
+##Instructions for 1D plots
 
 To call the function:
 ````
@@ -40,7 +42,7 @@ Supported flags for "options" string:
   - --normalize: to normalize all backgrounds
   - --isLinear: to use linear instead of log on y-axis
   - --preserveBackgroundOrder: to keep the backgrounds in the order you specified, rather than putting the smallest backgrounds on the bottom
-  - --noOverflow: do not make the last bin an overflow bin (important if your last bin is already an overflow bin)
+  - --noOverflow: do not make the last bin an overflow bin (important if your last bin is already an overflow bin).  Also underflow.
   - --yAxisLabel X: change the y-axis label from its default of "Entries"
   - --yAxisUnit X: change the y-axis unit from its default of ""
   - --yAxisOverride X: replace the entire y-axis label with X
@@ -85,3 +87,22 @@ Advanced Usage
   - If you run with more than 5 signals, it will automatically set your backgrounds to gray and striped.
 
 E-mail Alex with bug reports or feature requests, george AT physics DOT ucsb
+
+##Instructions for 2D plots
+
+To call the function:
+````
+  PlotMaker2D(TH2F* plot, std::string options);
+````
+Mandatory argument:
+  - A 2D histogram.  Can be TH2F* or TH2D*.
+
+Options:
+  - --outputName X: to specify the name of the output PDF. 
+  - --noOverflow: if you don't want underflow/overflow to be put into first/last bin.
+  - --setTitle X
+  - --Xaxis X
+  - --Yaxis X
+  - --sciNot X: to put your bin contents into scientific notation.  X is a printf string (ie --sciNot .2 will give you two decimal places)
+  - --colors: if you want each bin to be colored proportional to its value
+  

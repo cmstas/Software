@@ -17,6 +17,8 @@ void PlotMaker2D(TH2F* hist, std::string options_string){
   string title = ""; 
   string Xaxis = "";
   string Yaxis = "";
+  string sciNot = "";
+  bool color = 0;
 
   //Loop over options and change default settings to user-defined settings
   for (unsigned int i = 0; i < Options.size(); i++){
@@ -25,11 +27,14 @@ void PlotMaker2D(TH2F* hist, std::string options_string){
     else if (Options[i].find("setTitle") < Options[i].length()) title = getString(Options[i], "setTitle"); 
     else if (Options[i].find("Xaxis") < Options[i].length()) Xaxis = getString(Options[i], "Xaxis"); 
     else if (Options[i].find("Yaxis") < Options[i].length()) Yaxis = getString(Options[i], "Yaxis"); 
+    else if (Options[i].find("sciNot") < Options[i].length()){ sciNot = getString(Options[i], "sciNot"); if (sciNot == "") cout << "Warning!  --sciNot requires an argument for the precision.  Ex: .2"; }
+    else if (Options[i].find("color") < Options[i].length()) color = 1;
     else cout << "Warning: Option not recognized!  Option: " << Options[i] << endl;
   }
 
   //Fix right margin (too much space)
-  gStyle->SetPadRightMargin(0.04); 
+  if (!color) gStyle->SetPadRightMargin(0.04); 
+  if ( color) gStyle->SetPadRightMargin(0.14); 
 
   //Declare canvas
   TCanvas *canvas = new TCanvas("canvas");
@@ -50,8 +55,15 @@ void PlotMaker2D(TH2F* hist, std::string options_string){
   if (Xaxis != "") hist->GetXaxis()->SetTitle(Xaxis.c_str());
   if (Yaxis != "") hist->GetYaxis()->SetTitle(Yaxis.c_str());
 
+  //Set scientific notation if needed
+  if (sciNot != "") gStyle->SetPaintTextFormat(Form("%sE", sciNot.c_str()));
+
+  //Make it a contour plot
+
   //Draw it
-  hist->Draw("TEXTE"); 
+  string opt = "TEXTE";
+  if (color) opt += "COLZ";
+  hist->Draw(opt.c_str()); 
 
   //Save it
   canvas->Print(Form("%s.pdf", outputName.c_str())); 
