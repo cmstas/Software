@@ -236,6 +236,7 @@ void dataMCplotMaker(TH1F* Data, std::vector <TH1F*> Backgrounds, std::vector <s
   bool noOutput = false;
   bool noErrBars = false;
   bool noBlackLines = false;
+  bool histoErrors = false;
 
   //Loop over options and change default settings to user-defined settings
   for (unsigned int i = 0; i < Options.size(); i++){
@@ -279,6 +280,7 @@ void dataMCplotMaker(TH1F* Data, std::vector <TH1F*> Backgrounds, std::vector <s
     else if (Options[i].find("errHistAtBottom") < Options[i].length()) errHistAtBottom = true; 
     else if (Options[i].find("noOutput") < Options[i].length()) noOutput = true; 
     else if (Options[i].find("noErrBars") < Options[i].length()) noErrBars = true; 
+    else if (Options[i].find("histoErrors") < Options[i].length()) histoErrors = true; 
     else cout << "Warning: Option not recognized!  Option: " << Options[i] << endl;
   }
 
@@ -506,7 +508,7 @@ void dataMCplotMaker(TH1F* Data, std::vector <TH1F*> Backgrounds, std::vector <s
     for (unsigned int i = 0; i < Backgrounds.size(); i++){
       Backgrounds[i]->UseCurrentStyle();
       if (!nostack) Backgrounds[i]->SetFillColor(Colors[i]);
-      if (dots) Backgrounds[i]->SetMarkerColor(Colors[i]);
+      Backgrounds[i]->SetMarkerColor(Colors[i]);
       if ( noBlackLines) Backgrounds[i]->SetLineColor(Colors[i]);
       if (!noBlackLines) Backgrounds[i]->SetLineColor(kBlack);
       if (nostack && normalize) Backgrounds[i]->Scale(1.0/Backgrounds[i]->Integral());
@@ -518,6 +520,7 @@ void dataMCplotMaker(TH1F* Data, std::vector <TH1F*> Backgrounds, std::vector <s
       Backgrounds[i]->UseCurrentStyle();
       Backgrounds[i]->SetFillColor(kWhite);
       Backgrounds[i]->SetLineColor(Colors[i]);
+      Backgrounds[i]->SetMarkerColor(Colors[i]);
       if (nostack && normalize) Backgrounds[i]->Scale(1.0/Backgrounds[i]->Integral());
       stack->Add(Backgrounds[i]);
     }
@@ -600,7 +603,8 @@ void dataMCplotMaker(TH1F* Data, std::vector <TH1F*> Backgrounds, std::vector <s
   }
 
   //Draw
-  if (!nostack && !dots) stack->Draw("hist");
+  if (!nostack && !dots && histoErrors) stack->Draw("histe");
+  if (!nostack && !dots && !histoErrors) stack->Draw("hist");
   if (dots) stack->Draw("PE"); 
   if (nostack) stack->Draw("nostack");
   THStack *stack2 = new THStack("stack2", "stack2"); 
