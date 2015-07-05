@@ -692,8 +692,7 @@ void dataMCplotMaker(TH1F* Data, std::vector <TH1F*> Backgrounds, std::vector <s
   tex->SetTextSize(0.028);
   if (overrideHeader[0] == '\0'){
     tex->SetTextAlign(31);
-    if (noData) tex->DrawLatex(0.98,type_y,Form("%s fb^{-1} (%s TeV)", lumi.c_str(), energy.c_str()));
-    else tex->DrawLatex(0.96,type_y,Form("%s fb^{-1} (%s TeV)", lumi.c_str(), energy.c_str()));
+    tex->DrawLatex(0.96,type_y,Form("%s fb^{-1} (%s TeV)", lumi.c_str(), energy.c_str()));
     tex->SetTextAlign(11);
   }
   tex->SetTextSize(0.035);
