@@ -740,7 +740,7 @@ void dataMCplotMaker(TH1F* Data, std::vector <TH1F*> Backgrounds, std::vector <s
       }
       float data_value = Data->GetBinContent(ib);
       float value = (MC_value > 0 ? data_value/MC_value : 1000);
-      err_hist->SetBinContent(ib, value);
+      if (data_value != 0 || MC_value != 0) err_hist->SetBinContent(ib, value);
       float MC_err = sqrt(MC_error_2);
       float data_err = Data->GetBinError(ib);
       if(!noErrBars) err_hist->SetBinError(ib, value * sqrt( pow(MC_err/MC_value, 2) + pow(data_err/data_value, 2) ));
@@ -758,8 +758,8 @@ void dataMCplotMaker(TH1F* Data, std::vector <TH1F*> Backgrounds, std::vector <s
     line.SetLineWidth(2);
     int maxbin = err_hist->GetXaxis()->GetNbins();
     line.DrawLine(err_hist->GetXaxis()->GetBinLowEdge(1),1,err_hist->GetXaxis()->GetBinUpEdge(maxbin),1);
-    if(noErrBars)err_hist->Draw("PSAME");
-    else err_hist->Draw("PESAME");
+    if(noErrBars)err_hist->Draw("pSAME");
+    else err_hist->Draw("pESAME");
     err_hist->GetXaxis()->SetLabelSize(0);
     err_hist->GetYaxis()->SetLabelSize(0.2);
     err_hist->GetYaxis()->SetRangeUser(0., 2.);
