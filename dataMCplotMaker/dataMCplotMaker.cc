@@ -372,8 +372,8 @@ void dataMCplotMaker(TH1F* Data, std::vector <TH1F*> Backgrounds, std::vector <s
 
   //Set colors for histograms (this is my color scheme, probably needs changed for publishable plots)
   if (color_input.size() == 0 && use_signals == 0 && nostack == 0){ 
-    Colors.push_back(kBlue-2);   
     Colors.push_back(kGreen+3);   
+    Colors.push_back(kBlue-2);   
     Colors.push_back(kOrange+10);
     Colors.push_back(kYellow-4); 
     Colors.push_back(kCyan-4);
@@ -387,8 +387,8 @@ void dataMCplotMaker(TH1F* Data, std::vector <TH1F*> Backgrounds, std::vector <s
     Colors.push_back(kViolet+4);
   }
   else if (color_input.size() == 0 && use_signals == 1){ 
-    Colors.push_back(kBlue-2);
     Colors.push_back(kGreen-3);
+    Colors.push_back(kBlue-2);
     Colors.push_back(kCyan);
     Colors.push_back(kOrange-4);
     Colors.push_back(kMagenta-8);
