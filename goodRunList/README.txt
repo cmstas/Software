@@ -7,6 +7,9 @@ cd $CMSSW_BASE/src
 git cms-init
 git cms-addpkg HLTrigger/Tools
 git clone git@github.com:cmstas/Software.git
+cd Software
+git checkout root6
+cd ../
 cp Software/goodRunList/dcsonly_2015.py HLTrigger/Tools/python/
 scram b -j3
 cd HLTrigger/Tools/python
