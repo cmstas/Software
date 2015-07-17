@@ -248,6 +248,7 @@ void dataMCplotMaker(TH1F* Data, std::vector <TH1F*> Backgrounds, std::vector <s
     else if (Options[i].find("preserveBackgroundOrder") < Options[i].length()) preserveBackgroundOrder = 1; 
     else if (Options[i].find("noBlackLines") < Options[i].length()) noBlackLines = 1; 
     else if (Options[i].find("noStack") < Options[i].length()) nostack = 1; 
+    else if (Options[i].find("lumiUnit") < Options[i].length()) lumiUnit = getString(Options[i], "lumiUnit"); 
     else if (Options[i].find("noFill") < Options[i].length()) noFill = 1;
     else if (Options[i].find("normalize") < Options[i].length()) normalize = 1; 
     else if (Options[i].find("preserveSignalOrder") < Options[i].length()) preserveSignalOrder = 1; 
@@ -287,7 +288,6 @@ void dataMCplotMaker(TH1F* Data, std::vector <TH1F*> Backgrounds, std::vector <s
     else if (Options[i].find("noOutput") < Options[i].length()) noOutput = true; 
     else if (Options[i].find("noErrBars") < Options[i].length()) noErrBars = true; 
     else if (Options[i].find("histoErrors") < Options[i].length()) histoErrors = true; 
-    else if (Options[i].find("lumiUnit") < Options[i].length()) lumiUnit = getString(Options[i], "lumiUnit"); 
     else cout << "Warning: Option not recognized!  Option: " << Options[i] << endl;
   }
 
