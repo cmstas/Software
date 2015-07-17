@@ -239,7 +239,8 @@ void dataMCplotMaker(TH1F* Data, std::vector <TH1F*> Backgrounds, std::vector <s
   bool noErrBars = false;
   bool noBlackLines = false;
   bool histoErrors = false;
-  bool xAxisOverrideGiven = false;
+  bool xAxisOverrideGiven = false;  
+  std::string lumiUnit = "fb"; 
 
   //Loop over options and change default settings to user-defined settings
   for (unsigned int i = 0; i < Options.size(); i++){
@@ -286,6 +287,7 @@ void dataMCplotMaker(TH1F* Data, std::vector <TH1F*> Backgrounds, std::vector <s
     else if (Options[i].find("noOutput") < Options[i].length()) noOutput = true; 
     else if (Options[i].find("noErrBars") < Options[i].length()) noErrBars = true; 
     else if (Options[i].find("histoErrors") < Options[i].length()) histoErrors = true; 
+    else if (Options[i].find("lumiUnit") < Options[i].length()) lumiUnit = getString(Options[i], "lumiUnit"); 
     else cout << "Warning: Option not recognized!  Option: " << Options[i] << endl;
   }
 
@@ -695,7 +697,7 @@ void dataMCplotMaker(TH1F* Data, std::vector <TH1F*> Backgrounds, std::vector <s
   tex->SetTextSize(0.028);
   if (overrideHeader[0] == '\0'){
     tex->SetTextAlign(31);
-    tex->DrawLatex(0.96,type_y,Form("%s fb^{-1} (%s TeV)", lumi.c_str(), energy.c_str()));
+    tex->DrawLatex(0.96,type_y,Form("%s %s^{-1} (%s TeV)", lumi.c_str(), lumiUnit.c_str(), energy.c_str()));
     tex->SetTextAlign(11);
   }
   tex->SetTextSize(0.035);
