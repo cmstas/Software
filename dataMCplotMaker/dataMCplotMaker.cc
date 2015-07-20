@@ -202,6 +202,7 @@ void dataMCplotMaker(TH1F* Data, std::vector <TH1F*> Backgrounds, std::vector <s
   bool doOverflow = 1;
   bool doCounts = 0;
   bool showXaxisUnit = 1;
+  bool noType = false;
   std::string xAxisLabel = "M_{T}";
   std::string energy = "13";
   std::string lumi = "10.0";
@@ -214,7 +215,7 @@ void dataMCplotMaker(TH1F* Data, std::vector <TH1F*> Backgrounds, std::vector <s
   std::string dataName = "data";
   std::string topYaxisTitle = "data/MC";
   std::string overrideHeader = "";
-  std::string type = "CMS Preliminary ";
+  std::string type = "CMS Preliminary "; // unused?
   std::string outputName = "data_MC_plot";
   bool preserveBackgroundOrder = 0;
   bool preserveSignalOrder = 0;
@@ -259,6 +260,7 @@ void dataMCplotMaker(TH1F* Data, std::vector <TH1F*> Backgrounds, std::vector <s
     else if (Options[i].find("noLegend") < Options[i].length()) noLegend = 1; 
     else if (Options[i].find("noOverflow") < Options[i].length()) doOverflow = 0; 
     else if (Options[i].find("doCounts") < Options[i].length()) doCounts = 1; 
+    else if (Options[i].find("noType") < Options[i].length()) noType = 1; 
     else if (Options[i].find("noXaxisUnit") < Options[i].length()) showXaxisUnit = 0; 
     else if (Options[i].find("divHalf") < Options[i].length()) doHalf = 1; 
     else if (Options[i].find("energy") < Options[i].length()) energy = getString(Options[i], "energy");
@@ -714,13 +716,15 @@ void dataMCplotMaker(TH1F* Data, std::vector <TH1F*> Backgrounds, std::vector <s
     tex->SetTextAlign(11);
   }
   tex->SetTextSize(0.035);
-  if (noData && overrideHeader[0] == '\0'){
-    tex->DrawLatex(0.16,type_y-.08, "CMS");
-    tex->DrawLatex(0.16,type_y-.11, "#it{Preliminary}"); 
-  }
-  if (!noData && overrideHeader[0] == '\0'){ 
-    tex->DrawLatex(0.83,type_y-.08, "CMS");
-    tex->DrawLatex(0.73,type_y-.13, "#it{Preliminary}"); 
+  if (!noType) {
+    if (noData && overrideHeader[0] == '\0'){
+      tex->DrawLatex(0.16,type_y-.08, "CMS");
+      tex->DrawLatex(0.16,type_y-.11, "#it{Preliminary}"); 
+    }
+    if (!noData && overrideHeader[0] == '\0'){ 
+      tex->DrawLatex(0.83,type_y-.08, "CMS");
+      tex->DrawLatex(0.73,type_y-.13, "#it{Preliminary}"); 
+    }
   }
   if (overrideHeader[0] != '\0') tex->DrawLatex(0.17,type_y,Form("%s", overrideHeader.c_str()));
   if (!noData && stack->GetMaximum() > 80000 && linear) finPad[0]->SetPad(0.0, 0.0, 1.0, 0.84);
