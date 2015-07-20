@@ -203,6 +203,7 @@ void dataMCplotMaker(TH1F* Data, std::vector <TH1F*> Backgrounds, std::vector <s
   bool doCounts = 0;
   bool showXaxisUnit = 1;
   bool noType = false;
+  bool colorTitle = false;
   std::string xAxisLabel = "M_{T}";
   std::string energy = "13";
   std::string lumi = "10.0";
@@ -261,6 +262,7 @@ void dataMCplotMaker(TH1F* Data, std::vector <TH1F*> Backgrounds, std::vector <s
     else if (Options[i].find("noOverflow") < Options[i].length()) doOverflow = 0; 
     else if (Options[i].find("doCounts") < Options[i].length()) doCounts = 1; 
     else if (Options[i].find("noType") < Options[i].length()) noType = 1; 
+    else if (Options[i].find("colorTitle") < Options[i].length()) colorTitle = 1; 
     else if (Options[i].find("noXaxisUnit") < Options[i].length()) showXaxisUnit = 0; 
     else if (Options[i].find("divHalf") < Options[i].length()) doHalf = 1; 
     else if (Options[i].find("energy") < Options[i].length()) energy = getString(Options[i], "energy");
@@ -679,6 +681,7 @@ void dataMCplotMaker(TH1F* Data, std::vector <TH1F*> Backgrounds, std::vector <s
   TLatex *tex = new TLatex();
   tex->SetNDC();
   tex->SetTextSize(0.035);
+  if (colorTitle) title = Form("#color[4]{%s}",title);
   if (noData == false){
     tex->DrawLatex(0.16,0.88,title);
     tex->DrawLatex(0.16,0.83,title2);
@@ -690,6 +693,10 @@ void dataMCplotMaker(TH1F* Data, std::vector <TH1F*> Backgrounds, std::vector <s
   if (noData == true){
     tex->DrawLatex(0.16,0.78,title);
     tex->DrawLatex(0.16,0.73,title2);
+    if(doCounts) {
+        float yCounts = (strcmp(title2, "") == 0) ? 0.73 : 0.68;
+        tex->DrawLatex(0.16,yCounts,Form("%i (MC)",nEventsMC)); 
+    }
   }
 
   //Draw vertical lines

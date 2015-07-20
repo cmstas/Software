@@ -43,6 +43,9 @@ Supported flags for "options" string:
   - --isLinear: to use linear instead of log on y-axis
   - --preserveBackgroundOrder: to keep the backgrounds in the order you specified, rather than putting the smallest backgrounds on the bottom
   - --noOverflow: do not make the last bin an overflow bin (important if your last bin is already an overflow bin).  Also underflow.
+  - --noType: suppress CMS Preliminary text
+  - --doCounts: show event counts: "__ (Data), __ (MC)"
+  - --colorTitle: apply a color to the distribution title (blue)
   - --yAxisLabel X: change the y-axis label from its default of "Entries"
   - --yAxisUnit X: change the y-axis unit from its default of ""
   - --yAxisOverride X: replace the entire y-axis label with X
