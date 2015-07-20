@@ -200,6 +200,7 @@ void dataMCplotMaker(TH1F* Data, std::vector <TH1F*> Backgrounds, std::vector <s
   bool noFill = 0;
   bool normalize = 0;
   bool doOverflow = 1;
+  bool doCounts = 0;
   bool showXaxisUnit = 1;
   std::string xAxisLabel = "M_{T}";
   std::string energy = "13";
@@ -257,6 +258,7 @@ void dataMCplotMaker(TH1F* Data, std::vector <TH1F*> Backgrounds, std::vector <s
     else if (Options[i].find("noDivisionLabel") < Options[i].length()) showDivisionLabel = 0; 
     else if (Options[i].find("noLegend") < Options[i].length()) noLegend = 1; 
     else if (Options[i].find("noOverflow") < Options[i].length()) doOverflow = 0; 
+    else if (Options[i].find("doCounts") < Options[i].length()) doCounts = 1; 
     else if (Options[i].find("noXaxisUnit") < Options[i].length()) showXaxisUnit = 0; 
     else if (Options[i].find("divHalf") < Options[i].length()) doHalf = 1; 
     else if (Options[i].find("energy") < Options[i].length()) energy = getString(Options[i], "energy");
@@ -664,6 +666,13 @@ void dataMCplotMaker(TH1F* Data, std::vector <TH1F*> Backgrounds, std::vector <s
   leg->SetBorderSize(0);
   if (!noLegend) leg->Draw();
 
+  //Get number of entries for data, MC
+  float nEventsMC = 0.0;
+  int nEventsData = Data->GetEntries();
+  for (unsigned int i = 0; i < Backgrounds.size(); i++){
+      nEventsMC += Backgrounds[i]->Integral(0,Backgrounds[i]->GetNbinsX()+doOverflow);
+  }
+
   //Draw title & subtitle on plot 
   TLatex *tex = new TLatex();
   tex->SetNDC();
@@ -671,6 +680,10 @@ void dataMCplotMaker(TH1F* Data, std::vector <TH1F*> Backgrounds, std::vector <s
   if (noData == false){
     tex->DrawLatex(0.16,0.88,title);
     tex->DrawLatex(0.16,0.83,title2);
+    if(doCounts) {
+        float yCounts = (strcmp(title2, "") == 0) ? 0.83 : 0.78;
+        tex->DrawLatex(0.16,yCounts,Form("%i (Data), %0.1f (MC)",nEventsData,nEventsMC)); 
+    }
   }
   if (noData == true){
     tex->DrawLatex(0.16,0.78,title);
