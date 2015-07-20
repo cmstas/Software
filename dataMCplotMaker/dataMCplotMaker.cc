@@ -670,13 +670,13 @@ void dataMCplotMaker(TH1F* Data, std::vector <TH1F*> Backgrounds, std::vector <s
   leg->SetBorderSize(0);
   if (!noLegend) leg->Draw();
 
+
   //Get number of entries for data, MC
   float nEventsMC = 0.0;
-  int nEventsData = Data->GetEntries();
+  int nEventsData = Data->Integral(0,Data->GetNbinsX()+doOverflow);
   for (unsigned int i = 0; i < Backgrounds.size(); i++){
       nEventsMC += Backgrounds[i]->Integral(0,Backgrounds[i]->GetNbinsX()+doOverflow);
   }
-
   //Draw title & subtitle on plot 
   TLatex *tex = new TLatex();
   tex->SetNDC();
@@ -695,7 +695,7 @@ void dataMCplotMaker(TH1F* Data, std::vector <TH1F*> Backgrounds, std::vector <s
     tex->DrawLatex(0.16,0.73,title2);
     if(doCounts) {
         float yCounts = (strcmp(title2, "") == 0) ? 0.73 : 0.68;
-        tex->DrawLatex(0.16,yCounts,Form("%i (MC)",nEventsMC)); 
+        tex->DrawLatex(0.16,yCounts,Form("%0.1f (MC)",nEventsMC)); 
     }
   }
 
