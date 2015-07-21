@@ -235,6 +235,7 @@ void dataMCplotMaker(TH1F* Data, std::vector <TH1F*> Backgrounds, std::vector <s
   bool png = false;
   bool dots = false;
   bool showPercentage = false;
+  bool percentageInBox = false;
   bool errHistAtBottom = false;
   std::vector<int> percent;
   std::string datacolor = "";
@@ -290,12 +291,14 @@ void dataMCplotMaker(TH1F* Data, std::vector <TH1F*> Backgrounds, std::vector <s
     else if (Options[i].find("nDivisions") < Options[i].length()) nDivisions = atoi( getString(Options[i], "nDivisions").c_str() );
     else if (Options[i].find("drawDots") < Options[i].length()) dots = true; 
     else if (Options[i].find("showPercentage") < Options[i].length()) showPercentage = true; 
+    else if (Options[i].find("percentageInBox") < Options[i].length()) percentageInBox = true; 
     else if (Options[i].find("errHistAtBottom") < Options[i].length()) errHistAtBottom = true; 
     else if (Options[i].find("noOutput") < Options[i].length()) noOutput = true; 
     else if (Options[i].find("noErrBars") < Options[i].length()) noErrBars = true; 
     else if (Options[i].find("histoErrors") < Options[i].length()) histoErrors = true; 
     else cout << "Warning: Option not recognized!  Option: " << Options[i] << endl;
   }
+  cout << percentageInBox << endl;
 
   //Decode data color
   Color_t dataColor = kBlack;
@@ -607,7 +610,7 @@ void dataMCplotMaker(TH1F* Data, std::vector <TH1F*> Backgrounds, std::vector <s
   }
 
   //Show Percentage
-  if(showPercentage == 1){
+  if(showPercentage || percentageInBox){
     std::vector<double> each;
     float total = 0;
     for(unsigned int i=0; i<Backgrounds.size(); i++){
@@ -670,6 +673,33 @@ void dataMCplotMaker(TH1F* Data, std::vector <TH1F*> Backgrounds, std::vector <s
   leg->SetBorderSize(0);
   if (!noLegend) leg->Draw();
 
+  if (percentageInBox){
+    cout << "here" << endl;
+    TLatex *pctTex = new TLatex();
+    leg->SetMargin(leg->GetMargin()*1.25);
+    float legHeight=abs(leg->GetY1()-leg->GetY2());
+    float entryHeight=legHeight/leg->GetNRows();
+    float legWidth=abs(leg->GetX2()-leg->GetX1());
+    float halfFillWidth = legWidth*leg->GetMargin()/2;
+    int nRows = leg->GetNRows();
+
+    for (unsigned int iEntry = 0; iEntry < Titles.size(); iEntry++)  {
+      float yRowOffset = 0.65 - nRows*0.05; // painstakingly-determined empirical formula
+      float xPctFudge = 0.01, yPctFudge = 0.01;
+      float xPctNDC = xPctFudge+leg->GetX1()+halfFillWidth*0.8;
+      float yPctNDC = yPctFudge+leg->GetY1()+(iEntry+yRowOffset)*entryHeight;
+      pctTex->SetTextSize(0.022);
+      pctTex->SetTextAlign(22);
+
+      float colR, colG, colB;
+      gROOT->GetColor(Colors[iEntry])->GetRGB(colR,colG,colB);
+      float darkness = 1.0 - ( 0.299 * colR + 0.587 * colG + 0.114 * colB);
+      if(darkness < 0.5) pctTex->SetTextColor(kBlack);
+      else pctTex->SetTextColor(kWhite);
+      
+      pctTex->DrawLatexNDC(xPctNDC,yPctNDC,Form("%i",percent[iEntry]));
+    }
+  }
 
   //Get number of entries for data, MC
   float nEventsMC = 0.0;

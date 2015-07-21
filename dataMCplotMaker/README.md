@@ -72,6 +72,7 @@ Supported flags for "options" string:
   - --dataColor: to change the data color to something other than black
   - --drawDots: to draw the backgrounds as dots rather than lines (recommended only for ratios like fake or flip rates) 
   - --showPercentage: to show the percentage of the integral of each MC plot contributing to the total background
+  - --percentageInBox: visual alternative to showPercentage which puts the percentage in the marker boxes of the legend
   - --errHistAtBottom: to make the Data/MC comparison histogram at the bottom
   - --noOutput: if by any chance you don't want an output to file
   - --noErrBars: if by any chance you don't want the data points to have error bars (it may be annoying when error bars are too big) (effective at both main hist and err hist)
