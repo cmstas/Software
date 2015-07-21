@@ -695,7 +695,7 @@ void dataMCplotMaker(TH1F* Data, std::vector <TH1F*> Backgrounds, std::vector <s
       if(darkness < 0.5) pctTex->SetTextColor(kBlack);
       else pctTex->SetTextColor(kWhite);
       
-      pctTex->DrawLatexNDC(xPctNDC,yPctNDC,Form("%i",percent[iEntry]));
+      pctTex->DrawLatexNDC(xPctNDC,yPctNDC,Form("%i#scale[0.5]{#lower[-0.3]{%%}}",percent[iEntry]));
     }
   }
 
