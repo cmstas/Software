@@ -616,7 +616,6 @@ void dataMCplotMaker(TH1F* Data, std::vector <TH1F*> Backgrounds, std::vector <s
       each.push_back(Backgrounds[i]->Integral());
       total += each.back();
     }
-    if(total < pow(1.0,-7.0)) { total = 1; showPercentage = 0; }
     for(unsigned int i=0; i<Backgrounds.size(); i++){
       each[i] = each[i]/total*100;
       percent.push_back((int) each[i]);
