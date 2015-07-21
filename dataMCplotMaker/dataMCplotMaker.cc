@@ -298,7 +298,6 @@ void dataMCplotMaker(TH1F* Data, std::vector <TH1F*> Backgrounds, std::vector <s
     else if (Options[i].find("histoErrors") < Options[i].length()) histoErrors = true; 
     else cout << "Warning: Option not recognized!  Option: " << Options[i] << endl;
   }
-  cout << percentageInBox << endl;
 
   //Decode data color
   Color_t dataColor = kBlack;
@@ -674,7 +673,6 @@ void dataMCplotMaker(TH1F* Data, std::vector <TH1F*> Backgrounds, std::vector <s
   if (!noLegend) leg->Draw();
 
   if (percentageInBox){
-    cout << "here" << endl;
     TLatex *pctTex = new TLatex();
     leg->SetMargin(leg->GetMargin()*1.25);
     float legHeight=abs(leg->GetY1()-leg->GetY2());
