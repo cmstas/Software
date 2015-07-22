@@ -86,7 +86,7 @@ void pres::TitleSlide(std::string title){
   <<  "  \\begin{textblock*}{12.8cm}(0cm,1.5cm)\n"
   <<  "  \\begin{center}\n"
   <<  "  \\usebeamerfont{title}\n"
-  <<  "  \\textcolor{" << keyColor << "}{\\textbf{\\huge " << title1 << " \\\\ \\vspace{0.3cm} " << title2 << "}} \%Allowed 20 characters upstairs and 30 downstairs\n"
+  <<  "  \\textcolor{" << keyColor << "}{\\textbf{\\huge " << title1 << " \\\\ \\vspace{1.0cm} " << title2 << "}} \%Allowed 20 characters upstairs and 30 downstairs\n"
   <<  "  \\end{center}\n"
   <<  "  \\end{textblock*}\n"
   <<  "  \\begin{center}\n"
@@ -174,16 +174,14 @@ pres::pres(std::string keyColor_, bool center){
 }
 
 float aspectRatio(std::string pdfFile){
-  //system("cp ~/software/SlideMaker/aspect_ratio.sh ."); 
-  //const char* command = (". aspect_ratio.sh " + pdfFile).c_str();
-  //cout << command << endl;
-  //string data = exec(command);
-  //cout << "data: " << data << endl;
-  //std::vector <std::string> result = GetParms(data);  
-  //if (atof(result[2].c_str()) == 0) return atof(result[1].c_str())/atof(result[0].c_str()); 
-  //else if (atof(result[2].c_str()) == 90) return atof(result[0].c_str())/atof(result[1].c_str()); 
-  //else cout << "Problem with aspect ratio.  Value was: " << result[0] << " " << result[1] << " " << result[2] << endl;
-  return 0.7;
+  const char* command = (". ~/software/SlideMaker/aspect_ratio.sh " + pdfFile).c_str();
+  cout << command << endl;
+  string data = exec(command);
+  cout << "data: " << data << endl;
+  std::vector <std::string> result = GetParms(data);  
+  if (atof(result[2].c_str()) == 0) return atof(result[1].c_str())/atof(result[0].c_str()); 
+  else if (atof(result[2].c_str()) == 90) return atof(result[0].c_str())/atof(result[1].c_str()); 
+  else cout << "Problem with aspect ratio.  Value was: " << result[0] << " " << result[1] << " " << result[2] << endl;
 }
 
 
