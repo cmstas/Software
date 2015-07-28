@@ -80,6 +80,7 @@ void pres::TitleSlide(std::string title){
   }
 
   std::string alex = ((underline == "alex") ? "\\underline{\\smash{\\textbf{A. George}}}" : "A. George");
+  std::string sich = ((underline == "sich") ? "\\underline{\\smash{\\textbf{S. Wang}}" : "S. Wang");
   myfile 
   <<  "\n" 
   <<  "\\defbeamertemplate*{title page}{customized}[1][]{ \n"
@@ -95,7 +96,7 @@ void pres::TitleSlide(std::string title){
   <<  "  \\begin{textblock*}{12.8cm}(0cm,4.0cm)\n"
   <<  "  \\begin{center}\n"
   <<  "  N. Amin, C. Campagnari, " << alex << ", F. Golf, J. Gran, \\\\ \n"
-  <<  "  B. Marsh, I. Suarez, S. Wang\\\\ \n"
+  <<  "  B. Marsh, I. Suarez, " << sich << "\\\\ \n"
   <<  "  (UCSB)\\\\ \n"
   <<  "  \\vspace{0.4cm} \n"
   <<  "  G. Cerati, D. Klein, D. Olivito, G. Zevi Della Porta\\\\ \n"
@@ -174,7 +175,7 @@ pres::pres(std::string keyColor_, bool center){
 }
 
 float aspectRatio(std::string pdfFile){
-  const char* command = (". ~/software/SlideMaker/aspect_ratio.sh " + pdfFile).c_str();
+  const char* command = (". ./aspect_ratio.sh " + pdfFile).c_str();
   cout << command << endl;
   string data = exec(command);
   cout << "data: " << data << endl;
