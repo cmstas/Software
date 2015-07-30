@@ -14,3 +14,4 @@ alexBeamer/*.tex
 makeCMS3ClassFiles/doAll.C
 makeCMS3ClassFiles/ScanChain.C
 tableMaker/SimpleTableDict.cpp
+.nfs*
