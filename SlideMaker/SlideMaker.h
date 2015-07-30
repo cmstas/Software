@@ -7,12 +7,12 @@
 
 class pres{
   public:
-    pres(std::string keyColor_ = "black", bool center = false); 
+    pres(std::string keyColor_ = "black", bool center = false, bool madrid_ = false); 
     ~pres(); 
     void TitleSlide(std::string title);
     void OutputFile(std::string output); 
     void Underline(std::string uline); 
-    void NewSlide();
+    void NewSlide(std::string options_string = "");
     void FinishSlide();
     void Title(std::string title); 
     void Text(std::string, std::string options_string = ""); 
@@ -32,6 +32,7 @@ class pres{
     void TwoTable(std::string table1, std::string table2, std::string options = "");
 
   private:
+    bool madrid;
     std::string keyColor;
     std::string output;
     std::string underline;

@@ -65,72 +65,106 @@ std::string getSize(int size){
 }
 
 void pres::TitleSlide(std::string title){
-  std::string title1 = "", title2 = ""; 
-  int len = title.size();
-  if (len < 30) title2 = title;
-  else if (len > 50){
-    std::cout << "ERROR!  Title is too long." << std::endl;
-    title2 = "Title is too long";
-  }
-  else{
-    int counter = len - 30; 
-    title2 = title.substr(len-30, string::npos); 
-    while (title2.substr(0,1) != " " && title2.size() > 0){ title2 = title2.substr(1, string::npos); counter++; }
-    title1 = title.substr(0, counter); 
-  }
+  if (!madrid){
+    std::string title1 = "", title2 = ""; 
+    int len = title.size();
+    if (len < 30) title2 = title;
+    else if (len > 50){
+      std::cout << "ERROR!  Title is too long." << std::endl;
+      title2 = "Title is too long";
+    }
+    else{
+      int counter = len - 30; 
+      title2 = title.substr(len-30, string::npos); 
+      while (title2.substr(0,1) != " " && title2.size() > 0){ title2 = title2.substr(1, string::npos); counter++; }
+      title1 = title.substr(0, counter); 
+    }
+    float dist = 0.4;
+    if (title1.size() == 0) dist = 1.0; 
 
-  std::string alex = ((underline == "alex") ? "\\underline{\\smash{\\textbf{A. George}}}" : "A. George");
-  myfile 
-  <<  "\n" 
-  <<  "\\defbeamertemplate*{title page}{customized}[1][]{ \n"
-  <<  "  \\begin{textblock*}{12.8cm}(0cm,1.5cm)\n"
-  <<  "  \\begin{center}\n"
-  <<  "  \\usebeamerfont{title}\n"
-  <<  "  \\textcolor{" << keyColor << "}{\\textbf{\\huge " << title1 << " \\\\ \\vspace{1.0cm} " << title2 << "}} \%Allowed 20 characters upstairs and 30 downstairs\n"
-  <<  "  \\end{center}\n"
-  <<  "  \\end{textblock*}\n"
-  <<  "  \\begin{center}\n"
-  <<  "  \\textcolor{" << keyColor << "}{\\rule{10cm}{2pt}}\n"
-  <<  "  \\end{center}\n"
-  <<  "  \\begin{textblock*}{12.8cm}(0cm,4.0cm)\n"
-  <<  "  \\begin{center}\n"
-  <<  "  N. Amin, C. Campagnari, " << alex << ", F. Golf, J. Gran, \\\\ \n"
-  <<  "  B. Marsh, I. Suarez, S. Wang\\\\ \n"
-  <<  "  (UCSB)\\\\ \n"
-  <<  "  \\vspace{0.4cm} \n"
-  <<  "  G. Cerati, D. Klein, D. Olivito, G. Zevi Della Porta\\\\ \n"
-  <<  "  C. Welke, J. Wood, F. W\\\"urthwein, A. Yagil \\\\ \n"
-  <<  "  (UCSD)\\\\ \n"
-  <<  "  \\vspace{0.4cm} \n"
-  <<  "  L. Bauerdick, K. Burkett, O. Gutsche, S. Jindariani, \\\\\n"
-  <<  "  J. Linacre, M. Liu, R. Lopes de Sa, H. Weber  \\\\ \n"
-  <<  "  (FNAL) \\\\ \n"
-  <<  "  \\end{center}\n"
-  <<  "  \\end{textblock*}\n"
-  <<  "  \\begin{textblock*}{2.7cm}(0cm, 0.1cm)\n"
-  <<  "  \\includegraphics[width=2.7cm]{/home/users/cgeorge/software/SlideMaker/ucsb.pdf}\n"
-  <<  "  \\end{textblock*}\n"
-  <<  "  \\begin{textblock*}{2.2cm}(10.3cm, 0.2cm)\n"
-  <<  "  \\includegraphics[width=2.2cm]{/home/users/cgeorge/software/SlideMaker/CMS.pdf}\n"
-  <<  "  \\end{textblock*}\n"
-  <<  "}\n"
-  <<  "\n" 
-  <<  "\\beamertemplatenavigationsymbolsempty\n"
-  <<  "\n" 
-  <<  "\\hyphenpenalty=10000"
-  <<  "\n" 
-  <<  "\\begin{document}\n"
-  <<  "\n"
-  <<  "\\frame[plain]{\\titlepage}\n"
-  <<  "\\usebackgroundtemplate{\n"
-  <<  "\\begin{tikzpicture}[thick]\n"
-  <<  "\\draw[fill=" << keyColor << ", draw=" << keyColor << "](0cm,0.0cm) -- (21.3cm,0.0cm) -- (21.3cm,21.3cm) -- (0.0cm,0.0cm);\n"
-  <<  "\\end{tikzpicture}\n"
-  <<  "}\n";
+    std::string alex = ((underline == "alex") ? "\\underline{\\smash{\\textbf{A. George}}}" : "A. George");
+    myfile 
+    <<  "\n" 
+    <<  "\\defbeamertemplate*{title page}{customized}[1][]{ \n"
+    <<  "  \\begin{textblock*}{12.8cm}(0cm,1.5cm)\n"
+    <<  "  \\begin{center}\n"
+    <<  "  \\usebeamerfont{title}\n"
+    <<  "  \\textcolor{" << keyColor << "}{\\textbf{\\huge " << title1 << " \\\\ \\vspace{";
+    myfile << dist;
+    myfile 
+    << "cm} " << title2 << "}} \%Allowed 20 characters upstairs and 30 downstairs\n"
+    <<  "  \\end{center}\n"
+    <<  "  \\end{textblock*}\n"
+    <<  "  \\begin{center}\n"
+    <<  "  \\textcolor{" << keyColor << "}{\\rule{10cm}{2pt}}\n"
+    <<  "  \\end{center}\n"
+    <<  "  \\begin{textblock*}{12.8cm}(0cm,4.0cm)\n"
+    <<  "  \\begin{center}\n"
+    <<  "  N. Amin, C. Campagnari, " << alex << ", F. Golf, J. Gran, \\\\ \n"
+    <<  "  B. Marsh, I. Suarez, S. Wang\\\\ \n"
+    <<  "  (UCSB)\\\\ \n"
+    <<  "  \\vspace{0.4cm} \n"
+    <<  "  G. Cerati, D. Klein, D. Olivito, G. Zevi Della Porta\\\\ \n"
+    <<  "  C. Welke, J. Wood, F. W\\\"urthwein, A. Yagil \\\\ \n"
+    <<  "  (UCSD)\\\\ \n"
+    <<  "  \\vspace{0.4cm} \n"
+    <<  "  L. Bauerdick, K. Burkett, O. Gutsche, S. Jindariani, \\\\\n"
+    <<  "  J. Linacre, M. Liu, R. Lopes de Sa, H. Weber  \\\\ \n"
+    <<  "  (FNAL) \\\\ \n"
+    <<  "  \\end{center}\n"
+    <<  "  \\end{textblock*}\n"
+    <<  "  \\begin{textblock*}{2.7cm}(0cm, 0.1cm)\n"
+    <<  "  \\includegraphics[width=2.7cm]{/home/users/cgeorge/software/SlideMaker/ucsb.pdf}\n"
+    <<  "  \\end{textblock*}\n"
+    <<  "  \\begin{textblock*}{2.2cm}(10.3cm, 0.2cm)\n"
+    <<  "  \\includegraphics[width=2.2cm]{/home/users/cgeorge/software/SlideMaker/CMS.pdf}\n"
+    <<  "  \\end{textblock*}\n"
+    <<  "}\n"
+    <<  "\n" 
+    <<  "\\beamertemplatenavigationsymbolsempty\n"
+    <<  "\n" 
+    <<  "\\hyphenpenalty=10000"
+    <<  "\n" 
+    <<  "\\begin{document}\n"
+    <<  "\n"
+    <<  "\\frame[plain]{\\titlepage}\n"
+    <<  "\\usebackgroundtemplate{\n"
+    <<  "\\begin{tikzpicture}[thick]\n"
+    <<  "\\draw[fill=" << keyColor << ", draw=" << keyColor << "](0cm,0.0cm) -- (21.3cm,0.0cm) -- (21.3cm,21.3cm) -- (0.0cm,0.0cm);\n"
+    <<  "\\end{tikzpicture}\n"
+    <<  "}\n";
+  }
+  if (madrid) { 
+  myfile << (R"(  
+    \beamertemplatenavigationsymbolsempty
+    \hyphenpenalty=10000
+    \begin{document}
+    \begin{frame}
+    \titlepage % Print the title page as the first slide
+    \begin{textblock*}{2.1cm}(0.1cm, 0.1cm)
+    \includegraphics[width=2.1cm]{ucsb.pdf}
+    \end{textblock*}
+    \begin{textblock*}{1.8cm}(14.1cm, 0.2cm)
+    \includegraphics[width=1.8cm]{CMS.pdf}
+    \end{textblock*}
+    \end{frame}
+  )"); 
+
+  }
 
 }
 
-void pres::NewSlide(){
+void pres::NewSlide(std::string options_string){
+
+  //Parse options
+  std::vector <std::string> Options = GetParms(options_string);  
+  //Set options
+  bool centerTitle = false;
+  for (unsigned int i = 0; i < Options.size(); i++){
+    if (Options[i].find("centerTitle") < Options[i].length()) centerTitle = true;
+  }
+
+  if (centerTitle) myfile << "\\setbeamertemplate{frametitle}[default][center] \n"; 
   myfile 
     << "\\begin{frame}\n";
   titleTwoLines = -1;
@@ -147,45 +181,81 @@ void pres::FinishSlide(){
 
 }
 
-pres::pres(std::string keyColor_, bool center){
+pres::pres(std::string keyColor_, bool center, bool madrid_){
+  madrid = madrid_;
   output = "presentation.tex";
   keyColor = keyColor_; 
   underline = ""; 
   myfile.open(output.c_str()); 
-  myfile
-    << "\\documentclass{beamer}\n"
+  myfile 
+    << "\\documentclass" ;
+    if (madrid) myfile << "[aspectratio=1610]" ;
+    myfile << "{beamer}\n"
     << "\\usepackage[absolute,overlay]{textpos}\n"
     << "\\usepackage{tikz}\n"
     << "\\usepackage{microtype}\n"
-    << "\\usepackage{graphicx}\n"
-    << "\\setbeamertemplate{footline}[frame number]\n"
+    << "\\usepackage{graphicx}\n";
+    if (!madrid) myfile << "\\setbeamertemplate{footline}[frame number]\n";
+    myfile 
     << "\\definecolor{darkgreen}{RGB}{0,100,0}\n"
     << "\\definecolor{gray}{RGB}{128,128,128}\n"
-    << "\\definecolor{grey}{RGB}{128,128,128}\n"
-    << "\\setbeamercolor{frametitle}{fg=" << keyColor << "}\n";
-    //<< "\\setbeamertemplate{itemize item}{\\small\\raise1.75pt\\color{" << keyColor << "}$\\blacktriangleright$}\n"
-    //<< "\\setbeamertemplate{itemize subitem}{\\footnotesize\\raise1.5pt\\color{" << keyColor << "}$\\blacktriangleright$}\n"
-    //<< "\\setbeamertemplate{itemize subsubitem}{\\scriptsize\\raise1.5pt\\color{" << keyColor << "}$\\blacktriangleright$}\n";
-    if (center)  myfile << "\\setbeamerfont{frametitle}{size=\\LARGE \\bfseries \\centering}\n";
-    if (!center) myfile << "\\setbeamerfont{frametitle}{size=\\LARGE \\bfseries}\n";
-    myfile << "\\setbeamertemplate{footline}{\\raisebox{5pt}{\\makebox[\\paperwidth]{\\hfill\\makebox[10pt]{\\scriptsize\\textcolor{white}{\\insertframenumber\\hspace{2mm}}}}}}";
+    << "\\definecolor{grey}{RGB}{128,128,128}\n";
+    if (!madrid) myfile << "\\setbeamercolor{frametitle}{fg=" << keyColor << "}\n";
+    if (!madrid && center)  myfile << "\\setbeamerfont{frametitle}{size=\\LARGE \\bfseries \\centering}\n";
+    if (!madrid && !center) myfile << "\\setbeamerfont{frametitle}{size=\\LARGE \\bfseries}\n";
+    if (madrid && center)  myfile << "\\setbeamerfont{frametitle}{ \\centering}\n";
+    if (madrid && !center) myfile << "\\setbeamerfont{frametitle}{}\n";
+    if (!madrid) myfile << "\\setbeamertemplate{footline}{\\raisebox{5pt}{\\makebox[\\paperwidth]{\\hfill\\makebox[10pt]{\\scriptsize\\textcolor{white}{\\insertframenumber\\hspace{2mm}}}}}}";
     myfile << "\\setbeamersize{text margin left=10pt,text margin right=10pt}";
+
+    //These lines for Madrid
+    if (madrid == true){
+    std::string alex = ((underline == "alex") ? "\\underline{\\smash{\\textbf{A. George}}}" : "A. George");
+    std::string sicheng = ((underline == "sicheng") ? "\\underline{\\smash{\\textbf{S. Wang}}}" : "S. Wang");
+    myfile << (R"(  
+    \usecolortheme{wolverine}
+    \title[MT2 with Single Soft Muon]{Single Soft Muon Study based on\\ All-hadronic MT2 Analysis} % The short title appears at the bottom of every slide, the full title is only on the title page
+    \author{ \phantom{N. Amin, C. Campagnari, A. George, F. Golf, J. Gran, B. Marsh,I. Suarez, S. Wang } }
+    \date{}
+    \institute[SNT]{
+    \begin{textblock*}{16cm}(0cm,4.8cm)
+      %\footnotesize
+    \begin{center}
+    )");
+    myfile << "N. Amin, C. Campagnari " << alex << ", F. Golf, J. Gran,\\\\ B. Marsh, I. Suarez, " << sicheng << endl;
+    myfile << (R"(  
+    (UCSB)\\
+    \vspace{0.3cm}
+    G. Cerati, D. Klein, D. Olivito, G. Zevi Della Porta, \\
+    C. Welke, J. Wood, F. W\"urthwein, A. Yagil \\
+    (UCSD)\\
+    \vspace{0.3cm} 
+    L. Bauerdick, K. Burkett, O. Gutsche, S. Jindariani, \\
+    J. Linacre, M. Liu, R. Lopes de Sa, H. Weber  \\
+    (FNAL) \\
+    \end{center}
+    \end{textblock*}
+    }
+  )"); 
+
+  }
+
 
 }
 
 float aspectRatio(std::string pdfFile){
   const char* command = (". ~/software/SlideMaker/aspect_ratio.sh " + pdfFile).c_str();
-  cout << command << endl;
   string data = exec(command);
-  cout << "data: " << data << endl;
   std::vector <std::string> result = GetParms(data);  
   if (atof(result[2].c_str()) == 0) return atof(result[1].c_str())/atof(result[0].c_str()); 
   else if (atof(result[2].c_str()) == 90) return atof(result[0].c_str())/atof(result[1].c_str()); 
   else cout << "Problem with aspect ratio.  Value was: " << result[0] << " " << result[1] << " " << result[2] << endl;
+  return 0.7;
 }
 
 
 void pres::Text(string text, std::string options_string){
+  int textSize = text.size();
   if (slideType == 1){
     myfile << text << endl;  
     return;
@@ -213,8 +283,9 @@ void pres::Text(string text, std::string options_string){
  
   if (titleTwoLines == -1) cout << "Error!!  Need Title on slide X before you can call 'text'." << endl;
   myfile <<  "  \\begin{textblock*}{" << width_ << "cm}[0.0,0.0](0.35cm, " << top_ + moveDown*9.6 << "cm)\n" << endl;
-  myfile
-  <<  "  \\begin{" << size_ << "} " 
+  myfile <<  "  \\begin{" << size_ << "} ";
+  if (slideType == 4 && textSize < 300) myfile << "\\vspace{2cm}" << endl;
+  myfile 
   <<  text
   <<  "  \\end{" << size_ << "}"
   <<  "  \\end{textblock*}\n";
@@ -243,7 +314,7 @@ void pres::Title(std::string title){
   << "\\frametitle{" 
   << title
   << "}\n";
-  if (title.size() > 30) titleTwoLines = 1;
+  if (title.size() > 40) titleTwoLines = 1;
   else titleTwoLines = 0;
 }
 
@@ -292,15 +363,11 @@ void pres::FreeText(float x, float y, std::string text, std::string options_stri
 } 
 
 void pres::TextPlotPlot(std::string plot1, std::string plot2, std::string options){
-  cout << __LINE__ << endl;
   float ar1 = aspectRatio(plot1); 
-  cout << __LINE__ << endl;
   float ar2 = aspectRatio(plot2); 
-  cout << __LINE__ << endl;
   float ar = std::max(ar1, ar2); 
   if (ar > 1.05) slideType = 2; 
   else slideType = 3;
-  cout << "ar: " << ar << endl;
   if (slideType == 2) pres::PlotType2(plot1, plot2, options, ar1, ar2); 
   if (slideType == 3) pres::PlotType3(plot1, plot2, options, ar1, ar2); 
 }
@@ -468,7 +535,7 @@ void pres::PlotType4(std::string plot, std::string options_string){
   if (ar <= 0){ cout << "ERROR!  Aspect ratio makes no sense." << endl; abort(); }
 
   //Title bottom
-  float titlebottom = 0.7;
+  float titlebottom = 1.0;
   if (titleTwoLines) titlebottom = 2.0;
 
   //Natural height and width
@@ -489,7 +556,7 @@ void pres::PlotType4(std::string plot, std::string options_string){
   //Place text box
   top.push_back(titlebottom); 
   bottom.push_back(9.6); 
-  width.push_back(12.8-width_-0.3); 
+  width.push_back(12.8-width_-0.5); 
 
   //Determine top of figures
   float top_of_figure = center_of_figure - width_*ar/2.0;
@@ -525,7 +592,7 @@ void pres::PlotType5(std::string plot, std::string options_string){
   if (ar <= 0){ cout << "ERROR!  Aspect ratio makes no sense." << endl; abort(); }
 
   //Title bottom
-  float titlebottom = 0.7;
+  float titlebottom = 0.8;
   if (titleTwoLines < 0) titlebottom = 0; 
   if (titleTwoLines == 1) titlebottom = 2.0;
 
