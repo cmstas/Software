@@ -83,6 +83,7 @@ void pres::TitleSlide(std::string title){
     if (title1.size() == 0) dist = 1.0; 
 
     std::string alex = ((underline == "alex") ? "\\underline{\\smash{\\textbf{A. George}}}" : "A. George");
+    std::string sich = ((underline == "sich") ? "\\underline{\\smash{\\textbf{S. Wang}}}" : "S. Wang");
     myfile 
     <<  "\n" 
     <<  "\\defbeamertemplate*{title page}{customized}[1][]{ \n"
@@ -101,7 +102,7 @@ void pres::TitleSlide(std::string title){
     <<  "  \\begin{textblock*}{12.8cm}(0cm,4.0cm)\n"
     <<  "  \\begin{center}\n"
     <<  "  N. Amin, C. Campagnari, " << alex << ", F. Golf, J. Gran, \\\\ \n"
-    <<  "  B. Marsh, I. Suarez, S. Wang\\\\ \n"
+    <<  "  B. Marsh, I. Suarez, " << sich << "\\\\ \n"
     <<  "  (UCSB)\\\\ \n"
     <<  "  \\vspace{0.4cm} \n"
     <<  "  G. Cerati, D. Klein, D. Olivito, G. Zevi Della Porta\\\\ \n"
@@ -155,71 +156,6 @@ void pres::TitleSlide(std::string title){
 }
 
 void pres::NewSlide(std::string options_string){
-
-  //Parse options
-  std::vector <std::string> Options = GetParms(options_string);  
-  //Set options
-  bool centerTitle = false;
-  for (unsigned int i = 0; i < Options.size(); i++){
-    if (Options[i].find("centerTitle") < Options[i].length()) centerTitle = true;
-  }
-
-  if (centerTitle) myfile << "\\setbeamertemplate{frametitle}[default][center] \n"; 
-
-  std::string alex = ((underline == "alex") ? "\\underline{\\smash{\\textbf{A. George}}}" : "A. George");
-  std::string sich = ((underline == "sich") ? "\\underline{\\smash{\\textbf{S. Wang}}" : "S. Wang");
-  myfile 
-  <<  "\n" 
-  <<  "\\defbeamertemplate*{title page}{customized}[1][]{ \n"
-  <<  "  \\begin{textblock*}{12.8cm}(0cm,1.5cm)\n"
-  <<  "  \\begin{center}\n"
-  <<  "  \\usebeamerfont{title}\n"
-  <<  "  \\textcolor{" << keyColor << "}{\\textbf{\\huge " << title1 << " \\\\ \\vspace{1.0cm} " << title2 << "}} \%Allowed 20 characters upstairs and 30 downstairs\n"
-  <<  "  \\end{center}\n"
-  <<  "  \\end{textblock*}\n"
-  <<  "  \\begin{center}\n"
-  <<  "  \\textcolor{" << keyColor << "}{\\rule{10cm}{2pt}}\n"
-  <<  "  \\end{center}\n"
-  <<  "  \\begin{textblock*}{12.8cm}(0cm,4.0cm)\n"
-  <<  "  \\begin{center}\n"
-  <<  "  N. Amin, C. Campagnari, " << alex << ", F. Golf, J. Gran, \\\\ \n"
-  <<  "  B. Marsh, I. Suarez, " << sich << "\\\\ \n"
-  <<  "  (UCSB)\\\\ \n"
-  <<  "  \\vspace{0.4cm} \n"
-  <<  "  G. Cerati, D. Klein, D. Olivito, G. Zevi Della Porta\\\\ \n"
-  <<  "  C. Welke, J. Wood, F. W\\\"urthwein, A. Yagil \\\\ \n"
-  <<  "  (UCSD)\\\\ \n"
-  <<  "  \\vspace{0.4cm} \n"
-  <<  "  L. Bauerdick, K. Burkett, O. Gutsche, S. Jindariani, \\\\\n"
-  <<  "  J. Linacre, M. Liu, R. Lopes de Sa, H. Weber  \\\\ \n"
-  <<  "  (FNAL) \\\\ \n"
-  <<  "  \\end{center}\n"
-  <<  "  \\end{textblock*}\n"
-  <<  "  \\begin{textblock*}{2.7cm}(0cm, 0.1cm)\n"
-  <<  "  \\includegraphics[width=2.7cm]{/home/users/cgeorge/software/SlideMaker/ucsb.pdf}\n"
-  <<  "  \\end{textblock*}\n"
-  <<  "  \\begin{textblock*}{2.2cm}(10.3cm, 0.2cm)\n"
-  <<  "  \\includegraphics[width=2.2cm]{/home/users/cgeorge/software/SlideMaker/CMS.pdf}\n"
-  <<  "  \\end{textblock*}\n"
-  <<  "}\n"
-  <<  "\n" 
-  <<  "\\beamertemplatenavigationsymbolsempty\n"
-  <<  "\n" 
-  <<  "\\hyphenpenalty=10000"
-  <<  "\n" 
-  <<  "\\begin{document}\n"
-  <<  "\n"
-  <<  "\\frame[plain]{\\titlepage}\n"
-  <<  "\\usebackgroundtemplate{\n"
-  <<  "\\begin{tikzpicture}[thick]\n"
-  <<  "\\draw[fill=" << keyColor << ", draw=" << keyColor << "](0cm,0.0cm) -- (21.3cm,0.0cm) -- (21.3cm,21.3cm) -- (0.0cm,0.0cm);\n"
-  <<  "\\end{tikzpicture}\n"
-  <<  "}\n";
-
-}
-
-void pres::NewSlide(){
->>>>>>> d430caba3f0277295fcc8cf40a14676328e70008
   myfile 
     << "\\begin{frame}\n";
   titleTwoLines = -1;
@@ -227,7 +163,6 @@ void pres::NewSlide(){
   top.clear();
   bottom.clear(); 
   width.clear();
-
 }
 
 void pres::FinishSlide(){
@@ -299,12 +234,8 @@ pres::pres(std::string keyColor_, bool center, bool madrid_){
 }
 
 float aspectRatio(std::string pdfFile){
-<<<<<<< HEAD
   const char* command = (". ~/software/SlideMaker/aspect_ratio.sh " + pdfFile).c_str();
-=======
-  const char* command = (". ./aspect_ratio.sh " + pdfFile).c_str();
   cout << command << endl;
->>>>>>> d430caba3f0277295fcc8cf40a14676328e70008
   string data = exec(command);
   std::vector <std::string> result = GetParms(data);  
   if (atof(result[2].c_str()) == 0) return atof(result[1].c_str())/atof(result[0].c_str()); 
