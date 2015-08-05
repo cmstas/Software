@@ -77,7 +77,8 @@ Supported flags for "options" string:
   - --noOutput: if by any chance you don't want an output to file
   - --noErrBars: if by any chance you don't want the data points to have error bars (it may be annoying when error bars are too big) (effective at both main hist and err hist)
   - --noBlackLines: don't put a black line between the various backgrounds
-  - --histoErrors: if you want your backgrounds to have error bars (usually on the data does)
+  - --histoErrors: if you want your backgrounds to have error bars (usually only the data does)
+  - --sigError: show statistical error on signal plots
 
 Example:
 ````

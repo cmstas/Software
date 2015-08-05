@@ -245,6 +245,7 @@ void dataMCplotMaker(TH1F* Data, std::vector <TH1F*> Backgrounds, std::vector <s
   bool histoErrors = false;
   bool xAxisOverrideGiven = false;  
   std::string lumiUnit = "fb"; 
+  bool sigError = false;
 
   //Loop over options and change default settings to user-defined settings
   for (unsigned int i = 0; i < Options.size(); i++){
@@ -296,6 +297,7 @@ void dataMCplotMaker(TH1F* Data, std::vector <TH1F*> Backgrounds, std::vector <s
     else if (Options[i].find("noOutput") < Options[i].length()) noOutput = true; 
     else if (Options[i].find("noErrBars") < Options[i].length()) noErrBars = true; 
     else if (Options[i].find("histoErrors") < Options[i].length()) histoErrors = true; 
+    else if (Options[i].find("sigError") < Options[i].length()) sigError = true; 
     else cout << "Warning: Option not recognized!  Option: " << Options[i] << endl;
   }
 
@@ -629,6 +631,8 @@ void dataMCplotMaker(TH1F* Data, std::vector <TH1F*> Backgrounds, std::vector <s
     for(int i=0; i< (100-ptotal); i++) percent[roundings[i].second] += 1;
   }
 
+  gStyle->SetErrorX(0.001); 
+
   //Draw
   if (!nostack && !dots && histoErrors) stack->Draw("histe");
   if (!nostack && !dots && !histoErrors) stack->Draw("hist");
@@ -649,7 +653,8 @@ void dataMCplotMaker(TH1F* Data, std::vector <TH1F*> Backgrounds, std::vector <s
   markerStyle.push_back(33);
   markerStyle.push_back(34);
   for (unsigned int i = 0; i < Signals.size(); i++){
-    Signals[i]->Draw("SAMEP");
+    if (!sigError) Signals[i]->Draw("SAMEP");
+    if ( sigError) Signals[i]->Draw("SAMEPE");
     if (Colors.size() >= i + Backgrounds.size() + 1) Signals[i]->SetMarkerColor(Colors[i + Backgrounds.size()]);
     Signals[i]->SetLineColor(kBlack);
     Signals[i]->SetLineWidth(3);
