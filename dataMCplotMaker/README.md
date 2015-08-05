@@ -79,6 +79,7 @@ Supported flags for "options" string:
   - --noBlackLines: don't put a black line between the various backgrounds
   - --histoErrors: if you want your backgrounds to have error bars (usually only the data does)
   - --sigError: show statistical error on signal plots
+  - --blackSignals: make signals black
 
 Example:
 ````

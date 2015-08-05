@@ -246,6 +246,7 @@ void dataMCplotMaker(TH1F* Data, std::vector <TH1F*> Backgrounds, std::vector <s
   bool xAxisOverrideGiven = false;  
   std::string lumiUnit = "fb"; 
   bool sigError = false;
+  bool blackSignals = false;
 
   //Loop over options and change default settings to user-defined settings
   for (unsigned int i = 0; i < Options.size(); i++){
@@ -298,6 +299,7 @@ void dataMCplotMaker(TH1F* Data, std::vector <TH1F*> Backgrounds, std::vector <s
     else if (Options[i].find("noErrBars") < Options[i].length()) noErrBars = true; 
     else if (Options[i].find("histoErrors") < Options[i].length()) histoErrors = true; 
     else if (Options[i].find("sigError") < Options[i].length()) sigError = true; 
+    else if (Options[i].find("blackSignals") < Options[i].length()) blackSignals = true; 
     else cout << "Warning: Option not recognized!  Option: " << Options[i] << endl;
   }
 
@@ -382,20 +384,13 @@ void dataMCplotMaker(TH1F* Data, std::vector <TH1F*> Backgrounds, std::vector <s
 
   std::vector <Color_t> Colors;
 
-  //Set colors for histograms (this is my color scheme, probably needs changed for publishable plots)
-  if (color_input.size() == 0 && use_signals == 0 && nostack == 0){ 
+  //Set colors for histograms
+  if (color_input.size() == 0 && use_signals == 0){ 
     Colors.push_back(kGreen+3);   
     Colors.push_back(kBlue-10);   
     Colors.push_back(kOrange+10);
-    Colors.push_back(kYellow-4); 
-    Colors.push_back(kCyan-4);
-    Colors.push_back(kViolet+4);
-  }
-  if (color_input.size() == 0 && use_signals == 0 && nostack){ 
-    Colors.push_back(kRed); 
-    Colors.push_back(kBlue-2);
-    Colors.push_back(kGreen+3);   
-    Colors.push_back(kBlack);
+    if (!nostack) Colors.push_back(kYellow-4); 
+    if (!nostack) Colors.push_back(kCyan-4);
     Colors.push_back(kViolet+4);
   }
   else if (color_input.size() == 0 && use_signals == 1){ 
@@ -408,10 +403,20 @@ void dataMCplotMaker(TH1F* Data, std::vector <TH1F*> Backgrounds, std::vector <s
     Colors.push_back(kGreen+3);
     Colors.push_back(kYellow-7);
   }
+  //If only 2 backgrounds, this green + "Azure" (med blue) seems to work well
+  if (color_input.size() == 0 && Backgrounds.size() == 2){
+    Colors[0] = kAzure+7;
+    Colors[1] = kGreen+3;
+  }
   else if (color_input.size() != 0){
     for (unsigned int i = 0; i < color_input.size(); i++){
       Colors.push_back(color_input[i]);
     }
+  }
+
+  //Black Signals
+  if (blackSignals){
+    for (unsigned int i = Backgrounds.size(); i < Colors.size(); i++) Colors[i] = kBlack; 
   }
 
   //Sort Backgrounds, with Titles and Colors
