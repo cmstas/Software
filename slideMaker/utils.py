@@ -81,7 +81,7 @@ def textLinesToPlotHeight(nlines):
 
 def splitTitle(title):
     # title = cleanTex(title) # this removes the tex from the title!
-    cutoff = 18
+    cutoff = 16
     if(len(title) <= cutoff):
         return "\\\\ \\vspace{0.4cm} "+title
     else:
