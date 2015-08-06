@@ -17,7 +17,6 @@ commonHeader = """
 \\usepackage{graphicx}
 \\usepackage{xcolor}
 \\usepackage{slashed}
-%% \\usepackage{./styles/appendixnumberbeamer} 
 \\usepackage{appendixnumberbeamer} 
 \\usepackage{amssymb}
 \\graphicspath{ GRAPHICSPATHHERE }
@@ -88,7 +87,6 @@ commonHeader = """
 """ % (institute)
 
 themeNick = """
-%% \\usepackage{./styles/enumitem}
 \\usepackage{enumitem}
 \\addtobeamertemplate{frametitle}{}{%
     \\begin{textblock*}{2.1cm}(0.84\\textwidth,0.15cm)
@@ -151,7 +149,6 @@ themeAlex = """
 """ % (institute)
 
 themeMadrid = """
-%% \\usepackage{./styles/enumitem}
 \\usepackage{enumitem}
 \\addtobeamertemplate{frametitle}{}{%
     \\begin{textblock*}{2.1cm}(0.80\\textwidth,0.08cm)
