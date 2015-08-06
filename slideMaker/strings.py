@@ -90,12 +90,12 @@ themeNick = """
 \\usepackage{enumitem}
 \\addtobeamertemplate{frametitle}{}{%
     \\begin{textblock*}{2.1cm}(0.84\\textwidth,0.15cm)
-        \\includegraphics[height=0.70cm]{./logos/ucsbquark.pdf}
+        \\includegraphics[height=0.70cm]{ucsbquark.pdf}
     %% \\begin{textblock*}{2.1cm}(0.80\\textwidth,0.08cm)
-        %% \\includegraphics[height=0.82cm]{./logos/ucsbwave.pdf}
+        %% \\includegraphics[height=0.82cm]{ucsbwave.pdf}
     \\end{textblock*}
     \\begin{textblock*}{2.1cm}(0.98\\textwidth,0.09cm)
-        \\includegraphics[height=0.82cm]{./logos/cmsbwlogothick.png}
+        \\includegraphics[height=0.82cm]{cmsbwlogothick.png}
     \\end{textblock*}
 } \n\n
 
@@ -132,10 +132,10 @@ themeAlex = """
   \\end{center}
   \\end{textblock*}
   \\begin{textblock*}{2.7cm}(0cm, 0.1cm)
-  \\includegraphics[width=2.7cm]{./logos/ucsb.pdf}
+  \\includegraphics[width=2.7cm]{ucsb.pdf}
   \\end{textblock*}
   \\begin{textblock*}{2.2cm}(10.3cm, 0.2cm)
-  \\includegraphics[width=2.2cm]{./logos/CMS.pdf}
+  \\includegraphics[width=2.2cm]{CMS.pdf}
   \\end{textblock*}
 }
 
@@ -152,10 +152,10 @@ themeMadrid = """
 \\usepackage{enumitem}
 \\addtobeamertemplate{frametitle}{}{%
     \\begin{textblock*}{2.1cm}(0.80\\textwidth,0.08cm)
-        \\includegraphics[height=0.82cm]{./logos/ucsbwave.pdf}
+        \\includegraphics[height=0.82cm]{ucsbwave.pdf}
     \\end{textblock*}
     \\begin{textblock*}{2.1cm}(0.98\\textwidth,0.09cm)
-        \\includegraphics[height=0.82cm]{./logos/cmsbwlogothick.png}
+        \\includegraphics[height=0.82cm]{cmsbwlogothick.png}
     \\end{textblock*}
 } \n\n
 
