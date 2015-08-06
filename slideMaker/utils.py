@@ -26,6 +26,7 @@ def bulletsToCode(bullets):
     code = "  \\begin{itemize}\n"
     wasSubpoint=False
     bullets = [bullet.strip() for bullet in bullets if len(bullet.strip()) > 3]
+    if(len(bullets) < 1): return ""
     for i,bullet in enumerate(bullets):
         isSubpoint = bullet.strip().startswith("--")
         isLast = i == (len(bullets)-1)
@@ -80,7 +81,7 @@ def textLinesToPlotHeight(nlines):
 
 def splitTitle(title):
     # title = cleanTex(title) # this removes the tex from the title!
-    cutoff = 20
+    cutoff = 18
     if(len(title) <= cutoff):
         return "\\\\ \\vspace{0.4cm} "+title
     else:

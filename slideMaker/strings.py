@@ -17,7 +17,8 @@ commonHeader = """
 \\usepackage{graphicx}
 \\usepackage{xcolor}
 \\usepackage{slashed}
-\\usepackage{./styles/appendixnumberbeamer} 
+%% \\usepackage{./styles/appendixnumberbeamer} 
+\\usepackage{appendixnumberbeamer} 
 \\usepackage{amssymb}
 \\graphicspath{ GRAPHICSPATHHERE }
 \\setbeamertemplate{navigation symbols}{}
@@ -87,7 +88,8 @@ commonHeader = """
 """ % (institute)
 
 themeNick = """
-\\usepackage{./styles/enumitem}
+%% \\usepackage{./styles/enumitem}
+\\usepackage{enumitem}
 \\addtobeamertemplate{frametitle}{}{%
     \\begin{textblock*}{2.1cm}(0.84\\textwidth,0.15cm)
         \\includegraphics[height=0.70cm]{./logos/ucsbquark.pdf}
@@ -149,7 +151,8 @@ themeAlex = """
 """ % (institute)
 
 themeMadrid = """
-\\usepackage{./styles/enumitem}
+%% \\usepackage{./styles/enumitem}
+\\usepackage{enumitem}
 \\addtobeamertemplate{frametitle}{}{%
     \\begin{textblock*}{2.1cm}(0.80\\textwidth,0.08cm)
         \\includegraphics[height=0.82cm]{./logos/ucsbwave.pdf}
