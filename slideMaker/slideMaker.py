@@ -19,10 +19,10 @@ def addSlideTitle(title="", opts=""):
     \\begin{frame}
     \\titlepage
         \\begin{textblock*}{2.1cm}(0.12\\textwidth,0.8\\textheight)
-            \\includegraphics[height=1.3cm]{./logos/ucsbwave.pdf}
+            \\includegraphics[height=1.3cm]{ucsbwave.pdf}
         \\end{textblock*}
         \\begin{textblock*}{2.1cm}(0.8\\textwidth,0.8\\textheight)
-            \\includegraphics[height=1.3cm]{./logos/cmsbwlogothick.png}
+            \\includegraphics[height=1.3cm]{cmsbwlogothick.png}
         \\end{textblock*}
     """ % (shorttitle,title)
 
@@ -40,10 +40,10 @@ def addSlideTitle(title="", opts=""):
     \\begin{frame}
     \\titlepage
         \\begin{textblock*}{2.1cm}(0.12\\textwidth,0.8\\textheight)
-            \\includegraphics[height=1.3cm]{./logos/ucsbwave.pdf}
+            \\includegraphics[height=1.3cm]{ucsbwave.pdf}
         \\end{textblock*}
         \\begin{textblock*}{2.1cm}(0.8\\textwidth,0.8\\textheight)
-            \\includegraphics[height=1.3cm]{./logos/cmsbwlogothick.png}
+            \\includegraphics[height=1.3cm]{cmsbwlogothick.png}
         \\end{textblock*}
     """ % (shorttitle,title)
 
