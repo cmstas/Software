@@ -250,6 +250,9 @@ void dataMCplotMaker(TH1F* Data, std::vector <TH1F*> Backgrounds, std::vector <s
   bool blackSignals = false;
   bool outOfFrame = false;
   bool markerStyle2 = false;
+  float legendWider_ = 0;
+  float legendTaller_ = 0;
+  bool largeLabels = false;
 
   //Loop over options and change default settings to user-defined settings
   for (unsigned int i = 0; i < Options.size(); i++){
@@ -306,6 +309,9 @@ void dataMCplotMaker(TH1F* Data, std::vector <TH1F*> Backgrounds, std::vector <s
     else if (Options[i].find("blackSignals") < Options[i].length()) blackSignals = true; 
     else if (Options[i].find("outOfFrame") < Options[i].length()) outOfFrame = true; 
     else if (Options[i].find("markerStyle2") < Options[i].length()) markerStyle2 = true; 
+    else if (Options[i].find("largeLabels") < Options[i].length()) largeLabels = true; 
+    else if (Options[i].find("legendWider") < Options[i].length())  legendWider_ = atof( getString(Options[i], "legendWider").c_str() );
+    else if (Options[i].find("legendTaller") < Options[i].length()) legendTaller_ = atof( getString(Options[i], "legendTaller").c_str() ); 
     else cout << "Warning: Option not recognized!  Option: " << Options[i] << endl;
   }
 
@@ -610,6 +616,16 @@ void dataMCplotMaker(TH1F* Data, std::vector <TH1F*> Backgrounds, std::vector <s
   if (noData) stack->GetYaxis()->SetTitleOffset(1.4);
   if (noData && linear) stack->GetYaxis()->SetTitleOffset(1.6);
 
+  //Title size
+  if (largeLabels){
+  stack->GetYaxis()->SetTitleSize(0.05);
+  stack->GetXaxis()->SetTitleSize(0.05);
+  stack->GetYaxis()->SetLabelSize(0.045);
+  stack->GetXaxis()->SetLabelSize(0.045);
+  stack->GetXaxis()->SetTitleOffset(stack->GetXaxis()->GetTitleOffset()-0.2); 
+  stack->GetYaxis()->SetTitleOffset(stack->GetYaxis()->GetTitleOffset()-0.2); 
+  }
+
   //X-axis string bin labels
   TString ts = ""+xAxisBinLabels;
   TObjArray *tx = ts.Tokenize(",");
@@ -683,9 +699,9 @@ void dataMCplotMaker(TH1F* Data, std::vector <TH1F*> Backgrounds, std::vector <s
 
   //Legend
   TLegend *leg;
-  if ((Backgrounds.size()+Signals.size() == 1 || Backgrounds.size()+Signals.size() == 2) && noData) leg = new TLegend(0.7+legendRight,0.79+legendUp,0.92+legendRight,0.87+legendUp); 
-  else if ((Backgrounds.size()+Signals.size() == 1 || Backgrounds.size()+Signals.size() == 2) && !noData) leg = new TLegend(0.7+legendRight,0.69+legendUp,0.92+legendRight,0.77+legendUp); 
-  else leg = new TLegend(0.7+legendRight,0.59+legendUp,0.92+legendRight,0.87+legendUp);
+  if ((Backgrounds.size()+Signals.size() == 1 || Backgrounds.size()+Signals.size() == 2) && noData) leg = new TLegend(0.7+legendRight,0.79+legendUp,0.92+legendRight+legendWider_,0.87+legendUp+legendTaller_); 
+  else if ((Backgrounds.size()+Signals.size() == 1 || Backgrounds.size()+Signals.size() == 2) && !noData) leg = new TLegend(0.7+legendRight,0.69+legendUp,0.92+legendRight+legendWider_,0.77+legendUp+legendTaller_); 
+  else leg = new TLegend(0.7+legendRight,0.59+legendUp,0.92+legendRight+legendWider_,0.87+legendUp+legendTaller_);
   leg->SetTextSize(legendTextSize);
   if (noData == false) leg->AddEntry(Data, dataName.c_str(), "lp");
   if (showPercentage) for (int i = Titles.size()-1; i > -1; i--) Titles[i] =  Form("%s [%i%%]", Titles[i].c_str(), percent[i]);

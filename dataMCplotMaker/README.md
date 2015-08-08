@@ -81,8 +81,11 @@ Supported flags for "options" string:
   - --sigError: show statistical error on signal plots
   - --blackSignals: make signals black
   - --legendBox: put stupid box around legend
+  -- --legendTaller X: increase legend size by X (only when using legendBox)
+  -- --legendWider X: increase legend size by X (only when using legendBox)
   - --outOfFrame: CMS Preliminary goes on top instead of in the frame
   - --markerStyle2: alternate marker style for signals (alternates between filled and unfilled)
+  - --largeLabel: use larger legend and axis label size
 
 Example:
 ````
