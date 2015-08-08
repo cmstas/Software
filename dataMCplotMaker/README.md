@@ -80,6 +80,7 @@ Supported flags for "options" string:
   - --histoErrors: if you want your backgrounds to have error bars (usually only the data does)
   - --sigError: show statistical error on signal plots
   - --blackSignals: make signals black
+  - --legendBox: put stupid box around legend
 
 Example:
 ````

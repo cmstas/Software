@@ -243,6 +243,7 @@ void dataMCplotMaker(TH1F* Data, std::vector <TH1F*> Backgrounds, std::vector <s
   bool noErrBars = false;
   bool noBlackLines = false;
   bool histoErrors = false;
+  bool legendBox = false;
   bool xAxisOverrideGiven = false;  
   std::string lumiUnit = "fb"; 
   bool sigError = false;
@@ -258,6 +259,7 @@ void dataMCplotMaker(TH1F* Data, std::vector <TH1F*> Backgrounds, std::vector <s
     else if (Options[i].find("noFill") < Options[i].length()) noFill = 1;
     else if (Options[i].find("normalize") < Options[i].length()) normalize = 1; 
     else if (Options[i].find("preserveSignalOrder") < Options[i].length()) preserveSignalOrder = 1; 
+    else if (Options[i].find("legendBox") < Options[i].length()) legendBox = 1; 
     else if (Options[i].find("outputName") < Options[i].length()) outputName = getString(Options[i], "outputName");
     else if (Options[i].find("png") < Options[i].length()) png = true;
     else if (Options[i].find("noDivisionLabel") < Options[i].length()) showDivisionLabel = 0; 
@@ -678,7 +680,8 @@ void dataMCplotMaker(TH1F* Data, std::vector <TH1F*> Backgrounds, std::vector <s
   if (dots) for (int i = Titles.size()-1; i > -1; i--) leg->AddEntry(Backgrounds[i], Titles[i].c_str(), "LPE");
   if (use_signals) for (int i = SignalTitles.size()-1; i > -1; i--) leg->AddEntry(Signals[i], SignalTitles[i].c_str(), "P");
   leg->SetFillStyle(0);
-  leg->SetBorderSize(0);
+  if ( legendBox) leg->SetBorderSize(1);
+  if (!legendBox) leg->SetBorderSize(0);
   if (!noLegend) leg->Draw();
 
   if (percentageInBox){
