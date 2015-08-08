@@ -81,6 +81,8 @@ Supported flags for "options" string:
   - --sigError: show statistical error on signal plots
   - --blackSignals: make signals black
   - --legendBox: put stupid box around legend
+  - --outOfFrame: CMS Preliminary goes on top instead of in the frame
+  - --markerStyle2: alternate marker style for signals (alternates between filled and unfilled)
 
 Example:
 ````

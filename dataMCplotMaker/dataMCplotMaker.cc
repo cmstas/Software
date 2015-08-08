@@ -248,6 +248,8 @@ void dataMCplotMaker(TH1F* Data, std::vector <TH1F*> Backgrounds, std::vector <s
   std::string lumiUnit = "fb"; 
   bool sigError = false;
   bool blackSignals = false;
+  bool outOfFrame = false;
+  bool markerStyle2 = false;
 
   //Loop over options and change default settings to user-defined settings
   for (unsigned int i = 0; i < Options.size(); i++){
@@ -302,6 +304,8 @@ void dataMCplotMaker(TH1F* Data, std::vector <TH1F*> Backgrounds, std::vector <s
     else if (Options[i].find("histoErrors") < Options[i].length()) histoErrors = true; 
     else if (Options[i].find("sigError") < Options[i].length()) sigError = true; 
     else if (Options[i].find("blackSignals") < Options[i].length()) blackSignals = true; 
+    else if (Options[i].find("outOfFrame") < Options[i].length()) outOfFrame = true; 
+    else if (Options[i].find("markerStyle2") < Options[i].length()) markerStyle2 = true; 
     else cout << "Warning: Option not recognized!  Option: " << Options[i] << endl;
   }
 
@@ -659,13 +663,22 @@ void dataMCplotMaker(TH1F* Data, std::vector <TH1F*> Backgrounds, std::vector <s
   markerStyle.push_back(29);
   markerStyle.push_back(33);
   markerStyle.push_back(34);
+  vector <int> markerStyle2_;
+  markerStyle2_.push_back(24);
+  markerStyle2_.push_back(20);
+  markerStyle2_.push_back(25);
+  markerStyle2_.push_back(21);
+  markerStyle2_.push_back(26);
+  markerStyle2_.push_back(22);
+  markerStyle2_.push_back(23);
   for (unsigned int i = 0; i < Signals.size(); i++){
     if (!sigError) Signals[i]->Draw("SAMEP");
     if ( sigError) Signals[i]->Draw("SAMEPE");
     if (Colors.size() >= i + Backgrounds.size() + 1) Signals[i]->SetMarkerColor(Colors[i + Backgrounds.size()]);
     Signals[i]->SetLineColor(kBlack);
     Signals[i]->SetLineWidth(3);
-    Signals[i]->SetMarkerStyle(markerStyle[i%7]);
+    if (!markerStyle2) Signals[i]->SetMarkerStyle(markerStyle[i%7]);
+    if ( markerStyle2) Signals[i]->SetMarkerStyle(markerStyle2_[i%7]);
   }
 
   //Legend
@@ -765,8 +778,11 @@ void dataMCplotMaker(TH1F* Data, std::vector <TH1F*> Backgrounds, std::vector <s
   tex->SetTextSize(0.035);
   if (!noType) {
     if (noData && overrideHeader[0] == '\0'){
-      tex->DrawLatex(0.16,type_y-.08, "CMS");
-      tex->DrawLatex(0.16,type_y-.11, "#it{Preliminary}"); 
+      float ycoord = outOfFrame ? .00 : .08;
+      tex->DrawLatex(0.16,type_y-ycoord, "CMS");              
+      ycoord = outOfFrame ? .00 : .11;
+      float xcoord = outOfFrame ? .24 : .16;
+      tex->DrawLatex(xcoord,type_y-ycoord, "#it{Preliminary}");
     }
     if (!noData && overrideHeader[0] == '\0'){ 
       tex->DrawLatex(0.83,type_y-.08, "CMS");
