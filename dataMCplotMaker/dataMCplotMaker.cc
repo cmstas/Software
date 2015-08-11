@@ -546,6 +546,7 @@ void dataMCplotMaker(TH1F* Data, std::vector <TH1F*> Backgrounds, std::vector <s
       Backgrounds[i]->SetMarkerColor(Colors[i]);
       if ( noBlackLines) Backgrounds[i]->SetLineColor(Colors[i]);
       if (!noBlackLines) Backgrounds[i]->SetLineColor(kBlack);
+      Backgrounds[i]->SetLineWidth(Backgrounds[i]->GetLineWidth()/1.5);
       if (nostack && normalize) Backgrounds[i]->Scale(1.0/Backgrounds[i]->Integral());
       stack->Add(Backgrounds[i]);
     }
@@ -703,6 +704,7 @@ void dataMCplotMaker(TH1F* Data, std::vector <TH1F*> Backgrounds, std::vector <s
   else if ((Backgrounds.size()+Signals.size() == 1 || Backgrounds.size()+Signals.size() == 2) && !noData) leg = new TLegend(0.7+legendRight,0.69+legendUp,0.92+legendRight+legendWider_,0.77+legendUp+legendTaller_); 
   else leg = new TLegend(0.7+legendRight,0.59+legendUp,0.92+legendRight+legendWider_,0.87+legendUp+legendTaller_);
   leg->SetTextSize(legendTextSize);
+  leg->SetTextFont(42);
   if (noData == false) leg->AddEntry(Data, dataName.c_str(), "lp");
   if (showPercentage) for (int i = Titles.size()-1; i > -1; i--) Titles[i] =  Form("%s [%i%%]", Titles[i].c_str(), percent[i]);
   if (!dots) for (int i = Titles.size()-1; i > -1; i--) leg->AddEntry(Backgrounds[i], Titles[i].c_str(), "f");
@@ -722,13 +724,16 @@ void dataMCplotMaker(TH1F* Data, std::vector <TH1F*> Backgrounds, std::vector <s
     float halfFillWidth = legWidth*leg->GetMargin()/2;
     int nRows = leg->GetNRows();
 
+    float yRowOffset = 0.65 - nRows*0.05; // painstakingly-determined empirical formula
+    float xPctFudge = 0.01, yPctFudge = 0.01;
+    if(Titles.size() < 5) yPctFudge = 0.005; // damn, this works nicely
+
     for (unsigned int iEntry = 0; iEntry < Titles.size(); iEntry++)  {
-      float yRowOffset = 0.65 - nRows*0.05; // painstakingly-determined empirical formula
-      float xPctFudge = 0.01, yPctFudge = 0.01;
       float xPctNDC = xPctFudge+leg->GetX1()+halfFillWidth*0.8;
       float yPctNDC = yPctFudge+leg->GetY1()+(iEntry+yRowOffset)*entryHeight;
       pctTex->SetTextSize(0.022);
       pctTex->SetTextAlign(22);
+      pctTex->SetTextFont(42);
 
       float colR, colG, colB;
       gROOT->GetColor(Colors[iEntry])->GetRGB(colR,colG,colB);
@@ -798,11 +803,15 @@ void dataMCplotMaker(TH1F* Data, std::vector <TH1F*> Backgrounds, std::vector <s
       tex->DrawLatex(0.16,type_y-ycoord, "CMS");              
       ycoord = outOfFrame ? .00 : .11;
       float xcoord = outOfFrame ? .24 : .16;
-      tex->DrawLatex(xcoord,type_y-ycoord, "#it{Preliminary}");
+      tex->DrawLatex(xcoord,type_y-ycoord, "#font[52]{Preliminary}");
     }
     if (!noData && overrideHeader[0] == '\0'){ 
-      tex->DrawLatex(0.83,type_y-.08, "CMS");
-      tex->DrawLatex(0.73,type_y-.13, "#it{Preliminary}"); 
+      float ycoord = outOfFrame ? .00 : .08;
+      float xcoord = outOfFrame ? .16 : .83;
+      tex->DrawLatex(xcoord,type_y-ycoord, "CMS");              
+      ycoord = outOfFrame ? .00 : .13;
+      xcoord = outOfFrame ? .24 : .73;
+      tex->DrawLatex(xcoord,type_y-ycoord, "#font[52]{Preliminary}");
     }
   }
   if (overrideHeader[0] != '\0') tex->DrawLatex(0.17,type_y,Form("%s", overrideHeader.c_str()));
