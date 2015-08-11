@@ -1,83 +1,44 @@
-<!DOCTYPE html>
 <html>
-    <body>
-        <canvas id="viewport" width="726" height="544" style="border:1px solid #d3d3d3;"></canvas>
-        <p id="p1">Hover your mouse over the image</p>
-        <p id="p2">Now click on a couple of points</p>
-        <p id="debug">debug</p>
-        <button id="prevButton" onClick="changeSlide(-1);">Previous</button>
-        <button id="nextButton" onClick="changeSlide(1);">Next</button>
-        <script>
-            var canvas = document.getElementById('viewport'),
-            context = canvas.getContext('2d');
+<head>
 
-            var firstClick = false;
+<meta charset="UTF-8" />
+<title>drag</title>
 
-            var mx1, my1, mx2, my2;
+<style type="text/css">
+#container {
+    position: relative; 
+    float: left;
+    padding-right: 15px;
+}
+#canvas { 
+    background: url("");
+    background-size: 800px 600px;
+    border: 1px solid #000; 
+}
+</style> 
+<script type='text/javascript' > 
+    var slides = [ SLIDESHERE ];
+    var currentSlideIdx = 0;
+</script>
+<script type="text/javascript" src="boxes.js"></script>
+</head>
+<body onLoad="init()">
+<button id="prevButton" onClick="changeSlide(-1);">Previous</button>
+<button id="nextButton" onClick="changeSlide(1);">Next</button>
 
-            // var slides = ["page_4.png", "page_5.png", "page_4.png", "page_5.png"];
-            var slides = [ SLIDESHERE ];
-            var currentSlideIdx = 1;
+<div id="container">
+    <canvas id="canvas" width="800" height="600"> This text is displayed if your browser does not support HTML5 Canvas.  </canvas>
+</div>
+<p id="slideNumber"></p>
+<p id="output" style="font-family:monospace"></p>
 
-            document.getElementById("debug").innerHTML = "Slide " + (currentSlideIdx+1) + " of " + slides.length; 
-            function make_base(imgname)
-            {
-                base_image = new Image();
-                base_image.src = imgname;
-                base_image.onload = function() {
-                    context.drawImage(base_image, 0, 0, 726,544);
-                }
-            }
-            make_base(slides[currentSlideIdx]);
-
-            function getMousePos(canvas, evt) {
-                var rect = canvas.getBoundingClientRect();
-                return {
-                    x: evt.clientX - rect.left,
-                    y: evt.clientY - rect.top
-                };
-            }
-            
-            function changeSlide(which) {
-                which = parseInt(which);
-                currentSlideIdx = (currentSlideIdx + which + slides.length) % slides.length;
-                make_base(slides[currentSlideIdx]);
-                document.getElementById("debug").innerHTML = "Slide " + (currentSlideIdx+1) + " of " + slides.length; 
-            }
-            canvas.addEventListener('mousemove', function(evt) {
-                var mousePos = getMousePos(canvas, evt);
-                document.getElementById("p1").innerHTML = "("+(mousePos.x/726).toFixed(2)+","+(mousePos.y/544).toFixed(2)+")";
-            }, false);
+- Click and drag the body of a shape to move it around.<br>
+- Drag handles to resize.<br>
+- Double click to spawn a new box.<br>
+- Double click while holding SHIFT to spawn a new arrow.<br>
+- Select an object and press the delete key to delete it.<br>
+- Shapes are attached to the slide, so flip slides freely.<br>
 
 
-
-            canvas.addEventListener('mousedown', function(evt) {
-                var mousePos = getMousePos(canvas, evt);
-                if(! firstClick ) {
-                    make_base(slides[currentSlideIdx]);
-                    firstClick = true;
-                    mx1 = (mousePos.x/726).toFixed(2);
-                    my1 = (mousePos.y/544).toFixed(2);
-
-
-                    } else if (firstClick ) {
-                    firstClick = false;
-
-                    mx2 = (mousePos.x/726).toFixed(2);
-                    my2 = (mousePos.y/544).toFixed(2);
-                    document.getElementById("p2").innerHTML = "sm.arrowObject( ("+mx1+","+my1+"), ("+mx2+","+my2+") )"
-
-                    context.beginPath();
-                    context.moveTo(mx1*726, my1*544);
-                    context.lineTo(mx2*726, my2*544);
-                    context.stroke();
-
-                }
-            }, false);
-
-        </script> 
-
-    </body>
+</body>
 </html>
-
-

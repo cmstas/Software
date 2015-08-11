@@ -7,6 +7,7 @@ source = ""
 theme = ""
 graphicspaths = ["./test/", "./logos/", os.path.dirname(os.path.abspath(__file__))+"/logos/"]
 gridslides = []
+globalOpts = {}
 
 def addSlideTitle(title="", opts=""):
     global source
@@ -172,7 +173,7 @@ def addSlide(title=None,text=None,p1=None,p2=None,opts="",textobjects=[],arrowob
             print ">>> Unspecified coordinates for box, will print out a grid for you"
             drawGrid = True
 
-    if( drawGrid ):
+    if( drawGrid and globalOpts["makegrids"]):
         texts, arrows = [], []
         ndivs = 20
         gridslides.append( slideNumber )
@@ -383,8 +384,13 @@ def writeSlides(output="output.tex", opts="--compile"):
             stat,out = commands.getstatusoutput("cp %s ~/public_html/%s/" % (output.replace(".tex",".pdf"), "dump" if opts["dump"] else ""))
             print ">>> Copied output to uaf-6.t2.ucsd.edu/~%s/%s%s" % (os.getenv("USER"), "dump/" if opts["dump"] else "", output.replace(".tex",".pdf"))
 
+    if(globalOpts["makegui"]):
+        utils.makeGUI(gridslides, output.replace(".tex",".pdf"))
+
 def startBackup():
-    global source
+    global source, slideNumber
+    slideNumber += 1
+
     color = "black"
     if(theme == "alex"): color = "alexcolor"
     if(theme == "nick"): color = "nickcolor"
@@ -416,6 +422,9 @@ if __name__ == '__main__':
     bullets = content.split("\n")
     content2 = "\n".join(bullets[0:4])
 
+    # global options that aren't slide specific
+    globalOpts = utils.parseOptions("--makegrids --makegui")
+
     t1 = textObject(x=0.25,y=0.15,width=0.3, text="testlabel", color="red", size=0, bold=False,opts="--rotate -45") 
     t2 = textObject(x=0.75,y=0.15,width=0.3, text="testlabel", color="coolblue", size=0, bold=False) 
 
@@ -429,20 +438,17 @@ if __name__ == '__main__':
     b2 = boxObject( (0.85,0.66), (0.55,0.32), color="coolblue", opts="--shadow")
 
     # for t in ["nick", "alex", "madrid"]:
-    for t in ["alex"]:
+    for t in ["nick"]:
         initSlides(me="Nick",themeName=t,opts="--graphicspaths ./test2/,./test3/ --themecolor 51,51,179 ")
         addSlide(title="Perturbation Theory on $H_m(dS_n,\\mathbb{R})$ Orbifolds", opts="--shorttitle hep-th crap")
         addSlide(text="UCSB Logo generated in LaTeX: \\[ \\begin{bmatrix} u \\\\ \\textcolor{gray!40!white}{d} \\end{bmatrix}\\!\\!  \\begin{bmatrix} c \\\\ s \\end{bmatrix}\\!\\!  \\begin{bmatrix} \\textcolor{gray!40!white}{t}   \\\\ b \\end{bmatrix} \\]")
         addSlide(p1="yields.pdf",p2="yields.pdf", textobjects=[t1,t2], arrowobjects=[a1,a2], boxobjects=[b1,b2])
-        addSlide(p1="zmass.pdf", arrowobjects=[arrowObject()])
-        addSlide(p1="zmass.pdf", textobjects=[textObject(text="wheredoIgo?")])
         addSlide(text=content)
         addSlide(text=content2, p1="zmass.pdf",opts="--drawtype shadowimage")
-        addSlide(text=content2, p1="zmass.pdf", opts="--sidebyside --drawtype shadowimage")
+        addSlide(text=content2, p1="zmass.pdf", opts="--sidebyside --drawtype shadowimage", arrowobjects=[arrowObject()])
         startBackup()
-        addSlide(text=content2, p1="filt.pdf")
+        addSlide(text=content2, p1="filt.pdf", textobjects=[textObject()])
         addSlide(text=content2, p1="zmass.pdf", p2="zmass.pdf")
         writeSlides("test_%s.tex" % t, opts="--compile --copy --dump")
 
-        utils.makeGUI(gridslides, "test_%s.pdf" % t)
 

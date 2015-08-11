@@ -1,7 +1,7 @@
 ### utility functions that don't directly touch the latex source go here
 import commands, os, sys
 
-listOfOptions = ["dump", "copy", "compile", "graphicspaths", "shorttitle", "themecolor", "sidebyside", "modernfont", "noarrowhead","rotate","drawtype","crayon","shadow"]
+listOfOptions = ["dump", "copy", "compile", "graphicspaths", "shorttitle", "themecolor", "sidebyside", "modernfont", "noarrowhead","rotate","drawtype","crayon","shadow","makegrids","makegui"]
 def parseOptions(optString):
     opts = { }
     for optName in listOfOptions:
@@ -92,11 +92,11 @@ def slideToPng(slidenumber,output,outdir):
     # but outdir is where we want to store the individual pages
     output = output.replace("tex","pdf")
     stat,out = commands.getstatusoutput("gs -dBATCH -dNOPAUSE -sDEVICE=pdfwrite -dFirstPage=%i -dLastPage=%i -sOutputFile=%s/page_%i.pdf %s" % (slidenumber, slidenumber, outdir, slidenumber, output))
-    stat,out = commands.getstatusoutput("gs -q -sDEVICE=pngalpha -dBATCH -dNOPAUSE -dDOINTERPOLATE -o %s/page_%i.png -sDEVICE=pngalpha -r480 %s/page_%i.pdf" % (outdir, slidenumber, outdir, slidenumber))
+    stat,out = commands.getstatusoutput("gs -q -sDEVICE=pngalpha -dNumRenderingThreads=4 -dBATCH -dNOPAUSE -dDOINTERPOLATE -o %s/page_%i.png -sDEVICE=pngalpha -r200 %s/page_%i.pdf" % (outdir, slidenumber, outdir, slidenumber))
 
 def makeGUI(slidenumbers, output):
     os.system("mkdir -p pages/")
-    os.system("rm pages/*.png")
+    os.system("rm pages/*.{png,pdf}")
     for slidenumber in slidenumbers:
         slideToPng(slidenumber, output, "pages/")
 
@@ -111,9 +111,7 @@ def makeGUI(slidenumbers, output):
     newhtml.write(html)
     newhtml.close()
 
+    stat,out = commands.getstatusoutput("cp -p html/*.js pages/")
     stat,out = commands.getstatusoutput("cp -rp pages ~/public_html/dump/")
     print ">>> Copied GUI to uaf-6.t2.ucsd.edu/~%s/dump/pages/gui.html" % (os.getenv("USER"))
 
-
-
-# print parseOptions("--dump --title left --caption this is stupid --unrecognizedopt")
