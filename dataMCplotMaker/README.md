@@ -11,6 +11,10 @@ To run:
   2.  "Include" the .h file (#include "path/dataMCplotMaker.h") in your file
   3.  In root, compile the .cc file (.L path/dataMCplotMaker.cc+) before loading and compiling your file.
 
+Quick start/testing:
+  1.  cd test/
+  2.  root -b -q doAll.C
+
 ##Instructions for 1D plots
 
 To call the function:
