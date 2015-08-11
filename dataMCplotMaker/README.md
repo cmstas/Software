@@ -11,6 +11,10 @@ To run:
   2.  "Include" the .h file (#include "path/dataMCplotMaker.h") in your file
   3.  In root, compile the .cc file (.L path/dataMCplotMaker.cc+) before loading and compiling your file.
 
+Quick start/testing:
+  1.  cd test/
+  2.  root -b -q doAll.C
+
 ##Instructions for 1D plots
 
 To call the function:
@@ -58,7 +62,7 @@ Supported flags for "options" string:
   - --topYaxisTitle X: change the y-axis label in the top histogram from its default of "data/MC"
   - --type X: change the top-left label from its default of "CMS Preliminary"
   - --overrideHeader X: override the entire top line to the user-defined value
-  - --vLine X: insert a vectical line where the x-axis = X
+  - --vLine X: insert a vertical line where the x-axis = X
   - --hLine X: insert a horizontal line where the y-axis = X
   - --setMaximum X: change the y-axis maximum from its default value (originally chosen such that the top of the top-most error bar appears at 3/4 of the histogram's height)
   - --setMinimum X: change the y-axis minimum from its default value (originally chosen to be 90% of the smallest bin's height on the bottom background)
