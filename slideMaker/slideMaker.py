@@ -6,7 +6,7 @@ from collections import defaultdict
 slideNumber = 0
 source = ""
 theme = ""
-graphicspaths = ["./test/", "./logos/", os.path.dirname(os.path.abspath(__file__))+"/logos/"]
+graphicspaths = [os.path.dirname(os.path.abspath(__file__))+"/test/", os.path.dirname(os.path.abspath(__file__))+"/logos/"]
 gridslides = []
 globalOpts = utils.parseOptions("")
 objs = defaultdict(list)

@@ -1,3 +1,6 @@
+import sys
+sys.path.append("../")
+
 import slideMaker as sm
 
 sm.addGlobalOptions("--makegui")
@@ -31,16 +34,16 @@ sm.addSlide(title="Perturbation Theory on $H_m(dS_n,\\mathbb{R})$ Orbifolds of A
 
 # pass in a list of textobjects (which are just dicts, so they can be modified too)
 sm.addSlide(p1="yields.pdf",p2="yields.pdf", objects=[t1,t2,a1,a2])
-sm.addSlide(p1="test/yields.pdf",p2="test/yields.pdf")
+sm.addSlide(p1="yields.pdf",p2="yields.pdf")
 
 # when I specify an empty arrow object, a helper grid gets printed on the slide if I've specified
 # the global option "--makegrid". A gui is produced if I speify "--makegui"
-sm.addSlide(p1="test/zmass.pdf", objects=[sm.object("arrow")])
+sm.addSlide(p1="zmass.pdf", objects=[sm.object("arrow")])
 sm.addSlide(text=content+content)
 
 # slides reset their numbering when you start the backup section
 sm.startBackup()
-sm.addSlide(text=content, p1="test/filt.pdf", opts="--sidebyside")
-sm.addSlide(text=content, p1="test/zmass.pdf", p2="test/zmass.pdf")
+sm.addSlide(text=content, p1="filt.pdf", opts="--sidebyside")
+sm.addSlide(text=content, p1="zmass.pdf", p2="zmass.pdf")
 
 sm.writeSlides("test_1.tex", opts="--compile --copy")

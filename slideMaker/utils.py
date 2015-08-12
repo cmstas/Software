@@ -1,6 +1,7 @@
 ### utility functions that don't directly touch the latex source go here
 import commands, os, sys
 
+basepath = os.path.dirname(os.path.abspath(__file__))
 listOfOptions = ["dump", "copy", "compile", "graphicspaths", "shorttitle", "themecolor", "sidebyside", "modernfont", "noarrowhead","rotate","drawtype","crayon","shadow","makegrid","makegui"]
 def parseOptions(optString):
     opts = { }
@@ -192,7 +193,7 @@ def makeGUI(slidenumbers, output):
     pngFiles = [file for file in os.listdir("./pages/") if file.endswith(".png")]
     pngFiles.sort()
 
-    html = open("./html/gui.html","r").read()
+    html = open("%s/html/gui.html" % basepath,"r").read()
 
     slideStr = "'"+"', '".join(pngFiles)+"'"
     html = html.replace("SLIDESHERE", slideStr)
@@ -201,7 +202,7 @@ def makeGUI(slidenumbers, output):
     newhtml.write(html)
     newhtml.close()
 
-    stat,out = commands.getstatusoutput("cp html/*.js pages/")
+    stat,out = commands.getstatusoutput("cp %s/html/*.js pages/" % basepath)
     stat,out = commands.getstatusoutput("cp -r pages ~/public_html/dump/")
     print "[SM] Copied GUI to uaf-6.t2.ucsd.edu/~%s/dump/pages/gui.html" % (os.getenv("USER"))
 

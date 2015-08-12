@@ -1,0 +1,44 @@
+<html>
+<head>
+
+<meta charset="UTF-8" />
+<title>drag</title>
+
+<style type="text/css">
+#container {
+    position: relative; 
+    float: left;
+    padding-right: 15px;
+}
+#canvas { 
+    background: url("");
+    background-size: 800px 600px;
+    border: 1px solid #000; 
+}
+</style> 
+<script type='text/javascript' > 
+    var slides = [ 'page_4.png' ];
+    var currentSlideIdx = 0;
+</script>
+<script type="text/javascript" src="boxes.js"></script>
+</head>
+<body onLoad="init()">
+<button id="prevButton" onClick="changeSlide(-1);">Previous</button>
+<button id="nextButton" onClick="changeSlide(1);">Next</button>
+
+<div id="container">
+    <canvas id="canvas" width="800" height="600"> This text is displayed if your browser does not support HTML5 Canvas.  </canvas>
+</div>
+<p id="slideNumber"></p>
+<p id="output" style="font-family:monospace"></p>
+
+- Click and drag the body of a shape to move it around.<br>
+- Drag handles to resize.<br>
+- Double click to spawn a new box.<br>
+- Double click while holding SHIFT to spawn a new arrow.<br>
+- Select an object and press the delete key to delete it.<br>
+- Shapes are attached to the slide, so flip slides freely.<br>
+
+
+</body>
+</html>
