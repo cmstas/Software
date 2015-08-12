@@ -170,7 +170,7 @@ Arrow.prototype = {
       if (this.x + this.w < 0 || this.y + this.h < 0) return;
       
       context.strokeStyle = "#000000";
-      var t = 8; // thickness
+      var t = 4; // thickness
       var edgeWidth = t*Math.cos(Math.PI/2 - Math.atan2(this.h,this.w));
       var edgeHeight = t*Math.sin(Math.PI/2 - Math.atan2(this.h,this.w));
       var offx = -edgeHeight;
@@ -179,9 +179,9 @@ Arrow.prototype = {
       context.moveTo(this.x-edgeWidth/2,this.y+edgeHeight/2);
       context.lineTo(this.x+edgeWidth/2,this.y-edgeHeight/2);
       context.lineTo(this.x+this.w+edgeWidth/2+offx,this.y+this.h-edgeHeight/2+offy);
-      context.lineTo(this.x+this.w+edgeWidth+offx,this.y+this.h-edgeHeight+offy);
+      context.lineTo(this.x+this.w+edgeWidth*2+offx*2,this.y+this.h-edgeHeight*2+offy*2);
       context.lineTo(this.x+this.w,this.y+this.h);
-      context.lineTo(this.x+this.w-edgeWidth+offx,this.y+this.h+edgeHeight+offy);
+      context.lineTo(this.x+this.w-edgeWidth*2+offx*2,this.y+this.h+edgeHeight*2+offy*2);
       context.lineTo(this.x+this.w-edgeWidth/2+offx,this.y+this.h+edgeHeight/2+offy);
       context.lineTo(this.x-edgeWidth/2,this.y+edgeHeight/2);
       context.fill();
@@ -295,6 +295,7 @@ function init() {
   
   // add a smaller purple rectangle
   addRect(45, 60, 50, 50, 'rgba(150,150,250,0.7)');
+  addArrow(100, 150, 50, 80, 'rgba(150,150,250,0.7)');
 }
 
 
@@ -437,6 +438,7 @@ function myMove(e){
   
 }
 
+
 // Happens when the mouse is clicked in the canvas
 function myDown(e){
   getMouse(e);
@@ -543,11 +545,20 @@ function getMouse(e) {
   my = e.pageY - offsetY
 }
 
+function numberFromIdx(idx) {
+    var num = slides[idx].split(".")[0];
+    num = num.split("_")[1];
+    num = parseInt(num);
+    console.log(num);
+    return num;
+}
+
 function changeSlide(which) {
 
   which = parseInt(which);
   currentSlideIdx = (currentSlideIdx + which + slides.length) % slides.length;
-  document.getElementById("slideNumber").innerHTML = "<b>Slide " + (currentSlideIdx+1) + " of " + slides.length + "</b>"; 
+  document.getElementById("slideNumber").innerHTML = "<b>Page " + (currentSlideIdx+1) + " of " + slides.length + "</b>"; 
+  document.getElementById("slideNumber").innerHTML += " (Slide #"+numberFromIdx(currentSlideIdx)+")"; 
 
   canvas.style.background = "url('"+slides[currentSlideIdx]+"')";
   canvas.style.backgroundSize = WIDTH+"px "+HEIGHT+"px";
@@ -561,7 +572,7 @@ function printCoordinates() {
 
   for (var islide = 0; islide < Object.keys(objectDict).length; islide++) {
     if(objectDict[islide].length > 0) {
-        document.getElementById("output").innerHTML += "<br><b># Slide "+(islide+1)+"</b><br>";
+        document.getElementById("output").innerHTML += "<br><b># Slide "+(numberFromIdx(islide))+"</b><br>";
     }
     for (var i = 0; i < objectDict[islide].length; i++) {
 
@@ -570,14 +581,16 @@ function printCoordinates() {
       var y1 = (objectDict[islide][i].y / HEIGHT).toFixed(2);
       var x2 = ((objectDict[islide][i].x+objectDict[islide][i].w) / WIDTH).toFixed(2);
       var y2 = ((objectDict[islide][i].y+objectDict[islide][i].h) / HEIGHT).toFixed(2);
+
+      document.getElementById("output").innerHTML += "objs["+numberFromIdx(islide)+"].append( sm.object(";
       if(objectDict[islide][i].type == "box") {
-        document.getElementById("output").innerHTML += "sm.boxObject";
+        document.getElementById("output").innerHTML += "\"box\", ";
       } else if(objectDict[islide][i].type == "arrow") {
-        document.getElementById("output").innerHTML += "sm.arrowObject";
+        document.getElementById("output").innerHTML += "\"arrow\", ";
       } else {
 
       }
-      document.getElementById("output").innerHTML += "( ("+x1+","+y1+"), ("+x2+","+y2+") )";
+      document.getElementById("output").innerHTML += "("+x1+","+y1+"),("+x2+","+y2+")) )";
       document.getElementById("output").innerHTML += "<br>";
     }
   }

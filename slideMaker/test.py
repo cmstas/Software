@@ -2,6 +2,14 @@ import slideMaker as sm
 
 sm.addGlobalOptions("--makegui")
 
+sm.objs[7].append( sm.object("box", (0.06,0.10),(0.12,0.18)) )
+sm.objs[7].append( sm.object("arrow", (0.15,0.12),(0.52,0.17)) )
+sm.objs[7].append( sm.object("arrow", (0.51,0.17),(0.56,0.24)) )
+sm.objs[7].append( sm.object("arrow", (0.56,0.23),(0.49,0.33)) )
+sm.objs[7].append( sm.object("arrow", (0.48,0.33),(0.34,0.32)) )
+sm.objs[7].append( sm.object("arrow", (0.35,0.32),(0.16,0.21)) )
+sm.objs[7].append( sm.object("arrow", (0.16,0.21),(0.15,0.12)) )
+
 content = """
  - first \\textbf{bullet} \\red{point} and if I make it long enough, it should wrap to the next line
    -- first secondary bullet \\textcolor{blue}{point}. similarly this should wrap to the next line given enough length

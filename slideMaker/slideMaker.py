@@ -1,6 +1,7 @@
 import os,sys,commands
 import utils
 from strings import *
+from collections import defaultdict
 
 slideNumber = 0
 source = ""
@@ -8,6 +9,7 @@ theme = ""
 graphicspaths = ["./test/", "./logos/", os.path.dirname(os.path.abspath(__file__))+"/logos/"]
 gridslides = []
 globalOpts = utils.parseOptions("")
+objs = defaultdict(list)
 
 def addSlideTitle(title="", opts=""):
     global source
@@ -134,38 +136,45 @@ def addSlide(title=None,text=None,p1=None,p2=None,opts="",textobjects=[],arrowob
 
     if( p1 and p2 ):
         if( text ):
-            print ">>> Adding TextPlotPlot slide"
+            print "[SM] Adding TextPlotPlot slide #%s" % slideNumber
             source += addSlideTextPlotPlot(title,bullets,p1,p2,drawType=drawtype,opts=opts)
         else:
-            print ">>> Adding PlotPlot slide"
+            print "[SM] Adding PlotPlot slide #%s" % slideNumber
             source += addSlidePlotPlot(title,p1,p2,drawType=drawtype,opts=opts)
     elif( p1 ):
         if( text ):
-            print ">>> Adding TextPlot slide"
+            print "[SM] Adding TextPlot slide #%s" % slideNumber
             source += addSlideTextPlot(title,bullets,p1,drawType=drawtype,opts=opts)
         else:
-            print ">>> Adding Plot slide"
+            print "[SM] Adding Plot slide #%s" % slideNumber
             source += addSlidePlot(title,p1,drawType=drawtype,opts=opts)
     elif( text ):
-        print ">>> Adding Text slide"
+        print "[SM] Adding Text slide #%s" % slideNumber
         source += addSlideText(title,bullets,opts=opts)
     elif( title ):
-        print ">>> Adding Title slide"
+        print "[SM] Adding Title slide #%s" % slideNumber
         addSlideTitle(title,opts)
     else:
         print "couldn't figure out what you want"
 
     drawGrid = False
+
+    objects.extend(objs[slideNumber])
     for object in objects:
-        if("grid" in object): drawGrid = True
+        if("grid" in object):
+            drawGrid = True
+            continue
         if(object["type"] == "box"): source += utils.getBoxCode(object)
         if(object["type"] == "arrow"): source += utils.getArrowCode(object)
         if(object["type"] == "text"): source += utils.getFreetextCode(object)
 
-    if(drawGrid): gridslides.append( slideNumber )
+    if(drawGrid and globalOpts["makegui"]):
+        gridslides.append( slideNumber )
+        print "[SM] Unspecified coordinates for object, will add to GUI"
+
 
     if( drawGrid and globalOpts["makegrid"]):
-        print ">>> Unspecified coordinates for object, will print out a grid for you"
+        print "[SM] Unspecified coordinates for object, will print out a grid for you"
         texts, arrows = [], []
         ndivs = 20
         for i in range(1,ndivs):
@@ -208,8 +217,8 @@ def initSlides(me="Nick", themeName="nick", opts=""):
     slideNumber = 0
 
 
-    print ">>> Hi",me
-    print ">>> Using theme:",theme
+    print "[SM] Hi",me
+    print "[SM] Using theme:",theme
 
     source += commonHeader
     if(opts["modernfont"]):
@@ -242,11 +251,11 @@ def initSlides(me="Nick", themeName="nick", opts=""):
 
     if(opts["graphicspaths"]):
         graphicspaths.extend(opts["graphicspaths"].split(","))
-        print ">>> Adding these to the graphics path:", opts["graphicspaths"].split(",")
+        print "[SM] Adding these to the graphics path:", opts["graphicspaths"].split(",")
 
     source = source.replace("GRAPHICSPATHHERE", "".join(["{"+p+"}" for p in graphicspaths]))
 
-    print ">>> Initializing slides"
+    print "[SM] Initializing slides"
 
 def writeSlides(output="output.tex", opts="--compile"):
     global source
@@ -254,7 +263,7 @@ def writeSlides(output="output.tex", opts="--compile"):
     fh = open(output,"w")
     fh.write(source)
     fh.close()
-    print ">>> Wrote slides"
+    print "[SM] Wrote slides"
 
     opts = utils.parseOptions(opts)
 
@@ -263,16 +272,16 @@ def writeSlides(output="output.tex", opts="--compile"):
         stat,out = commands.getstatusoutput("pdflatex -interaction=nonstopmode %s && \
                                              pdflatex -interaction=nonstopmode %s " % (output,output) )
         if("Fatal error" in out):
-            print ">>> ERROR: Tried to compile, but failed. Last few lines of printout below."
+            print "[SM] ERROR: Tried to compile, but failed. Last few lines of printout below."
             print "_"*40
             print "\n".join(out.split("\n")[-30:])
             return
         else:
-            print ">>> Compiled slides to", output.replace(".tex",".pdf")
+            print "[SM] Compiled slides to", output.replace(".tex",".pdf")
 
         if(opts["copy"]):
             stat,out = commands.getstatusoutput("cp %s ~/public_html/%s/" % (output.replace(".tex",".pdf"), "dump" if opts["dump"] else ""))
-            print ">>> Copied output to uaf-6.t2.ucsd.edu/~%s/%s%s" % (os.getenv("USER"), "dump/" if opts["dump"] else "", output.replace(".tex",".pdf"))
+            print "[SM] Copied output to uaf-6.t2.ucsd.edu/~%s/%s%s" % (os.getenv("USER"), "dump/" if opts["dump"] else "", output.replace(".tex",".pdf"))
 
     if(globalOpts["makegui"]):
         utils.makeGUI(gridslides, output.replace(".tex",".pdf"))

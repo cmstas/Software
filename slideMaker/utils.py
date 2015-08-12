@@ -12,7 +12,7 @@ def parseOptions(optString):
         if(len(opt.split()) < 1): continue
         optName = opt.split()[0].strip()
         if(optName not in listOfOptions): 
-            print ">>> Warning: unrecognized option:",optName
+            print "[SM] Warning: unrecognized option:",optName
             continue
 
         if(len(opt.split()) < 2):
@@ -190,6 +190,7 @@ def makeGUI(slidenumbers, output):
         slideToPng(slidenumber, output, "pages/")
 
     pngFiles = [file for file in os.listdir("./pages/") if file.endswith(".png")]
+    pngFiles.sort()
 
     html = open("./html/gui.html","r").read()
 
@@ -202,5 +203,5 @@ def makeGUI(slidenumbers, output):
 
     stat,out = commands.getstatusoutput("cp html/*.js pages/")
     stat,out = commands.getstatusoutput("cp -r pages ~/public_html/dump/")
-    print ">>> Copied GUI to uaf-6.t2.ucsd.edu/~%s/dump/pages/gui.html" % (os.getenv("USER"))
+    print "[SM] Copied GUI to uaf-6.t2.ucsd.edu/~%s/dump/pages/gui.html" % (os.getenv("USER"))
 
