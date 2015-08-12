@@ -7,7 +7,7 @@ source = ""
 theme = ""
 graphicspaths = ["./test/", "./logos/", os.path.dirname(os.path.abspath(__file__))+"/logos/"]
 gridslides = []
-globalOpts = {}
+globalOpts = utils.parseOptions("")
 
 def addSlideTitle(title="", opts=""):
     global source
@@ -114,7 +114,7 @@ def addSlideTextPlotPlot(slideTitle,bullets,plotName1,plotName2,drawType="includ
     code += "\\end{center}"
     return code
 
-def addSlide(title=None,text=None,p1=None,p2=None,opts="",textobjects=[],arrowobjects=[],boxobjects=[]):
+def addSlide(title=None,text=None,p1=None,p2=None,opts="",textobjects=[],arrowobjects=[],boxobjects=[],objects=[]):
     global source, slideNumber
     slideNumber += 1
 
@@ -155,161 +155,51 @@ def addSlide(title=None,text=None,p1=None,p2=None,opts="",textobjects=[],arrowob
     else:
         print "couldn't figure out what you want"
 
-    # draw free text objects before ending slide
     drawGrid = False
-    for textobject in textobjects:
-        if("grid" in textobject):
-            print ">>> Unspecified coordinates for text, will print out a grid for you"
-            drawGrid = True
-        source += getFreetextCode(textobject)
-    for arrowobject in arrowobjects:
-        source += getArrowCode(arrowobject)
-        if("grid" in arrowobject):
-            print ">>> Unspecified coordinates for arrow, will print out a grid for you"
-            drawGrid = True
-    for boxobject in boxobjects:
-        source += getBoxCode(boxobject)
-        if("grid" in boxobject):
-            print ">>> Unspecified coordinates for box, will print out a grid for you"
-            drawGrid = True
+    for object in objects:
+        if("grid" in object): drawGrid = True
+        if(object["type"] == "box"): source += utils.getBoxCode(object)
+        if(object["type"] == "arrow"): source += utils.getArrowCode(object)
+        if(object["type"] == "text"): source += utils.getFreetextCode(object)
 
-    if( drawGrid and globalOpts["makegrids"]):
+    if(drawGrid): gridslides.append( slideNumber )
+
+    if( drawGrid and globalOpts["makegrid"]):
+        print ">>> Unspecified coordinates for object, will print out a grid for you"
         texts, arrows = [], []
         ndivs = 20
-        gridslides.append( slideNumber )
         for i in range(1,ndivs):
-            texts.append( textObject(x=0.03,y=1.0*i/ndivs-0.010,width=0.3, text="\\scalebox{0.7}{%.2f}" % (1.0*i/ndivs), color="red", size=-4, bold=False) )
-            arrows.append( arrowObject( (0.0,1.0*i/ndivs), (1.0,1.0*i/ndivs), color="grey",opts="--noarrowhead" ) )
+            texts.append( object("text",p1=(0.03,1.0*i/ndivs-0.010),width=0.3, text="\\scalebox{0.7}{%.2f}" % (1.0*i/ndivs), color="red", size=-4, bold=False) )
+            arrows.append( object("arrow", (0.0,1.0*i/ndivs), (1.0,1.0*i/ndivs), color="grey",opts="--noarrowhead" ) )
 
-            texts.append( textObject(y=0.01,x=1.0*i/ndivs-0.015,width=0.3, text="\\scalebox{0.7}{%.2f}" % (1.0*i/ndivs), color="red", size=-4, bold=False) )
-            arrows.append( arrowObject( (1.0*i/ndivs,0.0), (1.0*i/ndivs,1.0), color="grey",opts="--noarrowhead" ) )
-        for text in texts: source += getFreetextCode(text)
-        for arrow in arrows: source += getArrowCode(arrow)
+            texts.append( object("text",p1=(1.0*i/ndivs-0.015,0.01),width=0.3, text="\\scalebox{0.7}{%.2f}" % (1.0*i/ndivs), color="red", size=-4, bold=False) )
+            arrows.append( object("arrow", (1.0*i/ndivs,0.0), (1.0*i/ndivs,1.0), color="grey",opts="--noarrowhead" ) )
+        for text in texts: source += utils.getFreetextCode(text)
+        for arrow in arrows: source += utils.getArrowCode(arrow)
 
     source += "\\end{frame} \n\n"
 
-def textObject(x=0,y=0,width=0.3,text="",size=0,bold=False,color="black",opts=""):
+
+def object(type="box",p1=(0,0),p2=(0,0),text="",width=0.3,size=0,bold=False,color="coolblue",opts=""):
     obj = { }
-    obj["x"] = x
-    obj["y"] = y
     obj["width"] = width
     obj["text"] = text
     obj["bold"] = bold
     obj["color"] = color
     obj["opts"] = opts
+    obj["size"] = utils.numToSize(size)
+    obj["x1"], obj["y1"] = p1
+    obj["x2"], obj["y2"] = p2
+    obj["type"] = type
 
-    if(x==0 and y==0):
-        # let's flag this slide and put a grid on it to help the user
-        obj["grid"] = 1
-
-    if   (size == -4): obj["size"] = "tiny"; 
-    elif (size == -3): obj["size"] = "scriptsize"; 
-    elif (size == -2): obj["size"] = "footnotesize"; 
-    elif (size == -1): obj["size"] = "small"; 
-    elif (size ==  0): obj["size"] = "normalsize"; 
-    elif (size ==  1): obj["size"] = "large"; 
-    elif (size ==  2): obj["size"] = "Large"; 
-    elif (size ==  3): obj["size"] = "LARGE"; 
-    elif (size ==  4): obj["size"] = "Huge"; 
-    elif (size ==  5): obj["size"] = "HUGE"; 
-    else: obj["size"] = "normalsize"; 
+    # let's flag this slide and put a grid on it to help the user
+    if(p1 == (0,0) and p2 == (0,0)): obj["grid"] = 1
     return obj
 
-def getFreetextCode(obj):
-    w = obj["width"]
-    x = obj["x"]
-    y = obj["y"]
-    color = obj["color"]
-    size = obj["size"]
-    text = obj["text"]
-    opts = utils.parseOptions(obj["opts"])
-    if(obj["bold"]): text = "\\textbf{%s}" % text
-    if(opts["rotate"]): text = "\\rotatebox{%s}{%s}" % (opts["rotate"],text)
-
-    code = """
-    \\begin{textblock*}{%.2f cm}[0.5,0.5](%.2f cm,%.2f cm)
-        \\begin{center}
-        \\begin{%s}
-            \\textcolor{%s}{%s}
-        \\end{%s}
-        \\end{center}
-    \\end{textblock*}
-    """ % (12.8*w,12.8*x,9.6*y, size, color, text, size)
-
-    return code
-
-def arrowObject(point1=(0,0),point2=(0,0),color="coolblue",opts=""):
-    obj = { }
-    obj["x1"], obj["y1"] = point1
-    obj["x2"], obj["y2"] = point2
-    obj["color"] = color
-    obj["opts"] = opts
-    if(point1 == (0,0) and point2 == (0,0)):
-        obj["grid"] = 1 # let's flag this slide and put a grid on it to help the user
-    return obj
-
-def getArrowCode(obj):
-    x1 = obj["x1"]
-    y1 = obj["y1"]
-    x2 = obj["x2"]
-    y2 = obj["y2"]
-    color = obj["color"]
-    opts = utils.parseOptions(obj["opts"])
-    type = ",-latex"
-
-    if(opts["noarrowhead"]): type = ""
-    if(opts["crayon"]): type += ",crayon"
-
-    code = """
-    \\begin{textblock*}{12.8cm}[1.0,0.0](12.8cm,9.6cm)
-        %% \\begin{tikzpicture}[overlay,remember picture]
-        \\begin{tikzpicture}[overlay,remember picture,crayon/.style={thick, line cap=round, line join=round,decoration={random steps, segment length=0.15pt, amplitude=0.25pt}, decorate}]
-            \\coordinate (0) at (%.2fcm,%.2fcm);   (0)  node  {};
-            \\coordinate (1) at (%.2fcm,%.2fcm);   (1)  node  {};
-            \\draw[draw=%s,solid,fill=%s,thick %s] (0) -- (1);
-        \\end{tikzpicture}
-    \\end{textblock*}
-    """ % (12.8*x1,9.6*(1-y1),12.8*x2,9.6*(1-y2),color,color,type)
-
-    return code
-
-def boxObject(p1=(0,0),p2=(0,0),color="coolblue",opts=""):
-    obj = { }
-    obj["x1"], obj["y1"] = p1 # top left
-    obj["x2"], obj["y2"] = p2 # bottom right
-    obj["color"] = color
-    obj["opts"] = opts
-    if(p1 == (0,0) and p2 == (0,0)):
-        obj["grid"] = 1 # let's flag this slide and put a grid on it to help the user
-    return obj
-
-def getBoxCode(obj):
-    x1 = obj["x1"]
-    y1 = obj["y1"]
-    x2 = obj["x2"]
-    y2 = obj["y2"]
-    color = obj["color"]
-    opts = utils.parseOptions(obj["opts"])
-    type = ""
-    if(opts["crayon"]): type += ",crayon"
-    if(opts["shadow"]): type += ",shadowed={double=gray,draw=gray}"
-
-    code = """
-    \\begin{textblock*}{12.8cm}[1.0,0.0](12.8cm,9.6cm)
-        %% \\begin{tikzpicture}[overlay,remember picture]
-        \\begin{tikzpicture}[overlay,remember picture,crayon/.style={thick, line cap=round, line join=round,decoration={random steps, segment length=0.15pt, amplitude=0.25pt}, decorate}]
-            \\coordinate (0) at (%.2fcm,%.2fcm);   (0)  node  {};
-            \\coordinate (1) at (%.2fcm,%.2fcm);   (1)  node  {};
-            \\coordinate (2) at (%.2fcm,%.2fcm);   (2)  node  {};
-            \\coordinate (3) at (%.2fcm,%.2fcm);   (3)  node  {};
-            \\draw[draw=%s,solid,thick %s] (0) -- (1) -- (2) -- (3) -- (0);
-        \\end{tikzpicture}
-    \\end{textblock*}
-    """ % (12.8*x1,9.6*(1-y1), 12.8*x2,9.6*(1-y1), 12.8*x2,9.6*(1-y2), 12.8*x1,9.6*(1-y2), color,type)
-
-    return code
-
-
+def addGlobalOptions(optstr):
+    global globalOpts
+    globalOpts = utils.parseOptions(optstr)
+    
 def initSlides(me="Nick", themeName="nick", opts=""):
     global source, commonHeader, theme, themeAlex, slideNumber
     source = ""
@@ -417,37 +307,31 @@ if __name__ == '__main__':
      - second \\textcolor{red}{point}
      - third bullet point
      -- fourth secondary bullet point $Z\\rightarrow\\mu\\mu$
-     -- fourth secondary bullet point $Z \\rightarrow \\mu\\mu$
     """
-    bullets = content.split("\n")
-    content2 = "\n".join(bullets[0:4])
+    content2 = "\n".join(content.split("\n")[0:4])
 
     # global options that aren't slide specific
-    globalOpts = utils.parseOptions("--makegrids --makegui")
+    addGlobalOptions("--makegui")
 
-    t1 = textObject(x=0.25,y=0.15,width=0.3, text="testlabel", color="red", size=0, bold=False,opts="--rotate -45") 
-    t2 = textObject(x=0.75,y=0.15,width=0.3, text="testlabel", color="coolblue", size=0, bold=False) 
-
-    a1 = arrowObject( (0.31,0.15), (0.69,0.15))
-    a2 = arrowObject( (0.31,0.15), (0.65,0.46), opts="--crayon --noarrowhead")
-
-    # a box object takes coordinates for the top left and bottom right corners
-    # thus, you can turn an arrow object into a box object with the same
-    # coordinates if the arrow goes along the diagonal of the box
-    b1 = boxObject( (0.65,0.46), (0.75,0.52), color="red", opts="--crayon")
-    b2 = boxObject( (0.85,0.66), (0.55,0.32), color="coolblue", opts="--shadow")
+    # coordinates are for top left and bottom right corners (or tail and head for arrow), respectively
+    t1 = object("text",(0.25,0.15),width=0.3, text="testlabel", color="red", size=0, bold=False,opts="--rotate -45") 
+    t2 = object("text",(0.75,0.15),width=0.3, text="testlabel", color="coolblue", size=0, bold=False) 
+    a3 = object("arrow", (0.31,0.15), (0.69,0.15))
+    a4 = object("arrow", (0.31,0.15), (0.65,0.46), opts="--crayon --noarrowhead")
+    b5 = object("box", (0.65,0.46), (0.75,0.52), color="red", opts="--crayon")
+    b6 = object("box", (0.85,0.66), (0.55,0.32), color="coolblue", opts="--shadow")
 
     # for t in ["nick", "alex", "madrid"]:
     for t in ["nick"]:
         initSlides(me="Nick",themeName=t,opts="--graphicspaths ./test2/,./test3/ --themecolor 51,51,179 ")
         addSlide(title="Perturbation Theory on $H_m(dS_n,\\mathbb{R})$ Orbifolds", opts="--shorttitle hep-th crap")
         addSlide(text="UCSB Logo generated in LaTeX: \\[ \\begin{bmatrix} u \\\\ \\textcolor{gray!40!white}{d} \\end{bmatrix}\\!\\!  \\begin{bmatrix} c \\\\ s \\end{bmatrix}\\!\\!  \\begin{bmatrix} \\textcolor{gray!40!white}{t}   \\\\ b \\end{bmatrix} \\]")
-        addSlide(p1="yields.pdf",p2="yields.pdf", textobjects=[t1,t2], arrowobjects=[a1,a2], boxobjects=[b1,b2])
-        addSlide(text=content)
+        addSlide(p1="yields.pdf",p2="yields.pdf", objects=[t1,t2,a3,a4,b5,b6])
+        addSlide(text=content, objects=[t2,a4])
         addSlide(text=content2, p1="zmass.pdf",opts="--drawtype shadowimage")
-        addSlide(text=content2, p1="zmass.pdf", opts="--sidebyside --drawtype shadowimage", arrowobjects=[arrowObject()])
+        addSlide(text=content2, p1="zmass.pdf", opts="--sidebyside --drawtype shadowimage", objects=[object("arrow")])
         startBackup()
-        addSlide(text=content2, p1="filt.pdf", textobjects=[textObject()])
+        addSlide(text=content2, p1="filt.pdf", objects=[object("text")])
         addSlide(text=content2, p1="zmass.pdf", p2="zmass.pdf")
         writeSlides("test_%s.tex" % t, opts="--compile --copy --dump")
 

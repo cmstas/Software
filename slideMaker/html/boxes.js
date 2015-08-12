@@ -488,7 +488,7 @@ function myUp(){
 
 function myKey(e) {
     console.log(e.keyCode);
-    if(e.keyCode == 46) { // delete key
+    if(e.keyCode == 46 || e.keyCode == 8) { // delete, backspace keys
       if (mySel != null) {
         objectDict[currentSlideIdx].splice(objectDict[currentSlideIdx].indexOf(mySel), 1);
         invalidate();
