@@ -22,11 +22,6 @@ commonHeader = """
 \\graphicspath{ GRAPHICSPATHHERE }
 \\setbeamertemplate{navigation symbols}{}
 
-\\newcommand{\\met}{\\slashed{E}_T}
-\\newcommand{\\red}[1]{\\textcolor{red}{#1}}
-\\newcommand{\\blue}[1]{\\textcolor{blue}{#1}}
-\\newcommand{\\orange}[1]{\\textcolor{orange}{#1}}
-
 \\definecolor{darkgreen}{RGB}{0,100,0}
 \\definecolor{gray}{RGB}{128,128,128}
 \\definecolor{grey}{RGB}{128,128,128}
@@ -34,6 +29,13 @@ commonHeader = """
 \\definecolor{nickcolor}{RGB}{51,51,179}
 \\definecolor{alexcolor}{RGB}{0,0,255}
 \\definecolor{madridcolor}{RGB}{51,51,179}
+
+\\newcommand{\\met}{\\slashed{E}_T}
+\\newcommand{\\red}[1]{\\textcolor{red}{#1}}
+\\newcommand{\\blue}[1]{\\textcolor{blue}{#1}}
+\\newcommand{\\coolblue}[1]{\\textcolor{coolblue}{#1}}
+\\newcommand{\\orange}[1]{\\textcolor{orange}{#1}}
+
 
 \\author[AUTHORHERE]{}
 \\date{\\today} 

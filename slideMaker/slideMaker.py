@@ -165,6 +165,7 @@ def addSlide(title=None,text=None,p1=None,p2=None,opts="",textobjects=[],arrowob
             drawGrid = True
             continue
         if(object["type"] == "box"): source += utils.getBoxCode(object)
+        if(object["type"] == "circle"): source += utils.getCircleCode(object)
         if(object["type"] == "arrow"): source += utils.getArrowCode(object)
         if(object["type"] == "text"): source += utils.getFreetextCode(object)
 
@@ -208,6 +209,10 @@ def object(type="box",p1=(0,0),p2=(0,0),text="",width=0.3,size=0,bold=False,colo
 def addGlobalOptions(optstr):
     global globalOpts
     globalOpts = utils.parseOptions(optstr)
+
+    if(globalOpts["graphicspaths"]):
+        graphicspaths.extend(globalOpts["graphicspaths"].split(","))
+        print "[SM] Adding these to the graphics path:", globalOpts["graphicspaths"].split(",")
     
 def initSlides(me="Nick", themeName="nick", opts=""):
     global source, commonHeader, theme, themeAlex, slideNumber
@@ -249,9 +254,6 @@ def initSlides(me="Nick", themeName="nick", opts=""):
     else:
         print "who are you?"
 
-    if(opts["graphicspaths"]):
-        graphicspaths.extend(opts["graphicspaths"].split(","))
-        print "[SM] Adding these to the graphics path:", opts["graphicspaths"].split(",")
 
     source = source.replace("GRAPHICSPATHHERE", "".join(["{"+p+"}" for p in graphicspaths]))
 
@@ -283,12 +285,14 @@ def writeSlides(output="output.tex", opts="--compile"):
             stat,out = commands.getstatusoutput("cp %s ~/public_html/%s/" % (output.replace(".tex",".pdf"), "dump" if opts["dump"] else ""))
             print "[SM] Copied output to uaf-6.t2.ucsd.edu/~%s/%s%s" % (os.getenv("USER"), "dump/" if opts["dump"] else "", output.replace(".tex",".pdf"))
 
-    if(globalOpts["makegui"]):
+    if(globalOpts["makegui"] and len(gridslides) > 0):
         utils.makeGUI(gridslides, output.replace(".tex",".pdf"))
 
 def startBackup():
     global source, slideNumber
     slideNumber += 1
+
+    print "[SM] Beginning backup"
 
     color = "black"
     if(theme == "alex"): color = "alexcolor"
@@ -320,7 +324,7 @@ if __name__ == '__main__':
     content2 = "\n".join(content.split("\n")[0:4])
 
     # global options that aren't slide specific
-    addGlobalOptions("--makegui")
+    addGlobalOptions("--makegui --graphicspaths ./test2/,./test3/ ")
 
     # coordinates are for top left and bottom right corners (or tail and head for arrow), respectively
     t1 = object("text",(0.25,0.15),width=0.3, text="testlabel", color="red", size=0, bold=False,opts="--rotate -45") 
@@ -329,12 +333,13 @@ if __name__ == '__main__':
     a4 = object("arrow", (0.31,0.15), (0.65,0.46), opts="--crayon --noarrowhead")
     b5 = object("box", (0.65,0.46), (0.75,0.52), color="red", opts="--crayon")
     b6 = object("box", (0.85,0.66), (0.55,0.32), color="coolblue", opts="--shadow")
+    c7 = object("circle", (0.85,0.66), (0.55,0.32), color="coolblue", opts="--dashed ")
 
     # for t in ["nick", "alex", "madrid"]:
     for t in ["nick"]:
-        initSlides(me="Nick",themeName=t,opts="--graphicspaths ./test2/,./test3/ --themecolor 51,51,179 ")
+        initSlides(me="Nick",themeName=t,opts="--themecolor 51,51,179 ")
         addSlide(title="Perturbation Theory on $H_m(dS_n,\\mathbb{R})$ Orbifolds", opts="--shorttitle hep-th crap")
-        addSlide(text="UCSB Logo generated in LaTeX: \\[ \\begin{bmatrix} u \\\\ \\textcolor{gray!40!white}{d} \\end{bmatrix}\\!\\!  \\begin{bmatrix} c \\\\ s \\end{bmatrix}\\!\\!  \\begin{bmatrix} \\textcolor{gray!40!white}{t}   \\\\ b \\end{bmatrix} \\]")
+        addSlide(text="UCSB Logo generated in LaTeX: \\[ \\begin{bmatrix} u \\\\ \\textcolor{gray!40!white}{d} \\end{bmatrix}\\!\\!  \\begin{bmatrix} c \\\\ s \\end{bmatrix}\\!\\!  \\begin{bmatrix} \\textcolor{gray!40!white}{t}   \\\\ b \\end{bmatrix} \\]", objects=[c7,b6])
         addSlide(p1="yields.pdf",p2="yields.pdf", objects=[t1,t2,a3,a4,b5,b6])
         addSlide(text=content, objects=[t2,a4])
         addSlide(text=content2, p1="zmass.pdf",opts="--drawtype shadowimage")

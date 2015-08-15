@@ -2,7 +2,7 @@
 import commands, os, sys
 
 basepath = os.path.dirname(os.path.abspath(__file__))
-listOfOptions = ["dump", "copy", "compile", "graphicspaths", "shorttitle", "themecolor", "sidebyside", "modernfont", "noarrowhead","rotate","drawtype","crayon","shadow","makegrid","makegui"]
+listOfOptions = ["dump", "copy", "compile", "graphicspaths", "shorttitle", "themecolor", "sidebyside", "modernfont", "noarrowhead","rotate","drawtype","crayon","shadow","makegrid","makegui","dashed"]
 def parseOptions(optString):
     opts = { }
     for optName in listOfOptions:
@@ -86,6 +86,7 @@ def getArrowCode(obj):
 
     if(opts["noarrowhead"]): type = ""
     if(opts["crayon"]): type += ",crayon"
+    if(opts["dashed"]): type += ",dashed"
 
     code = """
     \\begin{textblock*}{12.8cm}[1.0,0.0](12.8cm,9.6cm)
@@ -110,6 +111,7 @@ def getBoxCode(obj):
     type = ""
     if(opts["crayon"]): type += ",crayon"
     if(opts["shadow"]): type += ",shadowed={double=gray,draw=gray}"
+    if(opts["dashed"]): type += ",dashed"
 
     code = """
     \\begin{textblock*}{12.8cm}[1.0,0.0](12.8cm,9.6cm)
@@ -123,6 +125,35 @@ def getBoxCode(obj):
         \\end{tikzpicture}
     \\end{textblock*}
     """ % (12.8*x1,9.6*(1-y1), 12.8*x2,9.6*(1-y1), 12.8*x2,9.6*(1-y2), 12.8*x1,9.6*(1-y2), color,type)
+
+    return code
+
+def getCircleCode(obj):
+    x1 = obj["x1"]
+    y1 = obj["y1"]
+    x2 = obj["x2"]
+    y2 = obj["y2"]
+    color = obj["color"]
+    opts = parseOptions(obj["opts"])
+    type = ""
+    if(opts["crayon"]): type += ",crayon"
+    if(opts["shadow"]): type += ",shadowed={double=gray,draw=gray}"
+    if(opts["dashed"]): type += ",dashed"
+
+    tl = 12.8*x1, 9.6*(1-y1)
+    br = 12.8*x2, 9.6*(1-y2)
+    midpoint = (tl[0]+br[0])/2, (tl[1]+br[1])/2
+    rad = abs((br[0]-tl[0])/2)
+
+    code = """
+    \\begin{textblock*}{12.8cm}[1.0,0.0](12.8cm,9.6cm)
+        %% \\begin{tikzpicture}[overlay,remember picture]
+        \\begin{tikzpicture}[overlay,remember picture,crayon/.style={thick, line cap=round, line join=round,decoration={random steps, segment length=0.15pt, amplitude=0.25pt}, decorate}]
+            \\coordinate (0) at (%.2fcm,%.2fcm);   (0)  node  {};
+            \\draw[draw=%s,solid,thick %s] (0) circle  (%.2fcm);
+        \\end{tikzpicture}
+    \\end{textblock*}
+    """ % (midpoint[0], midpoint[1], color,type, rad)
 
     return code
 
