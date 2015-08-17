@@ -15,28 +15,26 @@ Instead of test.py, you could execute slideMaker.py. This makes it simpler to te
   * --graphicspaths X: X is a comma separated list of paths for images/plots
   * --makegui: make a GUI if invalid objects are created
   * --makegrid: draw a grid on a slide if invalid objects are created
+
 ### initSlides options
   * --modernfont: use Helvetica font
   * --themecolor r,g,b: takes RGB values for overall theme color
   * --casual: only display your name on title slide, not full SNT list
+
 ### addSlide options
   * --drawtype shadowimage: draw images on slide with a shadow
   * --shorttitle X: only applies to title slide. uses a short title for the footer bar
   * --sidebyside: displays text and plot side by side rather than text on top and plot on bottom
+
 ### addObject options
+  * supported object types: text, brace, arrow, line, box, circle
   * --noarrowhead: draw arrow with no arrowhead
   * --rotate X: rotate textbox by X degrees
   * --crayon: draw object with crayon theme (looks sort of like Keynote)
   * --shadow: draw object with shadow
   * --dashed: draw object with dashed lines
   * --flip: flip direction of arrows and braces (reverses opening of braces)
-#### Object types
-  * text
-  * brace
-  * arrow
-  * line
-  * box
-  * circle
+
 ### writeSlides options
   * --compile: compile slides (twice, for slide numbers) after writing .tex source (enabled by default)
   * --copy: copy output .pdf file to web directory (default: public_html)
