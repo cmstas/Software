@@ -33,6 +33,7 @@ def bulletsToCode(bullets):
         isSubpoint = bullet.strip().startswith("--")
         isLast = i == (len(bullets)-1)
         bullet = bullet.replace("--","",1).replace("-","",1).strip()
+        bullet = bullet.replace("_","\\_")
 
         if(isSubpoint and not wasSubpoint):
             code += "      \\begin{itemize}\n"
@@ -249,7 +250,10 @@ def makeGUI(guiInfo, output, workingdir):
 
     stat,out = commands.getstatusoutput("cp %s/html/*.{js,py} pages/" % basepath)
     # need 755 permissions or else cgi-bin stuff doesn't work
-    stat,out = commands.getstatusoutput("chmod 755 pages")
     stat,out = commands.getstatusoutput("cp -r pages ~/public_html/dump/")
+    stat,out = commands.getstatusoutput("chmod 755 ~/public_html/dump/")
+    stat,out = commands.getstatusoutput("chmod 755 ~/public_html/dump/pages/")
+    stat,out = commands.getstatusoutput("chmod 755 ~/public_html/dump/pages/copy.py")
+
     print "[SM] Copied GUI to uaf-6.t2.ucsd.edu/~%s/dump/pages/gui.html" % (os.getenv("USER"))
 
