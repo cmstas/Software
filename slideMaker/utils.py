@@ -248,9 +248,12 @@ def makeGUI(guiInfo, output, workingdir):
     newhtml.write(html)
     newhtml.close()
 
+
     stat,out = commands.getstatusoutput("cp %s/html/*.{js,py} pages/" % basepath)
+    stat,out = commands.getstatusoutput("cp %s/html/htaccess ~/public_html/.htaccess" % basepath)
     # need 755 permissions or else cgi-bin stuff doesn't work
     stat,out = commands.getstatusoutput("cp -r pages ~/public_html/dump/")
+    stat,out = commands.getstatusoutput("chmod 755 ~/public_html/.htaccess")
     stat,out = commands.getstatusoutput("chmod 755 ~/public_html/dump/")
     stat,out = commands.getstatusoutput("chmod 755 ~/public_html/dump/pages/")
     stat,out = commands.getstatusoutput("chmod 755 ~/public_html/dump/pages/copy.py")
