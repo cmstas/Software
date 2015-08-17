@@ -253,6 +253,7 @@ void dataMCplotMaker(TH1F* Data, std::vector <TH1F*> Backgrounds, std::vector <s
   float legendWider_ = 0;
   float legendTaller_ = 0;
   bool largeLabels = false;
+  float yTitleOffset_ = 0;
 
   //Loop over options and change default settings to user-defined settings
   for (unsigned int i = 0; i < Options.size(); i++){
@@ -312,6 +313,7 @@ void dataMCplotMaker(TH1F* Data, std::vector <TH1F*> Backgrounds, std::vector <s
     else if (Options[i].find("largeLabels") < Options[i].length()) largeLabels = true; 
     else if (Options[i].find("legendWider") < Options[i].length())  legendWider_ = atof( getString(Options[i], "legendWider").c_str() );
     else if (Options[i].find("legendTaller") < Options[i].length()) legendTaller_ = atof( getString(Options[i], "legendTaller").c_str() ); 
+    else if (Options[i].find("yTitleOffset") < Options[i].length()) yTitleOffset_ = atof( getString(Options[i], "yTitleOffset").c_str() ); 
     else cout << "Warning: Option not recognized!  Option: " << Options[i] << endl;
   }
 
@@ -613,8 +615,8 @@ void dataMCplotMaker(TH1F* Data, std::vector <TH1F*> Backgrounds, std::vector <s
   if (xAxisOverride[0] == '\0' && showXaxisUnit == 1) stack->GetXaxis()->SetTitle(Form("%s [%s]", xAxisLabel.c_str(), xAxisUnit.c_str()));
   if (xAxisOverride[0] != '\0' || xAxisOverrideGiven) stack->GetXaxis()->SetTitle(Form("%s", xAxisOverride.c_str()));
   if (!noData) stack->GetYaxis()->SetTitleOffset(1.5);
-  if (noData) stack->GetYaxis()->SetTitleOffset(1.4);
-  if (noData && linear) stack->GetYaxis()->SetTitleOffset(1.6);
+  if (noData && !linear) stack->GetYaxis()->SetTitleOffset(1.4+yTitleOffset_);
+  if (noData &&  linear) stack->GetYaxis()->SetTitleOffset(1.6+yTitleOffset_);
 
   //Title size
   if (largeLabels){
@@ -659,6 +661,9 @@ void dataMCplotMaker(TH1F* Data, std::vector <TH1F*> Backgrounds, std::vector <s
   }
 
   gStyle->SetErrorX(0.001); 
+
+  //Try this
+  Backgrounds[0]->SetMarkerColor(0); 
 
   //Draw
   if (!nostack && !dots && histoErrors) stack->Draw("histe");
