@@ -26,7 +26,7 @@
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
 <script>
   $(document).ready(function(){
-    $("button").click(function(){
+    $("#writeButton").click(function(){
       $.post("copy.py",
       {
         wd: wd,
@@ -46,7 +46,7 @@
 <body onLoad="init()">
 <p>
 <button id="prevButton" onClick="changeSlide(-1);"><b>← Previous</b></button>
-<button id="rect" onClick="addShape('rect');">Rectangle</button>
+<button id="box" onClick="addShape('box');">Rectangle</button>
 <button id="circle" onClick="addShape('circle');">Circle</button>
 <button id="arrow" onClick="addShape('arrow');">Arrow</button>
 <button id="line" onClick="addShape('line');">Line</button>
@@ -58,7 +58,7 @@
 </div>
 <p id="slideNumber"></p>
 <p id="output" style="font-family:monospace"></p>
-<button><b>Write objects!</b></button>
+<input type="button" id="writeButton" value="Write objects!" />
 <p id="results"> </p>
 
 <p>

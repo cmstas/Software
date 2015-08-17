@@ -24,7 +24,7 @@ Instead of test.py, you could execute slideMaker.py. This makes it simpler to te
 ### initSlides options
   * --modernfont: use Helvetica font
   * --themecolor r,g,b: takes RGB values for overall theme color
-  * --casual: only display your name on title slide, not full SNT list
+  * --casual X: only display X as your name on title slide, not full SNT list
 
 ### addSlide options
   * --drawtype shadowimage: draw images on slide with a shadow

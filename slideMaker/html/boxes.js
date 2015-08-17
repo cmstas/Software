@@ -627,7 +627,7 @@ function changeSlide(which) {
 function addShape(type, name) {
     name = name || "";
     // console.log(name);
-    if(type == "rect") addRect(45, 60, 50, 50, 'rgba(150,150,250,0.7)',name);
+    if(type == "box") addRect(45, 60, 50, 50, 'rgba(150,150,250,0.7)',name);
     else if(type == "text") addText(45, 60, 50, 50, 'rgba(150,150,250,0.7)',name);
     else if(type == "circle") addCircle(45, 60, 50, 50, 'rgba(50,150,250,0.7)',name);
     else if(type == "arrow") addArrow(100, 150, 50, 80, 'rgba(150,150,250,0.7)',name);

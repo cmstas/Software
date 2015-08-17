@@ -163,7 +163,13 @@ def addSlide(title=None,text=None,p1=None,p2=None,opts="",textobjects=[],arrowob
     # objects.extend(objs[slideNumber])
     objsGUI = []
     for objectName in objects:
-        object = objs[objectName]
+        object = {}
+        if objectName in objs:
+            object = objs[objectName]
+        else:
+            print "couldn't find object with id %s. did you define it?" % objectName
+            continue
+
         if("grid" in object):
             drawGrid = True
             objsGUI.append(object)
