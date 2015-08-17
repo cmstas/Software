@@ -12,7 +12,7 @@ commonHeader = """
 \\usepackage[absolute,overlay]{textpos}
 %% \\usepackage[absolute,overlay,showboxes]{textpos} %% showboxes for position debugging
 \\usepackage{tikz}
-\\usetikzlibrary{arrows,shapes,shadows,shadows.blur,shapes.geometric,calc,decorations.pathmorphing,positioning,automata}
+\\usetikzlibrary{arrows,shapes,shadows,shadows.blur,shapes.geometric,calc,decorations.pathmorphing,positioning,automata,decorations.pathreplacing}
 \\usepackage{microtype}
 \\usepackage{graphicx}
 \\usepackage{xcolor}
@@ -22,11 +22,6 @@ commonHeader = """
 \\graphicspath{ GRAPHICSPATHHERE }
 \\setbeamertemplate{navigation symbols}{}
 
-\\newcommand{\\met}{\\slashed{E}_T}
-\\newcommand{\\red}[1]{\\textcolor{red}{#1}}
-\\newcommand{\\blue}[1]{\\textcolor{blue}{#1}}
-\\newcommand{\\orange}[1]{\\textcolor{orange}{#1}}
-
 \\definecolor{darkgreen}{RGB}{0,100,0}
 \\definecolor{gray}{RGB}{128,128,128}
 \\definecolor{grey}{RGB}{128,128,128}
@@ -35,13 +30,20 @@ commonHeader = """
 \\definecolor{alexcolor}{RGB}{0,0,255}
 \\definecolor{madridcolor}{RGB}{51,51,179}
 
+\\newcommand{\\met}{\\slashed{E}_T}
+\\newcommand{\\red}[1]{\\textcolor{red}{#1}}
+\\newcommand{\\blue}[1]{\\textcolor{blue}{#1}}
+\\newcommand{\\coolblue}[1]{\\textcolor{coolblue}{#1}}
+\\newcommand{\\orange}[1]{\\textcolor{orange}{#1}}
+
+
 \\author[AUTHORHERE]{}
 \\date{\\today} 
 \\institute[SNT] 
 {
     \\vspace*{-1cm}
     \\begin{center}
-    %s
+    INSTITUTEHERE
         \\end{center}
 }
 
@@ -84,7 +86,7 @@ commonHeader = """
 \\drawshadow{image}
 \\end{tikzpicture}}
 
-""" % (institute)
+"""
 
 themeNick = """
 \\usepackage{enumitem}
@@ -128,7 +130,7 @@ themeAlex = """
   \\end{center}
   \\begin{textblock*}{12.8cm}(0cm,4.0cm)
   \\begin{center}
-  %s
+  INSTITUTEHERE
   \\end{center}
   \\end{textblock*}
   \\begin{textblock*}{2.7cm}(0cm, 0.1cm)
@@ -146,7 +148,7 @@ themeAlex = """
 }
 
 \\begin{document}
-""" % (institute)
+"""
 
 themeMadrid = """
 \\usepackage{enumitem}

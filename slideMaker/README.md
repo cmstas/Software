@@ -1,59 +1,51 @@
+## setup
+1) `export PATH=/nfs-7/texlive/2015/bin/x86_64-linux:$PATH`
+
+2) `cd` to slideMaker directory and add it to the path: `export PYTHONPATH=$PYTHONPATH:$(pwd)`
+
+I recommend putting these in your .bashrc.
+
 ## minimal minimal minimal working example
-0) export PATH=/nfs-7/texlive/2015/bin/x86_64-linux:$PATH
+1) `cd project/`
 
-1) check out repo and make sure there's a folder called "dump" inside the public_html directory
+2) `python test.py`
 
-2) python slideMaker.py
+This will produce test_1.pdf with an example slide for each of the possible slide types, and copy them to your public_html folder
 
-3) look at the output
+## testing working example
+Instead of test.py, you could execute slideMaker.py. This makes it simpler to test things on the fly.
 
-This makes it easy to edit the slideMaker and test it on-the-fly.
+## Options
+### addGlobalOptions options
+  * --graphicspaths X: X is a comma separated list of paths for images/plots
+  * --makegui: make a GUI if invalid objects are created
+  * --makegrid: draw a grid on a slide if invalid objects are created
 
-## standalone minimal working example
-Inside the main repository directory, create and execute a python file with the contents
-```python
-import slideMaker as sm
+### initSlides options
+  * --modernfont: use Helvetica font
+  * --themecolor r,g,b: takes RGB values for overall theme color
+  * --casual X: only display X as your name on title slide, not full SNT list
 
-content = """
- - first \\textbf{bullet} \\red{point} and if I make it long enough, it should wrap to the next line
-   -- first secondary bullet \\textcolor{blue}{point}. similarly this should wrap to the next line given enough length
-   -- second secondary bullet point $\\met$
-   -- third secondary bullet \\orange{test}
-"""
+### addSlide options
+  * --drawtype shadowimage: draw images on slide with a shadow
+  * --shorttitle X: only applies to title slide. uses a short title for the footer bar
+  * --sidebyside: displays text and plot side by side rather than text on top and plot on bottom
 
-t1 = sm.textObject(x=0.25,y=0.15,width=0.3, text="testlabel", color="red", size=0, bold=False) 
-t2 = sm.textObject(x=0.75,y=0.15,width=0.3, text="testlabel", color="coolblue", size=0, bold=False) 
+### addObject options
+  * supported object types: text, brace, arrow, line, box, circle
+  * --noarrowhead: draw arrow with no arrowhead
+  * --rotate X: rotate textbox by X degrees
+  * --crayon: draw object with crayon theme (looks sort of like Keynote)
+  * --shadow: draw object with shadow
+  * --dashed: draw object with dashed lines
+  * --flip: flip direction of arrows and braces (reverses opening of braces)
 
-a1 = sm.arrowObject( (0.31,0.15), (0.69,0.15) )
-a2 = sm.arrowObject( (0.31,0.15), (0.69,0.42) )
-
-# supported themes are "nick", "alex", and "madrid"
-for t in ["nick","alex","madrid"]:
-    # test2 and test3 can be folders with your plots, so you can execute this script anywhere really
-    # themecolor takes RGB. could put in explicit color names, but RGB more robust
-    # also try the --modernfont option
-    sm.initSlides(me="Nick",themeName=t,opts="--graphicspaths ./test2/,./test3/ --themecolor 51,51,179")
-    sm.addSlide(title="Perturbation Theory on $H_m(dS_n,\\mathbb{R})$ Orbifolds of Affine Bundles", opts="--shorttitle snarxiv hep-th")
-
-    # pass in a list of textobjects (which are just dicts, so they can be modified too)
-    sm.addSlide(p1="yields.pdf",p2="yields.pdf", textobjects=[t1,t2], arrowobjects=[a1,a2])
-    sm.addSlide(p1="test/yields.pdf",p2="test/yields.pdf")
-
-    # when I specify an empty arrow object, a helper grid gets printed on the slide!
-    sm.addSlide(p1="test/zmass.pdf", arrowobjects=[sm.arrowObject()])
-    sm.addSlide(text=content+content)
-
-    # slides reset their numbering when you start the backup section
-    sm.startBackup()
-    sm.addSlide(text=content, p1="test/filt.pdf", opts="--sidebyside")
-    sm.addSlide(text=content, p1="test/zmass.pdf", p2="test/zmass.pdf")
-    sm.writeSlides("test_%s.tex" % t, opts="--compile --copy")
-```
-This will produce test_*.pdf with an example slide for each of the possible slide types, and copy them to your public_html folder
-
-## Notes:
-* put updated style files into style and include them in a way similar to enumitem
+### writeSlides options
+  * --compile: compile slides (twice, for slide numbers) after writing .tex source (enabled by default)
+  * --copy: copy output .pdf file to web directory (default: public_html)
+  * --dump: copy to "dump" directory within web directory
 
 ## TODO:
 * figure out good algorithm for resizing images so that they don't overlap with text
+
 ** see http://www.latex-community.org/forum/viewtopic.php?f=45&t=22655
