@@ -1,5 +1,5 @@
 ### utility functions that don't directly touch the latex source go here
-import commands, os, sys
+import commands, os, sys, json
 
 basepath = os.path.dirname(os.path.abspath(__file__))
 listOfOptions = ["dump", "copy", "compile", "graphicspaths", "shorttitle", "themecolor", "sidebyside", "modernfont", "noarrowhead","rotate","drawtype","crayon","shadow","makegrid","makegui","dashed","brace","flip"]
@@ -223,9 +223,13 @@ def slideToPng(slidenumber,output,outdir):
     stat,out = commands.getstatusoutput(cmd1)
     stat,out = commands.getstatusoutput(cmd2)
 
-def makeGUI(slidenumbers, output):
+def makeGUI(guiInfo, output):
     os.system("mkdir -p pages/")
     os.system("rm pages/*.{png,pdf}")
+    slidenumbers = [e["slideNumber"] for e in guiInfo]
+    
+    # print json.dumps(guiInfo)
+
     for slidenumber in slidenumbers:
         slideToPng(slidenumber, output, "pages/")
 
@@ -236,6 +240,7 @@ def makeGUI(slidenumbers, output):
 
     slideStr = "'"+"', '".join(pngFiles)+"'"
     html = html.replace("SLIDESHERE", slideStr)
+    html = html.replace("INFOHERE", json.dumps(guiInfo))
 
     newhtml = open("./pages/gui.html","w")
     newhtml.write(html)

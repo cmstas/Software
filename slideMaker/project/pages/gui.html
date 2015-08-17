@@ -18,13 +18,20 @@
 </style> 
 <script type='text/javascript' > 
     var slides = [ 'page_4.png' ];
+    var info = [{"slideNumber": 4, "objects": [{"y2": 0, "x1": 0, "bold": false, "color": "coolblue", "text": "", "x2": 0, "width": 0.29999999999999999, "grid": 1, "y1": 0, "size": "normalsize", "type": "arrow", "opts": "", "name": "a0"}, {"y2": 0, "x1": 0, "bold": false, "color": "coolblue", "text": "", "x2": 0, "width": 0.29999999999999999, "grid": 1, "y1": 0, "size": "normalsize", "type": "circle", "opts": "", "name": "c0"}]}];
     var currentSlideIdx = 0;
 </script>
 <script type="text/javascript" src="boxes.js"></script>
 </head>
 <body onLoad="init()">
-<button id="prevButton" onClick="changeSlide(-1);">Previous</button>
-<button id="nextButton" onClick="changeSlide(1);">Next</button>
+<p>
+<button id="prevButton" onClick="changeSlide(-1);"><b>← Previous</b></button>
+<button id="rect" onClick="addShape('rect');">Rectangle</button>
+<button id="circle" onClick="addShape('circle');">Circle</button>
+<button id="arrow" onClick="addShape('arrow');">Arrow</button>
+<button id="line" onClick="addShape('line');">Line</button>
+<button id="nextButton" onClick="changeSlide(1);"><b>Next →</b> </button>
+</p>
 
 <div id="container">
     <canvas id="canvas" width="800" height="600"> This text is displayed if your browser does not support HTML5 Canvas.  </canvas>
@@ -36,6 +43,7 @@
 - Drag handles to resize.<br>
 - Double click to spawn a new box.<br>
 - Double click while holding SHIFT to spawn a new arrow.<br>
+- Or...just click the appropriate buttons to add objects.<br>
 - Select an object and press the delete key to delete it.<br>
 - Shapes are attached to the slide, so flip slides freely.<br>
 

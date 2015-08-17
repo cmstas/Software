@@ -12,8 +12,8 @@
 
 
 // holds all our boxes, and arrows
-var objects = []; 
 var objectDict = { };
+var numObjs = 0;
 
 // New, holds the 8 tiny boxes that will be our selection handles
 // the selection handles will be in this order:
@@ -72,6 +72,7 @@ function Box() {
   this.h = 1;
   this.fill = '#444444';
   this.type = "box";
+  this.objNum = 0;
 }
 function Arrow() {
   this.x = 0;
@@ -80,6 +81,7 @@ function Arrow() {
   this.h = 1;
   this.fill = '#444444';
   this.type = "arrow";
+  this.objNum = 0;
 }
 
 // New methods on the Box class
@@ -98,8 +100,18 @@ Box.prototype = {
       // We can skip the drawing of elements that have moved off the screen:
       if (this.x > WIDTH || this.y > HEIGHT) return; 
       if (this.x + this.w < 0 || this.y + this.h < 0) return;
+
+      var middleX = this.x + this.w/2;
+      var middleY = this.y + this.h/2;
+      var rad = this.w/2;
       
-      context.fillRect(this.x,this.y,this.w,this.h);
+      if(this.type == "circle") {
+        context.beginPath();
+        context.arc(middleX,middleY,rad,0,2*Math.PI,false);
+        context.fill();
+      } else {
+        context.fillRect(this.x,this.y,this.w,this.h);
+      }
       
     // draw selection
     // this is a stroke along the box and also 8 new selection handles
@@ -178,11 +190,18 @@ Arrow.prototype = {
       context.beginPath();
       context.moveTo(this.x-edgeWidth/2,this.y+edgeHeight/2);
       context.lineTo(this.x+edgeWidth/2,this.y-edgeHeight/2);
-      context.lineTo(this.x+this.w+edgeWidth/2+offx,this.y+this.h-edgeHeight/2+offy);
-      context.lineTo(this.x+this.w+edgeWidth*2+offx*2,this.y+this.h-edgeHeight*2+offy*2);
-      context.lineTo(this.x+this.w,this.y+this.h);
-      context.lineTo(this.x+this.w-edgeWidth*2+offx*2,this.y+this.h+edgeHeight*2+offy*2);
-      context.lineTo(this.x+this.w-edgeWidth/2+offx,this.y+this.h+edgeHeight/2+offy);
+      
+      if(this.type=="arrow") {
+        context.lineTo(this.x+this.w+edgeWidth/2+offx,this.y+this.h-edgeHeight/2+offy);
+        context.lineTo(this.x+this.w+edgeWidth*2+offx*2,this.y+this.h-edgeHeight*2+offy*2);
+        context.lineTo(this.x+this.w,this.y+this.h);
+        context.lineTo(this.x+this.w-edgeWidth*2+offx*2,this.y+this.h+edgeHeight*2+offy*2);
+        context.lineTo(this.x+this.w-edgeWidth/2+offx,this.y+this.h+edgeHeight/2+offy);
+      } else {
+        context.lineTo(this.x+this.w+edgeWidth/2,this.y+this.h-edgeHeight/2);
+        context.lineTo(this.x+this.w-edgeWidth/2,this.y+this.h+edgeHeight/2);
+      }
+
       context.lineTo(this.x-edgeWidth/2,this.y+edgeHeight/2);
       context.fill();
       
@@ -213,25 +232,70 @@ Arrow.prototype = {
 }
 
 //Initialize a new Box, add it, and invalidate the canvas
-function addRect(x, y, w, h, fill) {
+function addRect(x, y, w, h, fill, name) {
   var rect = new Box;
   rect.x = x;
   rect.y = y;
-  rect.w = w
+  rect.w = w;
   rect.h = h;
   rect.fill = fill;
-  objectDict[currentSlideIdx].push(rect);
+  if(name) rect.objId = name;
+  else rect.objId = "gr"+numObjs;
+  objectDict[currentSlideIdx].push(rect); numObjs++;
+  invalidate();
+}
+function addText(x, y, w, h, fill, name) {
+  var rect = new Box;
+  rect.x = x;
+  rect.y = y;
+  rect.w = w;
+  rect.h = h;
+  rect.fill = fill;
+  if(name) rect.objId = name;
+  else rect.objId = "gt"+numObjs;
+  rect.type = "text";
+  objectDict[currentSlideIdx].push(rect); numObjs++;
   invalidate();
 }
 
-function addArrow(x, y, w, h, fill) {
+function addCircle(x, y, w, h, fill, name) {
+  var circ = new Box;
+  circ.x = x;
+  circ.y = y;
+  circ.w = w;
+  circ.h = h;
+  circ.fill = fill;
+  if(name) circ.objId = name;
+  else circ.objId = "gc"+numObjs;
+  circ.type = "circle";
+  objectDict[currentSlideIdx].push(circ); numObjs++;
+  invalidate();
+}
+
+function addLine(x, y, w, h, fill, name) {
   var arrow = new Arrow;
   arrow.x = x;
   arrow.y = y;
   arrow.w = w
   arrow.h = h;
   arrow.fill = fill;
-  objectDict[currentSlideIdx].push(arrow);
+  if(name) arrow.objId = name;
+  else arrow.objId = "gl"+numObjs;
+  arrow.type = "line";
+  objectDict[currentSlideIdx].push(arrow); numObjs++;
+  invalidate();
+}
+
+function addArrow(x, y, w, h, fill, name) {
+  var arrow = new Arrow;
+  arrow.x = x;
+  arrow.y = y;
+  arrow.w = w
+  arrow.h = h;
+  arrow.fill = fill;
+  if(name) arrow.objId = name;
+  else arrow.objId = "ga"+numObjs;
+  objectDict[currentSlideIdx].push(arrow); numObjs++;
   invalidate();
 }
 
@@ -253,6 +317,8 @@ function init() {
   for( var i = 0; i < slides.length; i++) {
     objectDict[i] = [];
   }
+
+  addInitialObjects();
 
   
   //fixes a problem where double clicking causes text to get selected on the canvas
@@ -294,8 +360,6 @@ function init() {
   // addRect(240, 120, 40, 40, 'rgba(2,165,165,0.7)');  
   
   // add a smaller purple rectangle
-  addRect(45, 60, 50, 50, 'rgba(150,150,250,0.7)');
-  addArrow(100, 150, 50, 80, 'rgba(150,150,250,0.7)');
 }
 
 
@@ -489,7 +553,6 @@ function myUp(){
 }
 
 function myKey(e) {
-    console.log(e.keyCode);
     if(e.keyCode == 46 || e.keyCode == 8) { // delete, backspace keys
       if (mySel != null) {
         objectDict[currentSlideIdx].splice(objectDict[currentSlideIdx].indexOf(mySel), 1);
@@ -506,8 +569,6 @@ function myDblClick(e) {
   // so I left them as vars in case someone wanted to make them args for something and copy this code
   var width = 40;
   var height = 40;
-
-  console.log(e.shiftKey + " " + e.ctrlKey  + " " + e.metaKey);
 
   if(!e.shiftKey) {
     addRect(mx - (width / 2), my - (height / 2), width, height, 'rgba(220,205,65,0.7)');
@@ -546,11 +607,7 @@ function getMouse(e) {
 }
 
 function numberFromIdx(idx) {
-    var num = slides[idx].split(".")[0];
-    num = num.split("_")[1];
-    num = parseInt(num);
-    console.log(num);
-    return num;
+    return info[idx]["slideNumber"];
 }
 
 function changeSlide(which) {
@@ -558,7 +615,7 @@ function changeSlide(which) {
   which = parseInt(which);
   currentSlideIdx = (currentSlideIdx + which + slides.length) % slides.length;
   document.getElementById("slideNumber").innerHTML = "<b>Page " + (currentSlideIdx+1) + " of " + slides.length + "</b>"; 
-  document.getElementById("slideNumber").innerHTML += " (Slide #"+numberFromIdx(currentSlideIdx)+")"; 
+  document.getElementById("slideNumber").innerHTML += " (Slide #"+info[currentSlideIdx]["slideNumber"]+")"; 
 
   canvas.style.background = "url('"+slides[currentSlideIdx]+"')";
   canvas.style.backgroundSize = WIDTH+"px "+HEIGHT+"px";
@@ -567,12 +624,22 @@ function changeSlide(which) {
   invalidate();
 }
 
+function addShape(type, name) {
+    name = name || "";
+    // console.log(name);
+    if(type == "rect") addRect(45, 60, 50, 50, 'rgba(150,150,250,0.7)',name);
+    else if(type == "text") addText(45, 60, 50, 50, 'rgba(150,150,250,0.7)',name);
+    else if(type == "circle") addCircle(45, 60, 50, 50, 'rgba(50,150,250,0.7)',name);
+    else if(type == "arrow") addArrow(100, 150, 50, 80, 'rgba(150,150,250,0.7)',name);
+    else if(type == "line") addLine(100, 150, 50, 80, 'rgba(150,150,200,0.7)',name);
+}
+
 function printCoordinates() {
   document.getElementById("output").innerHTML = "";
 
   for (var islide = 0; islide < Object.keys(objectDict).length; islide++) {
     if(objectDict[islide].length > 0) {
-        document.getElementById("output").innerHTML += "<br><b># Slide "+(numberFromIdx(islide))+"</b><br>";
+        document.getElementById("output").innerHTML += "<br><b># Slide "+info[islide]["slideNumber"]+"</b><br>";
     }
     for (var i = 0; i < objectDict[islide].length; i++) {
 
@@ -582,18 +649,52 @@ function printCoordinates() {
       var x2 = ((objectDict[islide][i].x+objectDict[islide][i].w) / WIDTH).toFixed(2);
       var y2 = ((objectDict[islide][i].y+objectDict[islide][i].h) / HEIGHT).toFixed(2);
 
-      document.getElementById("output").innerHTML += "objs["+numberFromIdx(islide)+"].append( sm.object(";
-      if(objectDict[islide][i].type == "box") {
+      var type = objectDict[islide][i].type;
+
+      // document.getElementById("output").innerHTML += "objs["+numberFromIdx(islide)+"].append( sm.object(";
+      var id = objectDict[islide][i].objId;
+      // if( i < info[currentSlideIdx]["objects"].length ) {
+      //   id = info[currentSlideIdx]["objects"][i]["name"];
+      // }
+      document.getElementById("output").innerHTML += "addObject(\""+id+"\",";
+      if(type == "box") {
         document.getElementById("output").innerHTML += "\"box\", ";
-      } else if(objectDict[islide][i].type == "arrow") {
+      } else if(type == "text") {
+        document.getElementById("output").innerHTML += "\"text\", ";
+      } else if(type == "arrow") {
         document.getElementById("output").innerHTML += "\"arrow\", ";
+      } else if(type == "line") {
+        document.getElementById("output").innerHTML += "\"line\", ";
+      } else if(type == "circle") {
+        document.getElementById("output").innerHTML += "\"circle\", ";
       } else {
 
       }
-      document.getElementById("output").innerHTML += "("+x1+","+y1+"),("+x2+","+y2+")) )";
+      document.getElementById("output").innerHTML += "("+x1+","+y1+"),("+x2+","+y2+"))";
       document.getElementById("output").innerHTML += "<br>";
     }
   }
+}
+
+function addInitialObjects() {
+    var temp = currentSlideIdx;
+
+    for(var i = 0; i < info.length; i++) {
+      currentSlideIdx = i;
+      for(var j = 0; j < info[i]["objects"].length; j++) {
+        var type = info[i]["objects"][j]["type"];
+        var name = info[i]["objects"][j]["name"];
+        // console.log(type + " " + name);
+
+        addShape(type, name);
+
+      }
+    }
+
+    currentSlideIdx = temp;
+    printCoordinates();
+
+
 }
 
 // If you dont want to use <body onLoad='init()'>
