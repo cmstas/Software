@@ -223,7 +223,7 @@ def slideToPng(slidenumber,output,outdir):
     stat,out = commands.getstatusoutput(cmd1)
     stat,out = commands.getstatusoutput(cmd2)
 
-def makeGUI(guiInfo, output):
+def makeGUI(guiInfo, output, workingdir):
     os.system("mkdir -p pages/")
     os.system("rm pages/*.{png,pdf}")
     slidenumbers = [e["slideNumber"] for e in guiInfo]
@@ -241,12 +241,15 @@ def makeGUI(guiInfo, output):
     slideStr = "'"+"', '".join(pngFiles)+"'"
     html = html.replace("SLIDESHERE", slideStr)
     html = html.replace("INFOHERE", json.dumps(guiInfo))
+    html = html.replace("WORKINGDIRHERE", workingdir)
 
     newhtml = open("./pages/gui.html","w")
     newhtml.write(html)
     newhtml.close()
 
-    stat,out = commands.getstatusoutput("cp %s/html/*.js pages/" % basepath)
+    stat,out = commands.getstatusoutput("cp %s/html/*.{js,py} pages/" % basepath)
+    # need 755 permissions or else cgi-bin stuff doesn't work
+    stat,out = commands.getstatusoutput("chmod 755 pages")
     stat,out = commands.getstatusoutput("cp -r pages ~/public_html/dump/")
     print "[SM] Copied GUI to uaf-6.t2.ucsd.edu/~%s/dump/pages/gui.html" % (os.getenv("USER"))
 

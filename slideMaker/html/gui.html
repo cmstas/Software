@@ -18,10 +18,30 @@
 </style> 
 <script type='text/javascript' > 
     var slides = [ SLIDESHERE ];
-    var info = INFOHERE;
+    var info = INFOHERE
+    var wd = "WORKINGDIRHERE";
     var currentSlideIdx = 0;
 </script>
 <script type="text/javascript" src="boxes.js"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+<script>
+  $(document).ready(function(){
+    $("button").click(function(){
+      $.post("copy.py",
+      {
+        wd: wd,
+        output: $("#output").html(),
+      },
+      function(data,status){
+        if(status == "success") {
+          $("#results").html("<b>SUCCESS!</b> "+data);
+        } else {
+          $("#results").html("<b>FAILED to copy the file!</b>");
+        }
+      });
+    });
+  });
+</script>
 </head>
 <body onLoad="init()">
 <p>
@@ -38,7 +58,16 @@
 </div>
 <p id="slideNumber"></p>
 <p id="output" style="font-family:monospace"></p>
+<button><b>Write objects!</b></button>
+<p id="results"> </p>
 
+<p>
+<b>Meta Info</b><br>
+- Working directory: WORKINGDIRHERE<br>
+</p>
+
+<p>
+<b>Instructions</b><br>
 - Click and drag the body of a shape to move it around.<br>
 - Drag handles to resize.<br>
 - Double click to spawn a new box.<br>
@@ -46,7 +75,7 @@
 - Or...just click the appropriate buttons to add objects.<br>
 - Select an object and press the delete key to delete it.<br>
 - Shapes are attached to the slide, so flip slides freely.<br>
-
+</p>
 
 </body>
 </html>

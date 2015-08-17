@@ -246,8 +246,9 @@ def addGlobalOptions(optstr):
 
     if(globalOpts["makegui"]):
         try:
-            execfile("objectsgui.txt")
-            print "[SM] Found file with objects from GUI. Importing them."
+            fname = "objectsgui.txt"
+            execfile(os.getcwd()+"/"+fname)
+            print "[SM] Found file (%s) with objects from GUI. Importing them." % (fname)
         except:
             print "[SM] Didn't find file with objects from GUI."
 
@@ -325,7 +326,7 @@ def writeSlides(output="output.tex", opts="--compile"):
             print "[SM] Copied output to uaf-6.t2.ucsd.edu/~%s/%s%s" % (os.getenv("USER"), "dump/" if opts["dump"] else "", output.replace(".tex",".pdf"))
 
     if(globalOpts["makegui"] and len(objectslides) > 0):
-        utils.makeGUI(objectslides, output.replace(".tex",".pdf"))
+        utils.makeGUI(objectslides, output.replace(".tex",".pdf"), os.getcwd())
 
 def startBackup():
     global source, slideNumber

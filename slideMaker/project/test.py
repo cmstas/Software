@@ -1,13 +1,9 @@
 import sys
-sys.path.append("../")
+# sys.path.append("../")
 
 import slideMaker as sm
 
 sm.addGlobalOptions("--makegui")
-
-# sm.objectsFromGUI()
-# execfile("objectsgui.txt")
-
 
 content = """
  - first \\textbf{bullet} \\red{point} and if I make it long enough, it should wrap to the next line
@@ -45,4 +41,4 @@ sm.startBackup()
 sm.addSlide(text=content, p1="filt.pdf", opts="--sidebyside")
 sm.addSlide(text=content, p1="zmass.pdf", p2="zmass.pdf")
 
-# sm.writeSlides("test_1.tex", opts="--compile --copy")
+sm.writeSlides("test_1.tex", opts="--compile --copy")
