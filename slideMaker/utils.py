@@ -2,7 +2,7 @@
 import commands, os, sys
 
 basepath = os.path.dirname(os.path.abspath(__file__))
-listOfOptions = ["dump", "copy", "compile", "graphicspaths", "shorttitle", "themecolor", "sidebyside", "modernfont", "noarrowhead","rotate","drawtype","crayon","shadow","makegrid","makegui","dashed"]
+listOfOptions = ["dump", "copy", "compile", "graphicspaths", "shorttitle", "themecolor", "sidebyside", "modernfont", "noarrowhead","rotate","drawtype","crayon","shadow","makegrid","makegui","dashed","brace"]
 def parseOptions(optString):
     opts = { }
     for optName in listOfOptions:
@@ -82,10 +82,15 @@ def getArrowCode(obj):
     y2 = obj["y2"]
     color = obj["color"]
     opts = parseOptions(obj["opts"])
-    type = ",-latex"
 
-    if(opts["noarrowhead"]): type = ""
+    type = ""
+    if(opts["brace"]):
+        type += ",decorate,decoration={brace}"
+    else:
+        if(not opts["noarrowhead"]):
+            type += ",-latex"
     if(opts["crayon"]): type += ",crayon"
+    if(opts["shadow"]): type += ",shadowed={double=gray,draw=gray}"
     if(opts["dashed"]): type += ",dashed"
 
     code = """
@@ -94,10 +99,10 @@ def getArrowCode(obj):
         \\begin{tikzpicture}[overlay,remember picture,crayon/.style={thick, line cap=round, line join=round,decoration={random steps, segment length=0.15pt, amplitude=0.25pt}, decorate}]
             \\coordinate (0) at (%.2fcm,%.2fcm);   (0)  node  {};
             \\coordinate (1) at (%.2fcm,%.2fcm);   (1)  node  {};
-            \\draw[draw=%s,solid,fill=%s,thick %s] (0) -- (1);
+            \\draw[draw=%s,solid,thick %s] (0) -- (1);
         \\end{tikzpicture}
     \\end{textblock*}
-    """ % (12.8*x1,9.6*(1-y1),12.8*x2,9.6*(1-y2),color,color,type)
+    """ % (12.8*x1,9.6*(1-y1),12.8*x2,9.6*(1-y2),color,type)
 
     return code
 

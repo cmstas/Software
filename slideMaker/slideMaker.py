@@ -168,6 +168,12 @@ def addSlide(title=None,text=None,p1=None,p2=None,opts="",textobjects=[],arrowob
         if(object["type"] == "circle"): source += utils.getCircleCode(object)
         if(object["type"] == "arrow"): source += utils.getArrowCode(object)
         if(object["type"] == "text"): source += utils.getFreetextCode(object)
+        if(object["type"] == "line"): 
+            object["opts"] += " --noarrowhead "
+            source += utils.getArrowCode(object)
+        if(object["type"] == "brace"): 
+            object["opts"] += " --brace "
+            source += utils.getArrowCode(object)
 
     if(drawGrid and globalOpts["makegui"]):
         gridslides.append( slideNumber )
@@ -329,8 +335,9 @@ if __name__ == '__main__':
     # coordinates are for top left and bottom right corners (or tail and head for arrow), respectively
     t1 = object("text",(0.25,0.15),width=0.3, text="testlabel", color="red", size=0, bold=False,opts="--rotate -45") 
     t2 = object("text",(0.75,0.15),width=0.3, text="testlabel", color="coolblue", size=0, bold=False) 
-    a3 = object("arrow", (0.31,0.15), (0.69,0.15))
-    a4 = object("arrow", (0.31,0.15), (0.65,0.46), opts="--crayon --noarrowhead")
+    a3 = object("brace", (0.31,0.15), (0.69,0.15), opts="")
+    a4 = object("arrow", (0.31,0.15), (0.65,0.46), opts="--crayon")
+    l4 = object("line", (0.31,0.15), (0.65,0.46), opts="--shadow")
     b5 = object("box", (0.65,0.46), (0.75,0.52), color="red", opts="--crayon")
     b6 = object("box", (0.85,0.66), (0.55,0.32), color="coolblue", opts="--shadow")
     c7 = object("circle", (0.85,0.66), (0.55,0.32), color="coolblue", opts="--dashed ")
@@ -339,7 +346,7 @@ if __name__ == '__main__':
     for t in ["nick"]:
         initSlides(me="Nick",themeName=t,opts="--themecolor 51,51,179 ")
         addSlide(title="Perturbation Theory on $H_m(dS_n,\\mathbb{R})$ Orbifolds", opts="--shorttitle hep-th crap")
-        addSlide(text="UCSB Logo generated in LaTeX: \\[ \\begin{bmatrix} u \\\\ \\textcolor{gray!40!white}{d} \\end{bmatrix}\\!\\!  \\begin{bmatrix} c \\\\ s \\end{bmatrix}\\!\\!  \\begin{bmatrix} \\textcolor{gray!40!white}{t}   \\\\ b \\end{bmatrix} \\]", objects=[c7,b6])
+        addSlide(text="UCSB Logo generated in LaTeX: \\[ \\begin{bmatrix} u \\\\ \\textcolor{gray!40!white}{d} \\end{bmatrix}\\!\\!  \\begin{bmatrix} c \\\\ s \\end{bmatrix}\\!\\!  \\begin{bmatrix} \\textcolor{gray!40!white}{t}   \\\\ b \\end{bmatrix} \\]", objects=[c7,b6,l4])
         addSlide(p1="yields.pdf",p2="yields.pdf", objects=[t1,t2,a3,a4,b5,b6])
         addSlide(text=content, objects=[t2,a4])
         addSlide(text=content2, p1="zmass.pdf",opts="--drawtype shadowimage")

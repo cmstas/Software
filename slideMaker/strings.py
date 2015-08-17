@@ -12,7 +12,7 @@ commonHeader = """
 \\usepackage[absolute,overlay]{textpos}
 %% \\usepackage[absolute,overlay,showboxes]{textpos} %% showboxes for position debugging
 \\usepackage{tikz}
-\\usetikzlibrary{arrows,shapes,shadows,shadows.blur,shapes.geometric,calc,decorations.pathmorphing,positioning,automata}
+\\usetikzlibrary{arrows,shapes,shadows,shadows.blur,shapes.geometric,calc,decorations.pathmorphing,positioning,automata,decorations.pathreplacing}
 \\usepackage{microtype}
 \\usepackage{graphicx}
 \\usepackage{xcolor}
