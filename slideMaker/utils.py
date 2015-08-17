@@ -2,12 +2,13 @@
 import commands, os, sys
 
 basepath = os.path.dirname(os.path.abspath(__file__))
-listOfOptions = ["dump", "copy", "compile", "graphicspaths", "shorttitle", "themecolor", "sidebyside", "modernfont", "noarrowhead","rotate","drawtype","crayon","shadow","makegrid","makegui","dashed","brace"]
+listOfOptions = ["dump", "copy", "compile", "graphicspaths", "shorttitle", "themecolor", "sidebyside", "modernfont", "noarrowhead","rotate","drawtype","crayon","shadow","makegrid","makegui","dashed","brace","flip"]
 def parseOptions(optString):
     opts = { }
     for optName in listOfOptions:
         opts[optName] = False
 
+    optString = optString.replace(*"\n ")
     for opt in optString.split("--"):
         opt = opt.strip()
         if(len(opt.split()) < 1): continue
@@ -82,6 +83,8 @@ def getArrowCode(obj):
     y2 = obj["y2"]
     color = obj["color"]
     opts = parseOptions(obj["opts"])
+
+    if(opts["flip"]): x1,y1,x2,y2 = x2,y2,x1,y1
 
     type = ""
     if(opts["brace"]):

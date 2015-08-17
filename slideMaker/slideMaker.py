@@ -330,17 +330,22 @@ if __name__ == '__main__':
     content2 = "\n".join(content.split("\n")[0:4])
 
     # global options that aren't slide specific
-    addGlobalOptions("--makegui --graphicspaths ./test2/,./test3/ ")
+    # addGlobalOptions("""--makegui 
+    addGlobalOptions(""" 
+                        --graphicspaths ./test2/,./test3/ """)
 
     # coordinates are for top left and bottom right corners (or tail and head for arrow), respectively
     t1 = object("text",(0.25,0.15),width=0.3, text="testlabel", color="red", size=0, bold=False,opts="--rotate -45") 
     t2 = object("text",(0.75,0.15),width=0.3, text="testlabel", color="coolblue", size=0, bold=False) 
-    a3 = object("brace", (0.31,0.15), (0.69,0.15), opts="")
-    a4 = object("arrow", (0.31,0.15), (0.65,0.46), opts="--crayon")
+    a3 = object("brace", (0.31,0.15), (0.69,0.15), opts="--flip")
+    a4 = object("arrow", (0.31,0.15), (0.65,0.46), opts="")
     l4 = object("line", (0.31,0.15), (0.65,0.46), opts="--shadow")
     b5 = object("box", (0.65,0.46), (0.75,0.52), color="red", opts="--crayon")
     b6 = object("box", (0.85,0.66), (0.55,0.32), color="coolblue", opts="--shadow")
     c7 = object("circle", (0.85,0.66), (0.55,0.32), color="coolblue", opts="--dashed ")
+
+    a0 = object("arrow")
+    t0 = object("text", (0,0))
 
     # for t in ["nick", "alex", "madrid"]:
     for t in ["nick"]:
@@ -348,12 +353,12 @@ if __name__ == '__main__':
         addSlide(title="Perturbation Theory on $H_m(dS_n,\\mathbb{R})$ Orbifolds", opts="--shorttitle hep-th crap")
         addSlide(text="UCSB Logo generated in LaTeX: \\[ \\begin{bmatrix} u \\\\ \\textcolor{gray!40!white}{d} \\end{bmatrix}\\!\\!  \\begin{bmatrix} c \\\\ s \\end{bmatrix}\\!\\!  \\begin{bmatrix} \\textcolor{gray!40!white}{t}   \\\\ b \\end{bmatrix} \\]", objects=[c7,b6,l4])
         addSlide(p1="yields.pdf",p2="yields.pdf", objects=[t1,t2,a3,a4,b5,b6])
-        addSlide(text=content, objects=[t2,a4])
+        addSlide(text=content, objects=[t2])
         addSlide(text=content2, p1="zmass.pdf",opts="--drawtype shadowimage")
-        addSlide(text=content2, p1="zmass.pdf", opts="--sidebyside --drawtype shadowimage", objects=[object("arrow")])
+        addSlide(text=content2, p1="zmass.pdf", opts="--sidebyside --drawtype shadowimage", objects=[a4,a0])
         startBackup()
-        addSlide(text=content2, p1="filt.pdf", objects=[object("text")])
+        addSlide(text=content2, p1="filt.pdf", objects=[t0])
         addSlide(text=content2, p1="zmass.pdf", p2="zmass.pdf")
-        writeSlides("test_%s.tex" % t, opts="--compile --copy --dump")
+        # writeSlides("test_%s.tex" % t, opts="--compile --copy --dump")
 
 
