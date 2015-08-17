@@ -255,7 +255,7 @@ def addGlobalOptions(optstr):
 
 
 def initSlides(me="Nick", themeName="nick", opts=""):
-    global source, commonHeader, theme, themeAlex, slideNumber
+    global source, commonHeader, theme, themeAlex, slideNumber, institute
     source = ""
     theme = themeName.lower()
     opts = utils.parseOptions(opts)
@@ -269,6 +269,7 @@ def initSlides(me="Nick", themeName="nick", opts=""):
     if(opts["modernfont"]):
         source += "\\usepackage{helvet} %% only modern font that works on uaf?"
 
+
     if(theme == "nick"):
         source += themeNick
         if(opts["themecolor"]): source = source.replace("\\definecolor{nickcolor}{RGB}{51,51,179}","\\definecolor{nickcolor}{RGB}{%s}" % opts["themecolor"])
@@ -281,7 +282,10 @@ def initSlides(me="Nick", themeName="nick", opts=""):
     else:
         print "unsupported theme:", theme
     
+    if(opts["casual"]): institute = "\\large{%s}" % opts["casual"]
+    source = source.replace("INSTITUTEHERE", institute)
 
+    fullname = ""
     if("Nick" in me): 
         source = source.replace("AUTHORHERE", "Nick Amin")
         source = source.replace("N. Amin", "\\underline{\\textbf{N. Amin}}")
@@ -292,7 +296,7 @@ def initSlides(me="Nick", themeName="nick", opts=""):
         source = source.replace("AUTHORHERE", "Alex George")
         source = source.replace("A. George", "\\underline{\\textbf{A. George}}")
     else:
-        print "who are you?"
+        print "who are you? add your name to slideMaker."
 
 
     source = source.replace("GRAPHICSPATHHERE", "".join(["{"+p+"}" for p in graphicspaths]))

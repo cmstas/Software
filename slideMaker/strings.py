@@ -43,7 +43,7 @@ commonHeader = """
 {
     \\vspace*{-1cm}
     \\begin{center}
-    %s
+    INSTITUTEHERE
         \\end{center}
 }
 
@@ -86,7 +86,7 @@ commonHeader = """
 \\drawshadow{image}
 \\end{tikzpicture}}
 
-""" % (institute)
+"""
 
 themeNick = """
 \\usepackage{enumitem}
@@ -130,7 +130,7 @@ themeAlex = """
   \\end{center}
   \\begin{textblock*}{12.8cm}(0cm,4.0cm)
   \\begin{center}
-  %s
+  INSTITUTEHERE
   \\end{center}
   \\end{textblock*}
   \\begin{textblock*}{2.7cm}(0cm, 0.1cm)
@@ -148,7 +148,7 @@ themeAlex = """
 }
 
 \\begin{document}
-""" % (institute)
+"""
 
 themeMadrid = """
 \\usepackage{enumitem}
