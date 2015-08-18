@@ -30,6 +30,7 @@ Instead of test.py, you could execute slideMaker.py. This makes it simpler to te
   * --drawtype shadowimage: draw images on slide with a shadow
   * --shorttitle X: only applies to title slide. uses a short title for the footer bar
   * --sidebyside: displays text and plot side by side rather than text on top and plot on bottom
+  * --texttop: for a slide with text only, this aligns text at the top rather than center
 
 ### addObject options
   * supported object types: text, brace, arrow, line, box, circle

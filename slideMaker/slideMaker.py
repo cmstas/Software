@@ -66,7 +66,7 @@ def addSlidePlot(slideTitle, plotName,drawType="includegraphics",opts=""):
     code = """
     \\begin{frame}\\frametitle{%s}
     \\begin{center}
-    \\vspace*{-0.035\\textheight}\\%s[height=0.88\\textheight,keepaspectratio]{%s}
+    \\vspace*{-0.075\\textheight}\\%s[height=0.88\\textheight,keepaspectratio]{%s}
     \\end{center}
     """ % (slideTitle, drawType, plotName)
     return code
@@ -82,7 +82,10 @@ def addSlidePlotPlot(slideTitle, plotName1, plotName2,drawType="includegraphics"
     return code
 
 def addSlideText(slideTitle,bullets,opts=""):
-    code = "\\begin{frame}\\frametitle{%s} \n" % (slideTitle)
+    opts = utils.parseOptions(opts)
+    pos = ""
+    if(opts["texttop"]): pos = "[t]"
+    code = "\\begin{frame}%s\\frametitle{%s} \n" % (pos,slideTitle)
     code += utils.bulletsToCode(bullets)
     return code
 
