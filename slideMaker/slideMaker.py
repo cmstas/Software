@@ -7,9 +7,10 @@ slideNumber = 0
 source = ""
 theme = ""
 graphicspaths = [os.path.dirname(os.path.abspath(__file__))+"/test/", os.path.dirname(os.path.abspath(__file__))+"/logos/"]
-gridslides = []
+objectslides = []
 globalOpts = utils.parseOptions("")
-objs = defaultdict(list)
+# objs = defaultdict(list)
+objs = {}
 
 def addSlideTitle(title="", opts=""):
     global source
@@ -65,7 +66,7 @@ def addSlidePlot(slideTitle, plotName,drawType="includegraphics",opts=""):
     code = """
     \\begin{frame}\\frametitle{%s}
     \\begin{center}
-    \\vspace*{-0.035\\textheight}\\%s[height=0.88\\textheight,keepaspectratio]{%s}
+    \\vspace*{-0.075\\textheight}\\%s[height=0.88\\textheight,keepaspectratio]{%s}
     \\end{center}
     """ % (slideTitle, drawType, plotName)
     return code
@@ -81,7 +82,10 @@ def addSlidePlotPlot(slideTitle, plotName1, plotName2,drawType="includegraphics"
     return code
 
 def addSlideText(slideTitle,bullets,opts=""):
-    code = "\\begin{frame}\\frametitle{%s} \n" % (slideTitle)
+    opts = utils.parseOptions(opts)
+    pos = ""
+    if(opts["texttop"]): pos = "[t]"
+    code = "\\begin{frame}%s\\frametitle{%s} \n" % (pos,slideTitle)
     code += utils.bulletsToCode(bullets)
     return code
 
@@ -159,17 +163,33 @@ def addSlide(title=None,text=None,p1=None,p2=None,opts="",textobjects=[],arrowob
 
     drawGrid = False
 
-    objects.extend(objs[slideNumber])
-    for object in objects:
+    # objects.extend(objs[slideNumber])
+    objsGUI = []
+    for objectName in objects:
+        object = {}
+        if objectName in objs:
+            object = objs[objectName]
+        else:
+            print "couldn't find object with id %s. did you define it?" % objectName
+            continue
+
         if("grid" in object):
             drawGrid = True
+            objsGUI.append(object)
             continue
         if(object["type"] == "box"): source += utils.getBoxCode(object)
+        if(object["type"] == "circle"): source += utils.getCircleCode(object)
         if(object["type"] == "arrow"): source += utils.getArrowCode(object)
         if(object["type"] == "text"): source += utils.getFreetextCode(object)
+        if(object["type"] == "line"): 
+            object["opts"] += " --noarrowhead "
+            source += utils.getArrowCode(object)
+        if(object["type"] == "brace"): 
+            object["opts"] += " --brace "
+            source += utils.getArrowCode(object)
 
     if(drawGrid and globalOpts["makegui"]):
-        gridslides.append( slideNumber )
+        objectslides.append( {"slideNumber": slideNumber, "objects": objsGUI} )
         print "[SM] Unspecified coordinates for object, will add to GUI"
 
 
@@ -205,12 +225,46 @@ def object(type="box",p1=(0,0),p2=(0,0),text="",width=0.3,size=0,bold=False,colo
     if(p1 == (0,0) and p2 == (0,0)): obj["grid"] = 1
     return obj
 
+def addObject(name,type="box",p1=(0,0),p2=(0,0),text="",width=0.3,size=0,bold=False,color="coolblue",opts=""):
+    obj = { }
+    obj["name"] = name
+    obj["width"] = width
+    obj["text"] = text
+    obj["bold"] = bold
+    obj["color"] = color
+    obj["opts"] = opts
+    obj["size"] = utils.numToSize(size)
+    obj["x1"], obj["y1"] = p1
+    obj["x2"], obj["y2"] = p2
+    obj["type"] = type
+
+    # let's flag this slide and put a grid on it to help the user
+    if(p1 == (0,0) and p2 == (0,0)): obj["grid"] = 1
+
+    # only add the object if it's not already there
+    # this is important for when the GUI makes objects
+    if name not in objs.keys(): objs[name] = obj
+
 def addGlobalOptions(optstr):
     global globalOpts
     globalOpts = utils.parseOptions(optstr)
-    
+
+    if(globalOpts["graphicspaths"]):
+        graphicspaths.extend(globalOpts["graphicspaths"].split(","))
+        print "[SM] Adding these to the graphics path:", globalOpts["graphicspaths"].split(",")
+
+    if(globalOpts["makegui"]):
+        try:
+            fname = "objectsgui.txt"
+            execfile(os.getcwd()+"/"+fname)
+            print "[SM] Found file (%s) with objects from GUI. Importing them." % (fname)
+        except:
+            print "[SM] Didn't find file with objects from GUI."
+
+
+
 def initSlides(me="Nick", themeName="nick", opts=""):
-    global source, commonHeader, theme, themeAlex, slideNumber
+    global source, commonHeader, theme, themeAlex, slideNumber, institute
     source = ""
     theme = themeName.lower()
     opts = utils.parseOptions(opts)
@@ -224,6 +278,7 @@ def initSlides(me="Nick", themeName="nick", opts=""):
     if(opts["modernfont"]):
         source += "\\usepackage{helvet} %% only modern font that works on uaf?"
 
+
     if(theme == "nick"):
         source += themeNick
         if(opts["themecolor"]): source = source.replace("\\definecolor{nickcolor}{RGB}{51,51,179}","\\definecolor{nickcolor}{RGB}{%s}" % opts["themecolor"])
@@ -236,7 +291,10 @@ def initSlides(me="Nick", themeName="nick", opts=""):
     else:
         print "unsupported theme:", theme
     
+    if(opts["casual"]): institute = "\\large{%s}" % opts["casual"]
+    source = source.replace("INSTITUTEHERE", institute)
 
+    fullname = ""
     if("Nick" in me): 
         source = source.replace("AUTHORHERE", "Nick Amin")
         source = source.replace("N. Amin", "\\underline{\\textbf{N. Amin}}")
@@ -247,11 +305,8 @@ def initSlides(me="Nick", themeName="nick", opts=""):
         source = source.replace("AUTHORHERE", "Alex George")
         source = source.replace("A. George", "\\underline{\\textbf{A. George}}")
     else:
-        print "who are you?"
+        print "who are you? add your name to slideMaker."
 
-    if(opts["graphicspaths"]):
-        graphicspaths.extend(opts["graphicspaths"].split(","))
-        print "[SM] Adding these to the graphics path:", opts["graphicspaths"].split(",")
 
     source = source.replace("GRAPHICSPATHHERE", "".join(["{"+p+"}" for p in graphicspaths]))
 
@@ -283,12 +338,14 @@ def writeSlides(output="output.tex", opts="--compile"):
             stat,out = commands.getstatusoutput("cp %s ~/public_html/%s/" % (output.replace(".tex",".pdf"), "dump" if opts["dump"] else ""))
             print "[SM] Copied output to uaf-6.t2.ucsd.edu/~%s/%s%s" % (os.getenv("USER"), "dump/" if opts["dump"] else "", output.replace(".tex",".pdf"))
 
-    if(globalOpts["makegui"]):
-        utils.makeGUI(gridslides, output.replace(".tex",".pdf"))
+    if(globalOpts["makegui"] and len(objectslides) > 0):
+        utils.makeGUI(objectslides, output.replace(".tex",".pdf"), os.getcwd())
 
 def startBackup():
     global source, slideNumber
     slideNumber += 1
+
+    print "[SM] Beginning backup"
 
     color = "black"
     if(theme == "alex"): color = "alexcolor"
@@ -320,27 +377,36 @@ if __name__ == '__main__':
     content2 = "\n".join(content.split("\n")[0:4])
 
     # global options that aren't slide specific
-    addGlobalOptions("--makegui")
+    # addGlobalOptions(""" 
+    addGlobalOptions("""--makegui 
+                        --graphicspaths ./test2/,./test3/ """)
+
 
     # coordinates are for top left and bottom right corners (or tail and head for arrow), respectively
-    t1 = object("text",(0.25,0.15),width=0.3, text="testlabel", color="red", size=0, bold=False,opts="--rotate -45") 
-    t2 = object("text",(0.75,0.15),width=0.3, text="testlabel", color="coolblue", size=0, bold=False) 
-    a3 = object("arrow", (0.31,0.15), (0.69,0.15))
-    a4 = object("arrow", (0.31,0.15), (0.65,0.46), opts="--crayon --noarrowhead")
-    b5 = object("box", (0.65,0.46), (0.75,0.52), color="red", opts="--crayon")
-    b6 = object("box", (0.85,0.66), (0.55,0.32), color="coolblue", opts="--shadow")
+    addObject("t1","text",(0.25,0.15),width=0.3, text="testlabel", color="red", size=0, bold=False,opts="--rotate -45") 
+    addObject("t2","text",(0.75,0.15),width=0.3, text="testlabel", color="coolblue", size=0, bold=False) 
+    addObject("a3","brace", (0.31,0.15), (0.69,0.15), opts="--flip")
+    addObject("a4","arrow", (0.31,0.15), (0.65,0.46), opts="")
+    addObject("l4","line", (0.31,0.15), (0.65,0.46), opts="--shadow")
+    addObject("b5","box", (0.65,0.46), (0.75,0.52), color="red", opts="--crayon")
+    addObject("b6","box", (0.85,0.66), (0.55,0.32), color="coolblue", opts="--shadow")
+    addObject("c7","circle", (0.85,0.66), (0.55,0.32), color="coolblue", opts="--dashed ")
+
+    addObject("a10","arrow")
+    addObject("a11","arrow", (0,0))
+    addObject("t10","text", (0,0))
 
     # for t in ["nick", "alex", "madrid"]:
     for t in ["nick"]:
-        initSlides(me="Nick",themeName=t,opts="--graphicspaths ./test2/,./test3/ --themecolor 51,51,179 ")
+        initSlides(me="Nick",themeName=t,opts="--themecolor 51,51,179 ")
         addSlide(title="Perturbation Theory on $H_m(dS_n,\\mathbb{R})$ Orbifolds", opts="--shorttitle hep-th crap")
-        addSlide(text="UCSB Logo generated in LaTeX: \\[ \\begin{bmatrix} u \\\\ \\textcolor{gray!40!white}{d} \\end{bmatrix}\\!\\!  \\begin{bmatrix} c \\\\ s \\end{bmatrix}\\!\\!  \\begin{bmatrix} \\textcolor{gray!40!white}{t}   \\\\ b \\end{bmatrix} \\]")
-        addSlide(p1="yields.pdf",p2="yields.pdf", objects=[t1,t2,a3,a4,b5,b6])
-        addSlide(text=content, objects=[t2,a4])
+        addSlide(text="UCSB Logo generated in LaTeX: \\[ \\begin{bmatrix} u \\\\ \\textcolor{gray!40!white}{d} \\end{bmatrix}\\!\\!  \\begin{bmatrix} c \\\\ s \\end{bmatrix}\\!\\!  \\begin{bmatrix} \\textcolor{gray!40!white}{t}   \\\\ b \\end{bmatrix} \\]", objects=["c7","b6","l4"])
+        addSlide(p1="yields.pdf",p2="yields.pdf", objects=["t1","t2","a3","a4","b5","b6"])
+        addSlide(text=content, objects=["t2"])
         addSlide(text=content2, p1="zmass.pdf",opts="--drawtype shadowimage")
-        addSlide(text=content2, p1="zmass.pdf", opts="--sidebyside --drawtype shadowimage", objects=[object("arrow")])
+        addSlide(text=content2, p1="zmass.pdf", opts="--sidebyside --drawtype shadowimage", objects=["a4","a11"])
         startBackup()
-        addSlide(text=content2, p1="filt.pdf", objects=[object("text")])
+        addSlide(text=content2, p1="filt.pdf", objects=["t10","a10"])
         addSlide(text=content2, p1="zmass.pdf", p2="zmass.pdf")
         writeSlides("test_%s.tex" % t, opts="--compile --copy --dump")
 

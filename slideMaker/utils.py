@@ -1,13 +1,14 @@
 ### utility functions that don't directly touch the latex source go here
-import commands, os, sys
+import commands, os, sys, json
 
 basepath = os.path.dirname(os.path.abspath(__file__))
-listOfOptions = ["dump", "copy", "compile", "graphicspaths", "shorttitle", "themecolor", "sidebyside", "modernfont", "noarrowhead","rotate","drawtype","crayon","shadow","makegrid","makegui"]
+listOfOptions = ["dump", "copy", "compile", "graphicspaths", "shorttitle", "themecolor", "sidebyside", "modernfont", "noarrowhead","rotate","drawtype","crayon","shadow","makegrid","makegui","dashed","brace","flip","casual","texttop"]
 def parseOptions(optString):
     opts = { }
     for optName in listOfOptions:
         opts[optName] = False
 
+    optString = optString.replace(*"\n ")
     for opt in optString.split("--"):
         opt = opt.strip()
         if(len(opt.split()) < 1): continue
@@ -32,6 +33,7 @@ def bulletsToCode(bullets):
         isSubpoint = bullet.strip().startswith("--")
         isLast = i == (len(bullets)-1)
         bullet = bullet.replace("--","",1).replace("-","",1).strip()
+        bullet = bullet.replace("_","\\_")
 
         if(isSubpoint and not wasSubpoint):
             code += "      \\begin{itemize}\n"
@@ -82,10 +84,18 @@ def getArrowCode(obj):
     y2 = obj["y2"]
     color = obj["color"]
     opts = parseOptions(obj["opts"])
-    type = ",-latex"
 
-    if(opts["noarrowhead"]): type = ""
+    if(opts["flip"]): x1,y1,x2,y2 = x2,y2,x1,y1
+
+    type = ""
+    if(opts["brace"]):
+        type += ",decorate,decoration={brace}"
+    else:
+        if(not opts["noarrowhead"]):
+            type += ",-latex"
     if(opts["crayon"]): type += ",crayon"
+    if(opts["shadow"]): type += ",shadowed={double=gray,draw=gray}"
+    if(opts["dashed"]): type += ",dashed"
 
     code = """
     \\begin{textblock*}{12.8cm}[1.0,0.0](12.8cm,9.6cm)
@@ -93,10 +103,10 @@ def getArrowCode(obj):
         \\begin{tikzpicture}[overlay,remember picture,crayon/.style={thick, line cap=round, line join=round,decoration={random steps, segment length=0.15pt, amplitude=0.25pt}, decorate}]
             \\coordinate (0) at (%.2fcm,%.2fcm);   (0)  node  {};
             \\coordinate (1) at (%.2fcm,%.2fcm);   (1)  node  {};
-            \\draw[draw=%s,solid,fill=%s,thick %s] (0) -- (1);
+            \\draw[draw=%s,solid,thick %s] (0) -- (1);
         \\end{tikzpicture}
     \\end{textblock*}
-    """ % (12.8*x1,9.6*(1-y1),12.8*x2,9.6*(1-y2),color,color,type)
+    """ % (12.8*x1,9.6*(1-y1),12.8*x2,9.6*(1-y2),color,type)
 
     return code
 
@@ -110,6 +120,7 @@ def getBoxCode(obj):
     type = ""
     if(opts["crayon"]): type += ",crayon"
     if(opts["shadow"]): type += ",shadowed={double=gray,draw=gray}"
+    if(opts["dashed"]): type += ",dashed"
 
     code = """
     \\begin{textblock*}{12.8cm}[1.0,0.0](12.8cm,9.6cm)
@@ -123,6 +134,35 @@ def getBoxCode(obj):
         \\end{tikzpicture}
     \\end{textblock*}
     """ % (12.8*x1,9.6*(1-y1), 12.8*x2,9.6*(1-y1), 12.8*x2,9.6*(1-y2), 12.8*x1,9.6*(1-y2), color,type)
+
+    return code
+
+def getCircleCode(obj):
+    x1 = obj["x1"]
+    y1 = obj["y1"]
+    x2 = obj["x2"]
+    y2 = obj["y2"]
+    color = obj["color"]
+    opts = parseOptions(obj["opts"])
+    type = ""
+    if(opts["crayon"]): type += ",crayon"
+    if(opts["shadow"]): type += ",shadowed={double=gray,draw=gray}"
+    if(opts["dashed"]): type += ",dashed"
+
+    tl = 12.8*x1, 9.6*(1-y1)
+    br = 12.8*x2, 9.6*(1-y2)
+    midpoint = (tl[0]+br[0])/2, (tl[1]+br[1])/2
+    rad = abs((br[0]-tl[0])/2)
+
+    code = """
+    \\begin{textblock*}{12.8cm}[1.0,0.0](12.8cm,9.6cm)
+        %% \\begin{tikzpicture}[overlay,remember picture]
+        \\begin{tikzpicture}[overlay,remember picture,crayon/.style={thick, line cap=round, line join=round,decoration={random steps, segment length=0.15pt, amplitude=0.25pt}, decorate}]
+            \\coordinate (0) at (%.2fcm,%.2fcm);   (0)  node  {};
+            \\draw[draw=%s,solid,thick %s] (0) circle  (%.2fcm);
+        \\end{tikzpicture}
+    \\end{textblock*}
+    """ % (midpoint[0], midpoint[1], color,type, rad)
 
     return code
 
@@ -184,9 +224,13 @@ def slideToPng(slidenumber,output,outdir):
     stat,out = commands.getstatusoutput(cmd1)
     stat,out = commands.getstatusoutput(cmd2)
 
-def makeGUI(slidenumbers, output):
+def makeGUI(guiInfo, output, workingdir):
     os.system("mkdir -p pages/")
     os.system("rm pages/*.{png,pdf}")
+    slidenumbers = [e["slideNumber"] for e in guiInfo]
+    
+    # print json.dumps(guiInfo)
+
     for slidenumber in slidenumbers:
         slideToPng(slidenumber, output, "pages/")
 
@@ -197,12 +241,22 @@ def makeGUI(slidenumbers, output):
 
     slideStr = "'"+"', '".join(pngFiles)+"'"
     html = html.replace("SLIDESHERE", slideStr)
+    html = html.replace("INFOHERE", json.dumps(guiInfo))
+    html = html.replace("WORKINGDIRHERE", workingdir)
 
     newhtml = open("./pages/gui.html","w")
     newhtml.write(html)
     newhtml.close()
 
-    stat,out = commands.getstatusoutput("cp %s/html/*.js pages/" % basepath)
+
+    stat,out = commands.getstatusoutput("cp %s/html/*.{js,py} pages/" % basepath)
+    stat,out = commands.getstatusoutput("cp %s/html/htaccess ~/public_html/.htaccess" % basepath)
+    # need 755 permissions or else cgi-bin stuff doesn't work
     stat,out = commands.getstatusoutput("cp -r pages ~/public_html/dump/")
+    stat,out = commands.getstatusoutput("chmod 755 ~/public_html/.htaccess")
+    stat,out = commands.getstatusoutput("chmod 755 ~/public_html/dump/")
+    stat,out = commands.getstatusoutput("chmod 755 ~/public_html/dump/pages/")
+    stat,out = commands.getstatusoutput("chmod 755 ~/public_html/dump/pages/copy.py")
+
     print "[SM] Copied GUI to uaf-6.t2.ucsd.edu/~%s/dump/pages/gui.html" % (os.getenv("USER"))
 

@@ -176,6 +176,18 @@ void SetTDRStyle(){
   tdrStyleAG->cd();
 }
 
+void singlePlotMaker(TH1F* h1, std::string title, std::string options_string) {
+    if(h1->GetEntries() < 1) {
+        std::cout << "Plot with title " << title << " is empty. Not drawing." << std::endl; return;
+    }
+    TH1F* null = new TH1F("","",1,0,1);
+    std::vector <TH1F*> Backgrounds;
+    std::vector <std::string> Titles;
+    Backgrounds.push_back(h1);
+    Titles.push_back(title);
+    dataMCplotMaker(null, Backgrounds, Titles, title, "", options_string);
+}
+
 void dataMCplotMaker(TH1F* Data, std::vector <TH1F*> Backgrounds, std::vector <string> Titles, std::string titleIn, std::string title2In, std::string options_string, std::vector <TH1F*> Signals, std::vector <string> SignalTitles, std::vector <Color_t> color_input){
 
   char* title = (char *)alloca(titleIn.size() + 1);
@@ -253,6 +265,7 @@ void dataMCplotMaker(TH1F* Data, std::vector <TH1F*> Backgrounds, std::vector <s
   float legendWider_ = 0;
   float legendTaller_ = 0;
   bool largeLabels = false;
+  float yTitleOffset_ = 0;
 
   //Loop over options and change default settings to user-defined settings
   for (unsigned int i = 0; i < Options.size(); i++){
@@ -312,6 +325,7 @@ void dataMCplotMaker(TH1F* Data, std::vector <TH1F*> Backgrounds, std::vector <s
     else if (Options[i].find("largeLabels") < Options[i].length()) largeLabels = true; 
     else if (Options[i].find("legendWider") < Options[i].length())  legendWider_ = atof( getString(Options[i], "legendWider").c_str() );
     else if (Options[i].find("legendTaller") < Options[i].length()) legendTaller_ = atof( getString(Options[i], "legendTaller").c_str() ); 
+    else if (Options[i].find("yTitleOffset") < Options[i].length()) yTitleOffset_ = atof( getString(Options[i], "yTitleOffset").c_str() ); 
     else cout << "Warning: Option not recognized!  Option: " << Options[i] << endl;
   }
 
@@ -614,8 +628,8 @@ void dataMCplotMaker(TH1F* Data, std::vector <TH1F*> Backgrounds, std::vector <s
   if (xAxisOverride[0] == '\0' && showXaxisUnit == 1) stack->GetXaxis()->SetTitle(Form("%s [%s]", xAxisLabel.c_str(), xAxisUnit.c_str()));
   if (xAxisOverride[0] != '\0' || xAxisOverrideGiven) stack->GetXaxis()->SetTitle(Form("%s", xAxisOverride.c_str()));
   if (!noData) stack->GetYaxis()->SetTitleOffset(1.5);
-  if (noData) stack->GetYaxis()->SetTitleOffset(1.4);
-  if (noData && linear) stack->GetYaxis()->SetTitleOffset(1.6);
+  if (noData && !linear) stack->GetYaxis()->SetTitleOffset(1.4+yTitleOffset_);
+  if (noData &&  linear) stack->GetYaxis()->SetTitleOffset(1.6+yTitleOffset_);
 
   //Title size
   if (largeLabels){
@@ -660,6 +674,9 @@ void dataMCplotMaker(TH1F* Data, std::vector <TH1F*> Backgrounds, std::vector <s
   }
 
   gStyle->SetErrorX(0.001); 
+
+  //Try this
+  Backgrounds[0]->SetMarkerColor(0); 
 
   //Draw
   if (!nostack && !dots && histoErrors) stack->Draw("histe");
