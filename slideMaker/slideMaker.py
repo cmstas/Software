@@ -127,8 +127,6 @@ def addSlide(title=None,text=None,p1=None,p2=None,opts="",textobjects=[],arrowob
     parsedOpts = utils.parseOptions(opts)
     drawtype = parsedOpts["drawtype"] if parsedOpts["drawtype"] else "includegraphics"
 
-    title = title.replace("_","\\_")
-
     bullets = []
     if( text ): bullets = text.split("\n")
 
