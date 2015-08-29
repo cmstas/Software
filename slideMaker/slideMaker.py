@@ -304,6 +304,9 @@ def initSlides(me="Nick", themeName="nick", opts=""):
     elif("Alex" in me): 
         source = source.replace("AUTHORHERE", "Alex George")
         source = source.replace("A. George", "\\underline{\\textbf{A. George}}")
+    elif("Jason" in me): 
+        source = source.replace("AUTHORHERE", "Jason Gran")
+        source = source.replace("J. Gran", "\\underline{\\textbf{J. Gran}}")
     else:
         print "who are you? add your name to slideMaker."
 
