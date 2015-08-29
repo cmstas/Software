@@ -210,10 +210,12 @@ def textLinesToPlotHeight(nlines):
 def splitTitle(title):
     # title = cleanTex(title) # this removes the tex from the title!
     cutoff = 16
-    if(len(title) <= cutoff):
+    if("ENDL" in title):
+        return title.replace("ENDL", "\\\\ \\vspace{0.4cm}")
+    elif(len(title) <= cutoff):
         return "\\\\ \\vspace{0.4cm} "+title
     else:
-        return title[:cutoff]+title[cutoff:].split()[0] + "\\\\ \\vspace{0.4cm}" + " ".join(title[cutoff:].split()[1:])
+        return title[:cutoff]+" "+title[cutoff:].split()[0] + "\\\\ \\vspace{0.4cm}" + " ".join(title[cutoff:].split()[1:])
 
 def slideToPng(slidenumber,output,outdir):
     # note that output is the pdf file we produce from writeSlides()
