@@ -31,6 +31,8 @@ commonHeader = """
 \\definecolor{madridcolor}{RGB}{51,51,179}
 
 \\newcommand{\\met}{\\slashed{E}_T}
+\\newcommand{\\pt}{p_{T}}
+\\newcommand{\\ht}{h_{T}}
 \\newcommand{\\red}[1]{\\textcolor{red}{#1}}
 \\newcommand{\\blue}[1]{\\textcolor{blue}{#1}}
 \\newcommand{\\coolblue}[1]{\\textcolor{coolblue}{#1}}
