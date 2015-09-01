@@ -291,7 +291,7 @@ def initSlides(me="Nick", themeName="nick", opts=""):
     else:
         print "unsupported theme:", theme
     
-    if(opts["casual"]): institute = "\\large{%s}" % opts["casual"]
+    if(opts["casual"]): institute = "\\large{%s}" % opts["casual"].replace("ENDL", "\\\\ \\vspace{0.4cm}")
     source = source.replace("INSTITUTEHERE", institute)
 
     fullname = ""
@@ -318,6 +318,7 @@ def initSlides(me="Nick", themeName="nick", opts=""):
 def writeSlides(output="output.tex", opts="--compile"):
     global source
     source += footer
+    output = output.replace(".pdf",".tex")
     fh = open(output,"w")
     fh.write(source)
     fh.close()

@@ -32,8 +32,8 @@ def bulletsToCode(bullets):
     for i,bullet in enumerate(bullets):
         isSubpoint = bullet.strip().startswith("--")
         isLast = i == (len(bullets)-1)
-        bullet = bullet.replace("--","",1).replace("-","",1).strip()
-        # bullet = bullet.replace("_","\\_")
+        while bullet[0] == "-":
+            bullet = bullet[1:]
 
         if(isSubpoint and not wasSubpoint):
             code += "      \\begin{itemize}\n"
@@ -215,7 +215,7 @@ def splitTitle(title):
     elif(len(title) <= cutoff):
         return "\\\\ \\vspace{0.4cm} "+title
     else:
-        return title[:cutoff]+" "+title[cutoff:].split()[0] + "\\\\ \\vspace{0.4cm}" + " ".join(title[cutoff:].split()[1:])
+        return title[:cutoff]+title[cutoff:].split()[0] + "\\\\ \\vspace{0.4cm}" + " ".join(title[cutoff:].split()[1:])
 
 def slideToPng(slidenumber,output,outdir):
     # note that output is the pdf file we produce from writeSlides()
