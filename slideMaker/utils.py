@@ -33,7 +33,7 @@ def bulletsToCode(bullets):
         isSubpoint = bullet.strip().startswith("--")
         isLast = i == (len(bullets)-1)
         bullet = bullet.replace("--","",1).replace("-","",1).strip()
-        bullet = bullet.replace("_","\\_")
+        # bullet = bullet.replace("_","\\_")
 
         if(isSubpoint and not wasSubpoint):
             code += "      \\begin{itemize}\n"
