@@ -36,7 +36,8 @@ sm.addSlide(p1="zmass.pdf", objects=["a0","c0"])
 sm.addSlide(text=content+content)
 
 # slides reset their numbering when you start the backup section
-sm.startBackup()
+# default (no option) does not do this
+sm.startBackup(opts="--resetnumbering")
 sm.addSlide(text=content, p1="filt.pdf", opts="--sidebyside")
 sm.addSlide(text=content, p1="zmass.pdf", p2="zmass.pdf")
 

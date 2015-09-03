@@ -345,9 +345,11 @@ def writeSlides(output="output.tex", opts="--compile"):
     if(globalOpts["makegui"] and len(objectslides) > 0):
         utils.makeGUI(objectslides, output.replace(".tex",".pdf"), os.getcwd())
 
-def startBackup():
+def startBackup(opts=""):
     global source, slideNumber
     slideNumber += 1
+
+    opts = utils.parseOptions(opts)
 
     print "[SM] Beginning backup"
 
@@ -356,8 +358,9 @@ def startBackup():
     if(theme == "nick"): color = "nickcolor"
     if(theme == "madrid"): color = "madridcolor"
 
+    if(opts["resetnumbering"]): source += "\n\\appendix\n"
+
     source += """
-    \\appendix
     \\begin{frame}[plain]
     \\centering
     \\begin{textblock*}{12.8cm}[0.5,0.5](6.4cm,4.8cm)

@@ -41,6 +41,9 @@ Instead of test.py, you could execute slideMaker.py. This makes it simpler to te
   * --dashed: draw object with dashed lines
   * --flip: flip direction of arrows and braces (reverses opening of braces)
 
+### startBackup options
+  * --resetnumbering: reset the slide numbers once you hit the backup
+
 ### writeSlides options
   * --compile: compile slides (twice, for slide numbers) after writing .tex source (enabled by default)
   * --copy: copy output .pdf file to web directory (default: public_html)
@@ -56,6 +59,7 @@ Instead of test.py, you could execute slideMaker.py. This makes it simpler to te
   * Place the date in the document via "\\today"
 
 ## TODO:
-* figure out good algorithm for resizing images so that they don't overlap with text
-
-** see http://www.latex-community.org/forum/viewtopic.php?f=45&t=22655
+  * figure out good algorithm for resizing images so that they don't overlap with text
+  ** see http://www.latex-community.org/forum/viewtopic.php?f=45&t=22655
+  * table maker
+  * two column text
