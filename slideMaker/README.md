@@ -62,4 +62,3 @@ Instead of test.py, you could execute slideMaker.py. This makes it simpler to te
   * figure out good algorithm for resizing images so that they don't overlap with text
   ** see http://www.latex-community.org/forum/viewtopic.php?f=45&t=22655
   * table maker
-  * two column text
