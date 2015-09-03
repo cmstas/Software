@@ -267,6 +267,7 @@ void dataMCplotMaker(TH1F* Data, std::vector <TH1F*> Backgrounds, std::vector <s
   bool largeLabels = false;
   float yTitleOffset_ = 0;
   bool compareMultiple = 0; 
+ 
 
   //Loop over options and change default settings to user-defined settings
   for (unsigned int i = 0; i < Options.size(); i++){
@@ -431,8 +432,8 @@ void dataMCplotMaker(TH1F* Data, std::vector <TH1F*> Backgrounds, std::vector <s
   }
   //(c) If only 2 backgrounds, use this green + "Azure"
   if (color_input.size() == 0 && Backgrounds.size() == 2){
-    Colors[0] = kAzure+7;
-    Colors[1] = kGreen+3;
+    if(Colors.size() > 0) Colors[0] = kAzure+7; else Colors.push_back(kAzure+7);
+    if(Colors.size() > 1) Colors[1] = kGreen+3; else Colors.push_back(kGreen+3);
   }
   //(d) Otherwise, default scheme for no signals
   if (color_input.size() == 0 && use_signals == 0){ 
@@ -595,7 +596,12 @@ void dataMCplotMaker(TH1F* Data, std::vector <TH1F*> Backgrounds, std::vector <s
       if (nostack && normalize) Backgrounds[i]->Scale(1.0/Backgrounds[i]->Integral());
       stack->Add(Backgrounds[i]);
     }
-}
+  }
+  else {
+    for (unsigned int i = 0; i < Backgrounds.size(); i++){
+      Backgrounds[i]->SetMarkerColor(Colors[i]);
+    }
+  }
 
   //Minimum and maximum
   float leftMax = AdjustedMaximum(1, Backgrounds, Data, Signals);
@@ -698,6 +704,9 @@ void dataMCplotMaker(TH1F* Data, std::vector <TH1F*> Backgrounds, std::vector <s
 
   //Try this
   if (!dots) Backgrounds[0]->SetMarkerColor(0); 
+  if (dots) Backgrounds[0]->SetMarkerColor(kBlue);
+  if (dots && Backgrounds.size() > 1) Backgrounds[1]->SetMarkerColor(kRed);
+  if (dots && Backgrounds.size() > 2) Backgrounds[2]->SetMarkerColor(kGreen+3);
 
   //Draw
   if (!nostack && !dots && histoErrors) stack->Draw("histe");
