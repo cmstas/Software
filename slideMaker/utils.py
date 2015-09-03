@@ -2,7 +2,7 @@
 import commands, os, sys, json
 
 basepath = os.path.dirname(os.path.abspath(__file__))
-listOfOptions = ["dump", "copy", "compile", "graphicspaths", "shorttitle", "themecolor", "sidebyside", "modernfont", "noarrowhead","rotate","drawtype","crayon","shadow","makegrid","makegui","dashed","brace","flip","casual"]
+listOfOptions = ["dump", "copy", "compile", "graphicspaths", "shorttitle", "themecolor", "sidebyside", "modernfont", "noarrowhead","rotate","drawtype","crayon","shadow","makegrid","makegui","dashed","brace","flip","casual","texttop"]
 def parseOptions(optString):
     opts = { }
     for optName in listOfOptions:
@@ -32,8 +32,8 @@ def bulletsToCode(bullets):
     for i,bullet in enumerate(bullets):
         isSubpoint = bullet.strip().startswith("--")
         isLast = i == (len(bullets)-1)
-        bullet = bullet.replace("--","",1).replace("-","",1).strip()
-        bullet = bullet.replace("_","\\_")
+        while bullet[0] == "-":
+            bullet = bullet[1:]
 
         if(isSubpoint and not wasSubpoint):
             code += "      \\begin{itemize}\n"
@@ -210,7 +210,9 @@ def textLinesToPlotHeight(nlines):
 def splitTitle(title):
     # title = cleanTex(title) # this removes the tex from the title!
     cutoff = 16
-    if(len(title) <= cutoff):
+    if("ENDL" in title):
+        return title.replace("ENDL", "\\\\ \\vspace{0.4cm}")
+    elif(len(title) <= cutoff):
         return "\\\\ \\vspace{0.4cm} "+title
     else:
         return title[:cutoff]+title[cutoff:].split()[0] + "\\\\ \\vspace{0.4cm}" + " ".join(title[cutoff:].split()[1:])

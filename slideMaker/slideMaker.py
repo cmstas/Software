@@ -66,7 +66,7 @@ def addSlidePlot(slideTitle, plotName,drawType="includegraphics",opts=""):
     code = """
     \\begin{frame}\\frametitle{%s}
     \\begin{center}
-    \\vspace*{-0.035\\textheight}\\%s[height=0.88\\textheight,keepaspectratio]{%s}
+    \\vspace*{-0.075\\textheight}\\%s[height=0.88\\textheight,keepaspectratio]{%s}
     \\end{center}
     """ % (slideTitle, drawType, plotName)
     return code
@@ -82,7 +82,10 @@ def addSlidePlotPlot(slideTitle, plotName1, plotName2,drawType="includegraphics"
     return code
 
 def addSlideText(slideTitle,bullets,opts=""):
-    code = "\\begin{frame}\\frametitle{%s} \n" % (slideTitle)
+    opts = utils.parseOptions(opts)
+    pos = ""
+    if(opts["texttop"]): pos = "[t]"
+    code = "\\begin{frame}%s\\frametitle{%s} \n" % (pos,slideTitle)
     code += utils.bulletsToCode(bullets)
     return code
 
@@ -288,7 +291,7 @@ def initSlides(me="Nick", themeName="nick", opts=""):
     else:
         print "unsupported theme:", theme
     
-    if(opts["casual"]): institute = "\\large{%s}" % opts["casual"]
+    if(opts["casual"]): institute = "\\large{%s}" % opts["casual"].replace("ENDL", "\\\\ \\vspace{0.4cm}")
     source = source.replace("INSTITUTEHERE", institute)
 
     fullname = ""
@@ -301,6 +304,9 @@ def initSlides(me="Nick", themeName="nick", opts=""):
     elif("Alex" in me): 
         source = source.replace("AUTHORHERE", "Alex George")
         source = source.replace("A. George", "\\underline{\\textbf{A. George}}")
+    elif("Jason" in me): 
+        source = source.replace("AUTHORHERE", "Jason Gran")
+        source = source.replace("J. Gran", "\\underline{\\textbf{J. Gran}}")
     else:
         print "who are you? add your name to slideMaker."
 
@@ -312,6 +318,7 @@ def initSlides(me="Nick", themeName="nick", opts=""):
 def writeSlides(output="output.tex", opts="--compile"):
     global source
     source += footer
+    output = output.replace(".pdf",".tex")
     fh = open(output,"w")
     fh.write(source)
     fh.close()

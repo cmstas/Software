@@ -16,6 +16,7 @@ TStyle *tdrStyleAG = NULL;
 
 void dataMCplotMaker(TH1F* Data, std::vector <TH1F*> Backgrounds, std::vector <string> Titles, std::string titleIn = "", std::string title2In = "", std::string options_string = "", std::vector <TH1F*> Signals = std::vector<TH1F*>(), std::vector <string> SignalTitles = std::vector<string>(), std::vector <Color_t> color_input = std::vector<Color_t>());
 
+void singlePlotMaker(TH1F* h1, std::string title="", std::string options_string="");
 
 
 #endif

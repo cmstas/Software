@@ -30,6 +30,7 @@ Instead of test.py, you could execute slideMaker.py. This makes it simpler to te
   * --drawtype shadowimage: draw images on slide with a shadow
   * --shorttitle X: only applies to title slide. uses a short title for the footer bar
   * --sidebyside: displays text and plot side by side rather than text on top and plot on bottom
+  * --texttop: for a slide with text only, this aligns text at the top rather than center
 
 ### addObject options
   * supported object types: text, brace, arrow, line, box, circle
@@ -44,6 +45,15 @@ Instead of test.py, you could execute slideMaker.py. This makes it simpler to te
   * --compile: compile slides (twice, for slide numbers) after writing .tex source (enabled by default)
   * --copy: copy output .pdf file to web directory (default: public_html)
   * --dump: copy to "dump" directory within web directory
+
+## Misc tips
+  * Writing the text "ENDL" without quotes in the title of the title slide or when specifying --casual X will force
+    a new line. This is helpful for when the function that wraps titles automatically is being stupid.
+  * Make sure to always escape backslashes and underscores in the text, e.g., "\\met" instead of "\met" and
+    "h1D\\_njets" instead of "h1D_njets". You don't need to escape underscores when inside the $ $ environment.
+  * Common symbols are built in, so you can do "$\\met \\gt 30$" or "$\\pt$" or even "$\\ht$". Feel free to add in more useful 
+    commands into strings.py.
+  * Place the date in the document via "\\today"
 
 ## TODO:
 * figure out good algorithm for resizing images so that they don't overlap with text
