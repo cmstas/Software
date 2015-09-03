@@ -7,6 +7,9 @@ struct PlotInfo {
   TH1F* Plot;
   string Title;
   Color_t Color;
+  TH1F* Signal;
+  Color_t SignalColor;
+  string SignalTitle;
 };
 
 TStyle *tdrStyleAG = NULL;

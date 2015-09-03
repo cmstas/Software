@@ -254,6 +254,7 @@ void dataMCplotMaker(TH1F* Data, std::vector <TH1F*> Backgrounds, std::vector <s
   float legendTaller_ = 0;
   bool largeLabels = false;
   float yTitleOffset_ = 0;
+  bool compareMultiple = 0; 
 
   //Loop over options and change default settings to user-defined settings
   for (unsigned int i = 0; i < Options.size(); i++){
@@ -314,6 +315,7 @@ void dataMCplotMaker(TH1F* Data, std::vector <TH1F*> Backgrounds, std::vector <s
     else if (Options[i].find("legendWider") < Options[i].length())  legendWider_ = atof( getString(Options[i], "legendWider").c_str() );
     else if (Options[i].find("legendTaller") < Options[i].length()) legendTaller_ = atof( getString(Options[i], "legendTaller").c_str() ); 
     else if (Options[i].find("yTitleOffset") < Options[i].length()) yTitleOffset_ = atof( getString(Options[i], "yTitleOffset").c_str() ); 
+    else if (Options[i].find("compareMultiple") < Options[i].length()) compareMultiple = true;
     else cout << "Warning: Option not recognized!  Option: " << Options[i] << endl;
   }
 
@@ -397,8 +399,30 @@ void dataMCplotMaker(TH1F* Data, std::vector <TH1F*> Backgrounds, std::vector <s
   }
 
   std::vector <Color_t> Colors;
+  std::vector <Color_t> Colors2;
 
   //Set colors for histograms
+  //(a) Use colors assigned
+  if (color_input.size() != 0){
+    for (unsigned int i = 0; i < color_input.size(); i++){
+      Colors.push_back(color_input[i]);
+    }
+  }
+  //(b) If compareMultiple, then need to light + dark colors
+  if (compareMultiple){
+    Colors.push_back(kGray);     Colors2.push_back(kBlack); 
+    Colors.push_back(kCyan);     Colors2.push_back(kBlue); 
+    Colors.push_back(kGreen);    Colors2.push_back(kGreen+3); 
+    Colors.push_back(kRed-7);    Colors2.push_back(kRed); 
+    Colors.push_back(kMagenta);  Colors2.push_back(kViolet+3); 
+    Colors.push_back(kOrange+1); Colors2.push_back(kOrange+3); 
+  }
+  //(c) If only 2 backgrounds, use this green + "Azure"
+  if (color_input.size() == 0 && Backgrounds.size() == 2){
+    Colors[0] = kAzure+7;
+    Colors[1] = kGreen+3;
+  }
+  //(d) Otherwise, default scheme for no signals
   if (color_input.size() == 0 && use_signals == 0){ 
     Colors.push_back(kGreen+3);   
     Colors.push_back(kBlue-10);   
@@ -407,7 +431,8 @@ void dataMCplotMaker(TH1F* Data, std::vector <TH1F*> Backgrounds, std::vector <s
     if (!nostack) Colors.push_back(kCyan-4);
     Colors.push_back(kViolet+4);
   }
-  else if (color_input.size() == 0 && use_signals == 1){ 
+  //(e) Otherwise, default scheme for signals
+  if (color_input.size() == 0 && use_signals == 1){ 
     Colors.push_back(kGreen-3);
     Colors.push_back(kBlue-2);
     Colors.push_back(kCyan);
@@ -416,16 +441,6 @@ void dataMCplotMaker(TH1F* Data, std::vector <TH1F*> Backgrounds, std::vector <s
     Colors.push_back(kRed);
     Colors.push_back(kGreen+3);
     Colors.push_back(kYellow-7);
-  }
-  //If only 2 backgrounds, this green + "Azure" (med blue) seems to work well
-  if (color_input.size() == 0 && Backgrounds.size() == 2){
-    Colors[0] = kAzure+7;
-    Colors[1] = kGreen+3;
-  }
-  else if (color_input.size() != 0){
-    for (unsigned int i = 0; i < color_input.size(); i++){
-      Colors.push_back(color_input[i]);
-    }
   }
 
   //Black Signals
@@ -441,6 +456,9 @@ void dataMCplotMaker(TH1F* Data, std::vector <TH1F*> Backgrounds, std::vector <s
       PlotInfo temp;
       temp.Plot = Backgrounds[i];
       temp.Title = Titles[i];
+      if (Signals.size() >= i+1)     temp.Signal      = Signals[i];
+      if (Colors2.size() >= i+1) temp.SignalColor = Colors2[i];
+      if (SignalTitles.size() >= i+1) temp.SignalTitle = SignalTitles[i];
       if (color_input.size() > 0){
         temp.Color = color_input[i];
       }
@@ -458,11 +476,14 @@ void dataMCplotMaker(TH1F* Data, std::vector <TH1F*> Backgrounds, std::vector <s
       Backgrounds.push_back(myPlotInfo[i].Plot);
       Titles.push_back(myPlotInfo[i].Title);
       Colors[i] = myPlotInfo[i].Color;
+      if (compareMultiple) Signals[i] = myPlotInfo[i].Signal;
+      if (compareMultiple) Colors2[i] = myPlotInfo[i].SignalColor;
+      if (compareMultiple) SignalTitles[i] = myPlotInfo[i].SignalTitle;
     }
   }
 
   //Sort Signals, with Titles and Colors
-  if (preserveSignalOrder == 0){
+  if (!preserveSignalOrder && !compareMultiple){
     std::vector<PlotInfo> myPlotInfo;
  
     for (unsigned int i = 0; i < Signals.size(); i++){
@@ -493,7 +514,7 @@ void dataMCplotMaker(TH1F* Data, std::vector <TH1F*> Backgrounds, std::vector <s
   //Draw histogram with two pads
   TCanvas c0("c0", "c0");
   TPad* finPad[2];
-  if (noData == false){
+  if (noData == false || compareMultiple){
     c0.SetCanvasSize(600, 700);
     if (errHistAtBottom == false){
       finPad[0] = new TPad("1", "1", 0.0, 0.0, 1.0, 0.84);
@@ -512,7 +533,7 @@ void dataMCplotMaker(TH1F* Data, std::vector <TH1F*> Backgrounds, std::vector <s
     finPad[1]->Draw();
     finPad[0]->cd();
   }
-  if (noData == true){
+  if (noData == true && !compareMultiple){
     c0.SetCanvasSize(600, 550);
     finPad[0] = new TPad();
     finPad[1] = new TPad();
@@ -524,7 +545,7 @@ void dataMCplotMaker(TH1F* Data, std::vector <TH1F*> Backgrounds, std::vector <s
   THStack *stack = new THStack("stack", ""); 
   Data->SetMarkerStyle(20);
   Data->UseCurrentStyle();
-  if(noFill == 0 && Signals.size() >= 5 && !nostack){
+  if(!compareMultiple && noFill == 0 && Signals.size() >= 5 && !nostack){
     vector <int> Style;
     Style.push_back(3003);
     Style.push_back(3004);
@@ -541,7 +562,7 @@ void dataMCplotMaker(TH1F* Data, std::vector <TH1F*> Backgrounds, std::vector <s
       stack->Add(Backgrounds[i]);
     }
   } 
-  if(noFill == 0 && (Signals.size() < 5 || nostack)){
+  if(noFill == 0 && (Signals.size() < 5 || nostack || compareMultiple)){
     for (unsigned int i = 0; i < Backgrounds.size(); i++){
       Backgrounds[i]->UseCurrentStyle();
       if (!nostack) Backgrounds[i]->SetFillColor(Colors[i]);
@@ -664,7 +685,7 @@ void dataMCplotMaker(TH1F* Data, std::vector <TH1F*> Backgrounds, std::vector <s
   gStyle->SetErrorX(0.001); 
 
   //Try this
-  Backgrounds[0]->SetMarkerColor(0); 
+  if (!dots) Backgrounds[0]->SetMarkerColor(0); 
 
   //Draw
   if (!nostack && !dots && histoErrors) stack->Draw("histe");
@@ -693,19 +714,23 @@ void dataMCplotMaker(TH1F* Data, std::vector <TH1F*> Backgrounds, std::vector <s
   markerStyle2_.push_back(26);
   markerStyle2_.push_back(22);
   markerStyle2_.push_back(23);
+  THStack signalsAG;
   for (unsigned int i = 0; i < Signals.size(); i++){
-    if (!sigError) Signals[i]->Draw("SAMEP");
-    if ( sigError) Signals[i]->Draw("SAMEPE");
-    if (Colors.size() >= i + Backgrounds.size() + 1) Signals[i]->SetMarkerColor(Colors[i + Backgrounds.size()]);
+    if (!compareMultiple && !sigError) Signals[i]->Draw("SAMEHISTP");
+    if (!compareMultiple &&  sigError) Signals[i]->Draw("SAMEPE");
+    if (compareMultiple) Signals[i]->SetMarkerColor(Colors2[i]); 
+    if (compareMultiple) signalsAG.Add(Signals[i]); 
+    else if (Colors.size() >= i + Backgrounds.size() + 1) Signals[i]->SetMarkerColor(Colors[i + Backgrounds.size()]);
     Signals[i]->SetLineColor(kBlack);
     Signals[i]->SetLineWidth(3);
     if (!markerStyle2) Signals[i]->SetMarkerStyle(markerStyle[i%7]);
     if ( markerStyle2) Signals[i]->SetMarkerStyle(markerStyle2_[i%7]);
   }
+  if (compareMultiple) signalsAG.Draw("SAMEHISTP");
 
   //Legend
   TLegend *leg;
-  if ((Backgrounds.size()+Signals.size() == 1 || Backgrounds.size()+Signals.size() == 2) && noData) leg = new TLegend(0.7+legendRight,0.79+legendUp,0.92+legendRight+legendWider_,0.87+legendUp+legendTaller_); 
+  if ((Backgrounds.size()+Signals.size() == 1 || Backgrounds.size()+Signals.size() == 2) && noData && !compareMultiple) leg = new TLegend(0.7+legendRight,0.79+legendUp,0.92+legendRight+legendWider_,0.87+legendUp+legendTaller_); 
   else if ((Backgrounds.size()+Signals.size() == 1 || Backgrounds.size()+Signals.size() == 2) && !noData) leg = new TLegend(0.7+legendRight,0.69+legendUp,0.92+legendRight+legendWider_,0.77+legendUp+legendTaller_); 
   else leg = new TLegend(0.7+legendRight,0.59+legendUp,0.92+legendRight+legendWider_,0.87+legendUp+legendTaller_);
   leg->SetTextSize(legendTextSize);
@@ -714,7 +739,7 @@ void dataMCplotMaker(TH1F* Data, std::vector <TH1F*> Backgrounds, std::vector <s
   if (showPercentage) for (int i = Titles.size()-1; i > -1; i--) Titles[i] =  Form("%s [%i%%]", Titles[i].c_str(), percent[i]);
   if (!dots) for (int i = Titles.size()-1; i > -1; i--) leg->AddEntry(Backgrounds[i], Titles[i].c_str(), "f");
   if (dots) for (int i = Titles.size()-1; i > -1; i--) leg->AddEntry(Backgrounds[i], Titles[i].c_str(), "LPE");
-  if (use_signals) for (int i = SignalTitles.size()-1; i > -1; i--) leg->AddEntry(Signals[i], SignalTitles[i].c_str(), "P");
+  if (use_signals && !compareMultiple) for (int i = SignalTitles.size()-1; i > -1; i--) leg->AddEntry(Signals[i], SignalTitles[i].c_str(), "P");
   leg->SetFillStyle(0);
   if ( legendBox) leg->SetBorderSize(1);
   if (!legendBox) leg->SetBorderSize(0);
@@ -794,7 +819,7 @@ void dataMCplotMaker(TH1F* Data, std::vector <TH1F*> Backgrounds, std::vector <s
 
   //Draw header
   float type_y = .95;
-  if (!noData) type_y = .96;
+  if (!noData || compareMultiple) type_y = .96;
   tex->SetTextSize(0.028);
   if (overrideHeader[0] == '\0'){
     tex->SetTextAlign(31);
@@ -835,9 +860,11 @@ void dataMCplotMaker(TH1F* Data, std::vector <TH1F*> Backgrounds, std::vector <s
   if (nDivisions != -1 && nDivisions < 0) stack->GetXaxis()->SetNdivisions(nDivisions, kFALSE);
 
   //-----------Second pad: data/MC yields---------------
-  if (noData == false){
+  if (!noData || compareMultiple){
+    if (compareMultiple) Data = (TH1F*)Signals[0]->Clone();
+    if (compareMultiple && Signals.size() > 1) for (unsigned int i = 1; i < Signals.size(); i++) Data->Add(Signals[i]); 
     finPad[1]->cd();
-    TH1F* err_hist = (TH1F*)Backgrounds[0]->Clone(); 
+    TH1F* err_hist = (TH1F*)Signals[1]->Clone(); 
     err_hist->SetTitle("");
     err_hist->Draw();
     err_hist->SetLineColor(kBlack);
