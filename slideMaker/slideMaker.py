@@ -81,6 +81,20 @@ def addSlidePlotPlot(slideTitle, plotName1, plotName2,drawType="includegraphics"
     """ % (slideTitle, drawType, plotName1, drawType, plotName2)
     return code
 
+def addSlideTextText(slideTitle, bullets1, bullets2,opts=""):
+    opts = utils.parseOptions(opts)
+    pos = ""
+    if(opts["texttop"]): pos = "[t]"
+
+    code = "\\begin{frame}%s\\frametitle{%s} \n" % (pos,slideTitle)
+    code += "\\begin{columns}\n  \\begin{column}{0.5\\textwidth} \n"
+    code += utils.bulletsToCode(bullets1)
+    code += "\\end{column}\n  \\begin{column}{0.5\\textwidth}"
+    code += utils.bulletsToCode(bullets2)
+    code += "\\end{column}\n\\end{columns} \n"
+
+    return code
+
 def addSlideText(slideTitle,bullets,opts=""):
     opts = utils.parseOptions(opts)
     pos = ""
@@ -120,15 +134,17 @@ def addSlideTextPlotPlot(slideTitle,bullets,plotName1,plotName2,drawType="includ
     code += "\\end{center}"
     return code
 
-def addSlide(title=None,text=None,p1=None,p2=None,opts="",textobjects=[],arrowobjects=[],boxobjects=[],objects=[]):
+def addSlide(title=None,text=None,text1=None,text2=None,p1=None,p2=None,opts="",textobjects=[],arrowobjects=[],boxobjects=[],objects=[]):
     global source, slideNumber
     slideNumber += 1
 
     parsedOpts = utils.parseOptions(opts)
     drawtype = parsedOpts["drawtype"] if parsedOpts["drawtype"] else "includegraphics"
+    if( text1 ): text = text1 # Compatibility
 
     bullets = []
     if( text ): bullets = text.split("\n")
+    if( text2 ): bullets2 = text2.split("\n")
 
     if( not title ):
         cleanP1 = p1.replace("_","\\_").rsplit(".",1)[0].split("/")[-1] if p1 else ""
@@ -153,8 +169,13 @@ def addSlide(title=None,text=None,p1=None,p2=None,opts="",textobjects=[],arrowob
             print "[SM] Adding Plot slide #%s" % slideNumber
             source += addSlidePlot(title,p1,drawType=drawtype,opts=opts)
     elif( text ):
-        print "[SM] Adding Text slide #%s" % slideNumber
-        source += addSlideText(title,bullets,opts=opts)
+        if ( text2 ):
+            pass
+            print "[SM] Adding TextText slide #%s" % slideNumber
+            source += addSlideTextText(title,bullets,bullets2,opts=opts)
+        else:
+            print "[SM] Adding Text slide #%s" % slideNumber
+            source += addSlideText(title,bullets,opts=opts)
     elif( title ):
         print "[SM] Adding Title slide #%s" % slideNumber
         addSlideTitle(title,opts)
@@ -345,9 +366,11 @@ def writeSlides(output="output.tex", opts="--compile"):
     if(globalOpts["makegui"] and len(objectslides) > 0):
         utils.makeGUI(objectslides, output.replace(".tex",".pdf"), os.getcwd())
 
-def startBackup():
+def startBackup(opts=""):
     global source, slideNumber
     slideNumber += 1
+
+    opts = utils.parseOptions(opts)
 
     print "[SM] Beginning backup"
 
@@ -356,8 +379,9 @@ def startBackup():
     if(theme == "nick"): color = "nickcolor"
     if(theme == "madrid"): color = "madridcolor"
 
+    if(opts["resetnumbering"]): source += "\n\\appendix\n"
+
     source += """
-    \\appendix
     \\begin{frame}[plain]
     \\centering
     \\begin{textblock*}{12.8cm}[0.5,0.5](6.4cm,4.8cm)

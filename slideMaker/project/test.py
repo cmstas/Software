@@ -33,10 +33,18 @@ sm.addSlide(p1="yields.pdf",p2="yields.pdf")
 # when I specify an empty object, a helper grid gets printed on the slide if I've specified
 # the global option "--makegrid". A gui is produced if I specify "--makegui" instead
 sm.addSlide(p1="zmass.pdf", objects=["a0","c0"])
-sm.addSlide(text=content+content)
+sm.addSlide(text1=content+content)
+
+sm.addSlide(text1="""
+- this is text that goes in the left column
+""",
+text2="""
+- this is text that goes in the right column
+""", opts="--texttop")
 
 # slides reset their numbering when you start the backup section
-sm.startBackup()
+# default (no option) does not do this
+sm.startBackup(opts="--resetnumbering")
 sm.addSlide(text=content, p1="filt.pdf", opts="--sidebyside")
 sm.addSlide(text=content, p1="zmass.pdf", p2="zmass.pdf")
 
