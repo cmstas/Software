@@ -8,7 +8,7 @@ sm.addGlobalOptions("--makegui --graphicspaths ./test2/,./test3/")
 content = """
  - first \\textbf{bullet} \\red{point} and if I make it long enough, it should wrap to the next line
    -- first secondary bullet \\textcolor{blue}{point}. similarly this should wrap to the next line given enough length
-   -- second secondary bullet point $\\met$
+   -- second secondary bullet point $\\met$, $\\Ht$, $\\mtmin$, $\\mt$, $\\pt$
    -- third secondary bullet \\orange{test}
 """
 
