@@ -3,6 +3,8 @@
 
 2) `cd` to slideMaker directory and add it to the path: `export PYTHONPATH=$PYTHONPATH:$(pwd)`
 
+3) If you want to use tables, `cd` to the slideMaker directory and do `curl -O https://raw.githubusercontent.com/aminnj/makers/master/tableMaker/tableMaker.py`
+
 I recommend putting these in your .bashrc.
 
 ## minimal minimal minimal working example
@@ -17,7 +19,7 @@ Instead of test.py, you could execute slideMaker.py. This makes it simpler to te
 
 ## Options
 ### addGlobalOptions options
-  * --graphicspaths X: X is a comma separated list of paths for images/plots
+  * --graphicspaths X: X is a comma separated list of paths for images/plots (note that a trailing / is required)
   * --makegui: make a GUI if invalid objects are created
   * --makegrid: draw a grid on a slide if invalid objects are created
 

@@ -66,7 +66,7 @@ def addSlidePlot(slideTitle, plotName,drawType="includegraphics",opts=""):
     code = """
     \\begin{frame}\\frametitle{%s}
     \\begin{center}
-    \\vspace*{-0.075\\textheight}\\%s[height=0.88\\textheight,keepaspectratio]{%s}
+    \\vspace*{-0.035\\textheight}\\%s[height=0.88\\textheight,keepaspectratio]{%s}
     \\end{center}
     """ % (slideTitle, drawType, plotName)
     return code
