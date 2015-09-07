@@ -885,7 +885,9 @@ void dataMCplotMaker(TH1F* Data, std::vector <TH1F*> Backgrounds, std::vector <s
     if (compareMultiple) Data = (TH1F*)Signals[0]->Clone();
     if (compareMultiple && Signals.size() > 1) for (unsigned int i = 1; i < Signals.size(); i++) Data->Add(Signals[i]); 
     finPad[1]->cd();
-    TH1F* err_hist = (TH1F*)Signals[1]->Clone(); 
+    TH1F* err_hist = 0;
+    if (compareMultiple) err_hist = (TH1F*)Signals[0]->Clone(); 
+    if (!compareMultiple) err_hist = (TH1F*)Backgrounds[0]->Clone(); 
     err_hist->SetTitle("");
     err_hist->Draw();
     err_hist->SetLineColor(kBlack);
