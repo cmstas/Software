@@ -542,8 +542,8 @@ void dataMCplotMaker(TH1F* Data, std::vector <TH1F*> Backgrounds, std::vector <s
     finPad[0]->SetLeftMargin(0.12);
     finPad[0]->SetBottomMargin(0.11);
     finPad[1]->SetLeftMargin(0.12);
-    finPad[0]->Draw();
     finPad[1]->Draw();
+    finPad[0]->Draw();
     finPad[0]->cd();
   }
   if (noData == true && !compareMultiple){
@@ -638,6 +638,10 @@ void dataMCplotMaker(TH1F* Data, std::vector <TH1F*> Backgrounds, std::vector <s
   stack->SetMinimum(myMin);
   stack->SetMaximum(myMax);
 
+  //If linear and large numbers, need extra space
+  if (linear && myMax > 1000) finPad[0]->SetLeftMargin(0.15);
+  if (linear && myMax > 1000) finPad[1]->SetLeftMargin(0.15);
+
   //Y-axis titles
   float bin_width = Backgrounds[0]->GetXaxis()->GetBinWidth(1);
   if (yAxisOverride != "" && yAxisOverride[0] != '\0') stack->GetYaxis()->SetTitle(Form("%s", yAxisOverride.c_str()));
@@ -657,6 +661,7 @@ void dataMCplotMaker(TH1F* Data, std::vector <TH1F*> Backgrounds, std::vector <s
   if (!noData) stack->GetYaxis()->SetTitleOffset(1.5);
   if (noData && !linear) stack->GetYaxis()->SetTitleOffset(1.4+yTitleOffset_);
   if (noData &&  linear) stack->GetYaxis()->SetTitleOffset(1.6+yTitleOffset_);
+  if (linear && myMax > 1000) stack->GetYaxis()->SetTitleOffset(0.5+stack->GetYaxis()->GetTitleOffset()); 
 
   //Title size
   if (largeLabels){
