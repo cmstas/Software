@@ -2,7 +2,7 @@
 import commands, os, sys, json
 
 basepath = os.path.dirname(os.path.abspath(__file__))
-listOfOptions = ["dump", "copy", "compile", "graphicspaths", "shorttitle", "themecolor", "sidebyside", "modernfont", "noarrowhead","rotate","drawtype","crayon","shadow","makegrid","makegui","dashed","brace","flip","casual","texttop", "resetnumbering"]
+listOfOptions = ["dump", "copy", "compile", "graphicspaths", "shorttitle", "themecolor", "sidebyside", "modernfont", "noarrowhead","rotate","drawtype","crayon","shadow","makegrid","makegui","dashed","brace","flip","casual","texttop", "resetnumbering", "vertical", "sizeratio"]
 def parseOptions(optString):
     opts = { }
     for optName in listOfOptions:

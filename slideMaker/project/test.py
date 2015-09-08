@@ -30,6 +30,7 @@ sm.addSlide(title="Perturbation Theory on $H_m(dS_n,\\mathbb{R})$ Orbifolds", op
 sm.addSlide(p1="yields.pdf",p2="yields.pdf", objects=["t1","t2","a1","a2"])
 sm.addSlide(p1="yields.pdf",p2="yields.pdf")
 
+
 # when I specify an empty object, a helper grid gets printed on the slide if I've specified
 # the global option "--makegrid". A gui is produced if I specify "--makegui" instead
 sm.addSlide(p1="zmass.pdf", objects=["a0","c0"])
@@ -41,6 +42,7 @@ import tableMaker as tm
 # https://github.com/aminnj/makers/tree/master/tableMaker
 tm.makeTable("tables/table1.txt")
 sm.addSlide(p1="tables/table1.pdf", p2="tables/table1.pdf")
+sm.addSlide(p1="tables/table1.pdf",p2="zmass.pdf", opts="--vertical --sizeratio 0.2")
 ### END TABLE EXAMPLE ###
 
 sm.addSlide(text1="""

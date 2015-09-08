@@ -72,13 +72,35 @@ def addSlidePlot(slideTitle, plotName,drawType="includegraphics",opts=""):
     return code
 
 def addSlidePlotPlot(slideTitle, plotName1, plotName2,drawType="includegraphics",opts=""):
-    code = """
-    \\begin{frame}\\frametitle{%s}
-    \\begin{center}
-    \\vspace*{-0.035\\textheight}\\%s[height=0.95\\textheight,width=0.48\\textwidth,keepaspectratio]{%s} \\hfill
-    \\vspace*{-0.035\\textheight}\\%s[height=0.95\\textheight,width=0.48\\textwidth,keepaspectratio]{%s}
-    \\end{center}
-    """ % (slideTitle, drawType, plotName1, drawType, plotName2)
+    opts = utils.parseOptions(opts)
+    code = ""
+    if(opts["vertical"]): 
+        totalSize = 0.84
+        size1, size2 = 0.5*totalSize, 0.5*totalSize
+        if(opts["sizeratio"]):
+            size1, size2 = float(opts["sizeratio"])*totalSize, (1.0-float(opts["sizeratio"]))*totalSize
+
+        code = """
+        \\begin{frame}\\frametitle{%s}
+        \\begin{center}
+        \\%s[height=%.2f\\textheight,keepaspectratio]{%s}\\vfill
+        \\%s[height=%.2f\\textheight,keepaspectratio]{%s}
+        \\end{center}
+        """ % (slideTitle, drawType, size1, plotName1, drawType, size2, plotName2)
+    else:
+        totalSize = 0.96
+        size1, size2 = 0.5*totalSize, 0.5*totalSize
+        if(opts["sizeratio"]):
+            size1, size2 = float(opts["sizeratio"])*totalSize, (1.0-float(opts["sizeratio"]))*totalSize
+
+        code = """
+        \\begin{frame}\\frametitle{%s}
+        \\begin{center}
+        \\vspace*{-0.035\\textheight}\\%s[width=%.2f\\textwidth,keepaspectratio]{%s} \\hfill
+        \\vspace*{-0.035\\textheight}\\%s[width=%.2f\\textwidth,keepaspectratio]{%s}
+        \\end{center}
+        """ % (slideTitle, drawType, size1, plotName1, drawType, size2, plotName2)
+
     return code
 
 def addSlideTextText(slideTitle, bullets1, bullets2,opts=""):
@@ -349,8 +371,9 @@ def writeSlides(output="output.tex", opts="--compile"):
 
     if(opts["compile"]):
         # compile twice to get correct slide numbers. latex is dumb. is this the only way?
-        stat,out = commands.getstatusoutput("pdflatex -interaction=nonstopmode %s && \
-                                             pdflatex -interaction=nonstopmode %s " % (output,output) )
+        # stat,out = commands.getstatusoutput("pdflatex -interaction=nonstopmode %s && \
+        #                                      pdflatex -interaction=nonstopmode %s " % (output,output) )
+        stat,out = commands.getstatusoutput("pdflatex -interaction=nonstopmode %s " % (output) )
         if("Fatal error" in out):
             print "[SM] ERROR: Tried to compile, but failed. Last few lines of printout below."
             print "_"*40

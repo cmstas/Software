@@ -33,6 +33,8 @@ Instead of test.py, you could execute slideMaker.py. This makes it simpler to te
   * --shorttitle X: only applies to title slide. uses a short title for the footer bar
   * --sidebyside: displays text and plot side by side rather than text on top and plot on bottom
   * --texttop: for a slide with text only, this aligns text at the top rather than center
+  * --vertical: for slides with two figures, this places them on top of each other
+  * --sizeratio: for slides with two figures, this is the fraction of the slide to give the first object
 
 ### addObject options
   * supported object types: text, brace, arrow, line, box, circle
