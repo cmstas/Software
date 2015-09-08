@@ -90,6 +90,7 @@ Supported flags for "options" string:
   - --outOfFrame: CMS Preliminary goes on top instead of in the frame
   - --markerStyle2: alternate marker style for signals (alternates between filled and unfilled)
   - --largeLabel: use larger legend and axis label size
+  - --lumiUnit: change the lumi unit from its default of "fb" (the 'inverse' part is automatic)
 
 Example:
 ````

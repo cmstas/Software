@@ -1,0 +1,7 @@
+\textbf{col1} | \textbf{col2} | \textbf{col3}  | \textbf{col4} | \textbf{col5}
+
+mrc 1 2 cols  | b             | c              | d             | e
+a             | b             | c              | d             | e
+a             | mrc 2 1 rows  | mrc 3 3 $\met$ | d             | e
+a             | b             | c              | d             | e
+a             | b             | c              | d             | e

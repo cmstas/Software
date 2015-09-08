@@ -2,12 +2,13 @@ import sys
 
 import slideMaker as sm
 
-sm.addGlobalOptions("--makegui")
+# test2 and test3 can be folders with your plots, so you can execute this script anywhere really
+sm.addGlobalOptions("--makegui --graphicspaths ./test2/,./test3/")
 
 content = """
  - first \\textbf{bullet} \\red{point} and if I make it long enough, it should wrap to the next line
    -- first secondary bullet \\textcolor{blue}{point}. similarly this should wrap to the next line given enough length
-   -- second secondary bullet point $\\met$
+   -- second secondary bullet point $\\met$, $\\Ht$, $\\mtmin$, $\\mt$, $\\pt$
    -- third secondary bullet \\orange{test}
 """
 
@@ -20,10 +21,9 @@ sm.addObject("a0","arrow")
 sm.addObject("c0","circle")
 
 # supported themes are "nick", "alex", and "madrid"
-# test2 and test3 can be folders with your plots, so you can execute this script anywhere really
 # themecolor takes RGB. could put in explicit color names, but RGB more robust
 # also try the --modernfont option
-sm.initSlides(me="Nick",themeName="nick",opts="--graphicspaths ./test2/,./test3/ --themecolor 51,51,179")
+sm.initSlides(me="Nick",themeName="nick",opts="--themecolor 51,51,179")
 sm.addSlide(title="Perturbation Theory on $H_m(dS_n,\\mathbb{R})$ Orbifolds", opts="--shorttitle snarxiv hep-th")
 
 # pass in a list of textobjects (which are just dicts, so they can be modified too)
@@ -35,6 +35,14 @@ sm.addSlide(p1="yields.pdf",p2="yields.pdf")
 sm.addSlide(p1="zmass.pdf", objects=["a0","c0"])
 sm.addSlide(text1=content+content)
 
+### BEGIN TABLE EXAMPLE ###
+import tableMaker as tm
+# wrote a table in tables/table1.txt with custom markup
+# https://github.com/aminnj/makers/tree/master/tableMaker
+tm.makeTable("tables/table1.txt")
+sm.addSlide(p1="tables/table1.pdf", p2="tables/table1.pdf")
+### END TABLE EXAMPLE ###
+
 sm.addSlide(text1="""
 - this is text that goes in the left column
 """,
@@ -42,10 +50,10 @@ text2="""
 - this is text that goes in the right column
 """, opts="--texttop")
 
-# slides reset their numbering when you start the backup section
-# default (no option) does not do this
-sm.startBackup(opts="--resetnumbering")
+# slides reset their numbering when you start the backup section if 
+# you specify opts="--resetnumbering"
+sm.startBackup()
 sm.addSlide(text=content, p1="filt.pdf", opts="--sidebyside")
 sm.addSlide(text=content, p1="zmass.pdf", p2="zmass.pdf")
 
-sm.writeSlides("test_1.tex", opts="--compile --copy")
+sm.writeSlides("test_1.tex", opts="--compile --copy --dump")

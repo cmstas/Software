@@ -32,11 +32,14 @@ commonHeader = """
 
 \\newcommand{\\met}{\\slashed{E}_T}
 \\newcommand{\\pt}{p_{T}}
-\\newcommand{\\ht}{h_{T}}
+\\newcommand{\\Ht}{h_{T}}
+\\newcommand{\\mt}{m_{T}}
+\\newcommand{\\mtmin}{m_{T}^\\text{min}}
 \\newcommand{\\red}[1]{\\textcolor{red}{#1}}
 \\newcommand{\\blue}[1]{\\textcolor{blue}{#1}}
 \\newcommand{\\coolblue}[1]{\\textcolor{coolblue}{#1}}
 \\newcommand{\\orange}[1]{\\textcolor{orange}{#1}}
+
 
 
 \\author[AUTHORHERE]{}
@@ -116,6 +119,8 @@ themeNick = """
 
 themeAlex = """
 \\setbeamertemplate{footline}[frame number]
+\\setbeamertemplate{itemize item}{\\color{alexcolor}$\\blacktriangleright$}
+\\setbeamertemplate{itemize subitem}{\\color{alexcolor}$\\blacktriangleright$}
 \\setbeamercolor{frametitle}{fg=alexcolor}
 \\setbeamerfont{frametitle}{size=\\LARGE \\bfseries}
 \\setbeamertemplate{footline}{\\raisebox{5pt}{\\makebox[\\paperwidth]{\\hfill\\makebox[10pt]{\\scriptsize\\textcolor{white}{\\insertframenumber\\hspace{2mm}}}}}}\\setbeamersize{text margin left=10pt,text margin right=10pt}
