@@ -107,6 +107,7 @@ def addSlideTextText(slideTitle, bullets1, bullets2,opts=""):
     opts = utils.parseOptions(opts)
     pos = ""
     if(opts["texttop"]): pos = "[t]"
+    if(opts["textbottom"]): pos = "[b]"
 
     code = "\\begin{frame}%s\\frametitle{%s} \n" % (pos,slideTitle)
     code += "\\begin{columns}\n  \\begin{column}{0.5\\textwidth} \n"
@@ -121,6 +122,7 @@ def addSlideText(slideTitle,bullets,opts=""):
     opts = utils.parseOptions(opts)
     pos = ""
     if(opts["texttop"]): pos = "[t]"
+    if(opts["textbottom"]): pos = "[b]"
     code = "\\begin{frame}%s\\frametitle{%s} \n" % (pos,slideTitle)
     code += utils.bulletsToCode(bullets, opts)
     return code
