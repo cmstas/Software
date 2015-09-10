@@ -2,7 +2,7 @@
 import commands, os, sys, json
 
 basepath = os.path.dirname(os.path.abspath(__file__))
-listOfOptions = ["dump", "copy", "compile", "graphicspaths", "shorttitle", "themecolor", "sidebyside", "modernfont", "noarrowhead","rotate","drawtype","crayon","shadow","makegrid","makegui","dashed","brace","flip","casual","texttop", "textbottom", "resetnumbering", "vertical", "sizeratio","textsize"]
+listOfOptions = ["dump", "copy", "compile", "graphicspaths", "shorttitle", "themecolor", "sidebyside", "modernfont", "noarrowhead","rotate","drawtype","crayon","shadow","makegrid","makegui","dashed","brace","flip","casual","texttop", "textbottom", "resetnumbering", "vertical", "sizeratio","textsize","movedowntext"]
 def parseOptions(optString):
     opts = { }
     for optName in listOfOptions:
@@ -25,10 +25,13 @@ def parseOptions(optString):
     return opts
 
 def bulletsToCode(bullets, opts):
+    code = ""
     textSize = 0
     if(opts["textsize"]): textSize = opts["textsize"]
+    if(opts["movedowntext"]): code += "\\vspace{%.2f\\textheight}\n" % float(opts["movedowntext"])
 
-    code = "  \\begin{%s}\n" % numToSize(textSize)
+
+    code += "  \\begin{%s}\n" % numToSize(textSize)
     code += "  \\begin{itemize}\n"
     wasSubpoint=False
     bullets = [bullet.strip() for bullet in bullets if len(bullet.strip()) > 3]

@@ -34,6 +34,7 @@ Instead of test.py, you could execute slideMaker.py. This makes it simpler to te
   * --sidebyside: displays text and plot side by side rather than text on top and plot on bottom
   * --texttop: for a slide with text only, this aligns text at the top rather than center
   * --textbottom: for a slide with text only, this aligns text at the bottom rather than center
+  * --movedowntext X: for a slide containing text, this shifts the text down by a fraction of the slide (0.5 is half the slide)
   * --vertical: for slides with two figures, this places them on top of each other
   * --sizeratio: for slides with two figures, this is the fraction of the slide to give the first object
   * --textsize: for slides with text, this number (between -4 and 5) will change the text size (0 is normal)
