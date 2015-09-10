@@ -2,7 +2,7 @@
 import commands, os, sys, json
 
 basepath = os.path.dirname(os.path.abspath(__file__))
-listOfOptions = ["dump", "copy", "compile", "graphicspaths", "shorttitle", "themecolor", "sidebyside", "modernfont", "noarrowhead","rotate","drawtype","crayon","shadow","makegrid","makegui","dashed","brace","flip","casual","texttop", "resetnumbering", "vertical", "sizeratio"]
+listOfOptions = ["dump", "copy", "compile", "graphicspaths", "shorttitle", "themecolor", "sidebyside", "modernfont", "noarrowhead","rotate","drawtype","crayon","shadow","makegrid","makegui","dashed","brace","flip","casual","texttop", "resetnumbering", "vertical", "sizeratio","textsize"]
 def parseOptions(optString):
     opts = { }
     for optName in listOfOptions:
@@ -24,8 +24,12 @@ def parseOptions(optString):
 
     return opts
 
-def bulletsToCode(bullets):
-    code = "  \\begin{itemize}\n"
+def bulletsToCode(bullets, opts):
+    textSize = 0
+    if(opts["textsize"]): textSize = opts["textsize"]
+
+    code = "  \\begin{%s}\n" % numToSize(textSize)
+    code += "  \\begin{itemize}\n"
     wasSubpoint=False
     bullets = [bullet.strip() for bullet in bullets if len(bullet.strip()) > 3]
     if(len(bullets) < 1): return ""
@@ -52,6 +56,7 @@ def bulletsToCode(bullets):
         wasSubpoint = isSubpoint
 
     code += "  \\end{itemize}\n"
+    code += "  \\end{%s}\n" % numToSize(textSize)
     return code
 
 def getFreetextCode(obj):
@@ -181,6 +186,7 @@ def cleanTex(text):
     return " ".join(cleanwords)
 
 def numToSize(size):
+    size = int(size)
     if   (size == -4): return "tiny"; 
     elif (size == -3): return "scriptsize"; 
     elif (size == -2): return "footnotesize"; 

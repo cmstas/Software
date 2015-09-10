@@ -110,9 +110,9 @@ def addSlideTextText(slideTitle, bullets1, bullets2,opts=""):
 
     code = "\\begin{frame}%s\\frametitle{%s} \n" % (pos,slideTitle)
     code += "\\begin{columns}\n  \\begin{column}{0.5\\textwidth} \n"
-    code += utils.bulletsToCode(bullets1)
+    code += utils.bulletsToCode(bullets1, opts)
     code += "\\end{column}\n  \\begin{column}{0.5\\textwidth}"
-    code += utils.bulletsToCode(bullets2)
+    code += utils.bulletsToCode(bullets2, opts)
     code += "\\end{column}\n\\end{columns} \n"
 
     return code
@@ -122,7 +122,7 @@ def addSlideText(slideTitle,bullets,opts=""):
     pos = ""
     if(opts["texttop"]): pos = "[t]"
     code = "\\begin{frame}%s\\frametitle{%s} \n" % (pos,slideTitle)
-    code += utils.bulletsToCode(bullets)
+    code += utils.bulletsToCode(bullets, opts)
     return code
 
 def addSlideTextPlot(slideTitle,bullets,plotName,drawType="includegraphics",opts=""):
@@ -131,13 +131,13 @@ def addSlideTextPlot(slideTitle,bullets,plotName,drawType="includegraphics",opts
     
     if(opts["sidebyside"]):
         code += "\\begin{columns}\n  \\begin{column}{0.5\\textwidth} \n"
-        code += utils.bulletsToCode(bullets)
+        code += utils.bulletsToCode(bullets, opts)
         code += "\\end{column}\n  \\begin{column}{0.5\\textwidth}"
         code += "    \\begin{center}"
         code += "      \\%s[width=\\textwidth,keepaspectratio]{%s} \n" % (drawType, plotName)
         code += "    \\end{center}\n  \\end{column}\n\\end{columns} \n"
     else:
-        code += utils.bulletsToCode(bullets)
+        code += utils.bulletsToCode(bullets, opts)
         code += "\\begin{center}"
         code += "  \\%s[height=%.2f\\textheight,keepaspectratio]{%s} \n" \
                     % (drawType, utils.textLinesToPlotHeight(utils.bulletNLines(bullets)),plotName)
@@ -146,8 +146,10 @@ def addSlideTextPlot(slideTitle,bullets,plotName,drawType="includegraphics",opts
     return code
 
 def addSlideTextPlotPlot(slideTitle,bullets,plotName1,plotName2,drawType="includegraphics",opts=""):
+    opts = utils.parseOptions(opts)
+
     code = "\\begin{frame}\\frametitle{%s} \n" % (slideTitle)
-    code += utils.bulletsToCode(bullets)
+    code += utils.bulletsToCode(bullets, opts)
     code += "\\begin{center}"
     code += "\\%s[height=%.2f\\textheight,width=0.48\\textwidth,keepaspectratio]{%s} \n" \
                 % (drawType, utils.textLinesToPlotHeight(utils.bulletNLines(bullets)),plotName1)
