@@ -347,10 +347,10 @@ void CTable::setRowLabel(const TString& labelTS, size_t r){
 
 void CTable::saveAs(const std::string& filename, bool overwrite){
   if(filename.length()>0){
-    if(file_==NULL){file_=new ofstream;}
+    if(file_==NULL){file_=new std::ofstream;}
     if(file_->good()){file_->close();}
     if(overwrite){file_->open(filename.c_str());}
-    else{file_->open(filename.c_str(),ofstream::out | ofstream::app);}
+    else{file_->open(filename.c_str(),std::ofstream::out | std::ofstream::app);}
     if(!file_->fail()){out_=file_;}
     else{
       std::cout<<"Failed to open file "<<filename<<", defaulting to terminal."<<std::endl;
@@ -371,7 +371,7 @@ bool CTable::isColLine(int i){
 
 void CTable::saveTex(const std::string& filename, bool standalone, bool withtitle){
   if(filename.length()>0){
-    if(file_==NULL){file_=new ofstream;}
+    if(file_==NULL){file_=new std::ofstream;}
     if(file_->good()){file_->close();}
     file_->open(filename.c_str());
     if(!file_->fail()){out_=file_;}
