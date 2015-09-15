@@ -332,6 +332,9 @@ void dataMCplotMaker(TH1F* Data, std::vector <TH1F*> Backgrounds, std::vector <s
     else cout << "Warning: Option not recognized!  Option: " << Options[i] << endl;
   }
 
+  //Print warnings
+  if (normalize && !nostack) cout << "Warning! You set option to normalize, but not option --noStack.  This won't do much!" << endl;
+
   //Decode data color
   Color_t dataColor = kBlack;
   if (datacolor != ""){
@@ -665,12 +668,12 @@ void dataMCplotMaker(TH1F* Data, std::vector <TH1F*> Backgrounds, std::vector <s
 
   //Title size
   if (largeLabels){
-  stack->GetYaxis()->SetTitleSize(0.05);
-  stack->GetXaxis()->SetTitleSize(0.05);
-  stack->GetYaxis()->SetLabelSize(0.045);
-  stack->GetXaxis()->SetLabelSize(0.045);
-  stack->GetXaxis()->SetTitleOffset(stack->GetXaxis()->GetTitleOffset()-0.2); 
-  stack->GetYaxis()->SetTitleOffset(stack->GetYaxis()->GetTitleOffset()-0.2); 
+    stack->GetYaxis()->SetTitleSize(0.05);
+    stack->GetXaxis()->SetTitleSize(0.05);
+    stack->GetYaxis()->SetLabelSize(0.045);
+    stack->GetXaxis()->SetLabelSize(0.045);
+    stack->GetXaxis()->SetTitleOffset(stack->GetXaxis()->GetTitleOffset()-0.2); 
+    stack->GetYaxis()->SetTitleOffset(stack->GetYaxis()->GetTitleOffset()-0.2); 
   }
 
   //X-axis string bin labels
@@ -708,7 +711,7 @@ void dataMCplotMaker(TH1F* Data, std::vector <TH1F*> Backgrounds, std::vector <s
   gStyle->SetErrorX(0.001); 
 
   //Try this
-  if (!dots) Backgrounds[0]->SetMarkerColor(0); 
+  if (!dots && !nostack) Backgrounds[0]->SetMarkerColor(0); 
   if (dots) Backgrounds[0]->SetMarkerColor(kBlue);
   if (dots && Backgrounds.size() > 1) Backgrounds[1]->SetMarkerColor(kRed);
   if (dots && Backgrounds.size() > 2) Backgrounds[2]->SetMarkerColor(kGreen+3);
@@ -763,8 +766,8 @@ void dataMCplotMaker(TH1F* Data, std::vector <TH1F*> Backgrounds, std::vector <s
   leg->SetTextFont(42);
   if (noData == false) leg->AddEntry(Data, dataName.c_str(), "lp");
   if (showPercentage) for (int i = Titles.size()-1; i > -1; i--) Titles[i] =  Form("%s [%i%%]", Titles[i].c_str(), percent[i]);
-  if (!dots) for (int i = Titles.size()-1; i > -1; i--) leg->AddEntry(Backgrounds[i], Titles[i].c_str(), "f");
-  if (dots) for (int i = Titles.size()-1; i > -1; i--) leg->AddEntry(Backgrounds[i], Titles[i].c_str(), "LPE");
+  if (!dots && !nostack) for (int i = Titles.size()-1; i > -1; i--) leg->AddEntry(Backgrounds[i], Titles[i].c_str(), "f");
+  if (dots || nostack) for (int i = Titles.size()-1; i > -1; i--) leg->AddEntry(Backgrounds[i], Titles[i].c_str(), "LPE");
   if (use_signals && !compareMultiple) for (int i = SignalTitles.size()-1; i > -1; i--) leg->AddEntry(Signals[i], SignalTitles[i].c_str(), "P");
   leg->SetFillStyle(0);
   if ( legendBox) leg->SetBorderSize(1);
