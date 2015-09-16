@@ -583,8 +583,8 @@ void dataMCplotMaker(TH1F* Data, std::vector <TH1F*> Backgrounds, std::vector <s
       Backgrounds[i]->UseCurrentStyle();
       if (!nostack) Backgrounds[i]->SetFillColor(Colors[i]);
       Backgrounds[i]->SetMarkerColor(Colors[i]);
-      if ( noBlackLines) Backgrounds[i]->SetLineColor(Colors[i]);
-      if (!noBlackLines) Backgrounds[i]->SetLineColor(kBlack);
+      if (noBlackLines || nostack) Backgrounds[i]->SetLineColor(Colors[i]);
+      else Backgrounds[i]->SetLineColor(kBlack);
       Backgrounds[i]->SetLineWidth(Backgrounds[i]->GetLineWidth()/1.5);
       if (nostack && normalize) Backgrounds[i]->Scale(1.0/Backgrounds[i]->Integral());
       stack->Add(Backgrounds[i]);
@@ -712,15 +712,16 @@ void dataMCplotMaker(TH1F* Data, std::vector <TH1F*> Backgrounds, std::vector <s
 
   //Try this
   if (!dots && !nostack) Backgrounds[0]->SetMarkerColor(0); 
-  if (dots) Backgrounds[0]->SetMarkerColor(kBlue);
-  if (dots && Backgrounds.size() > 1) Backgrounds[1]->SetMarkerColor(kRed);
-  if (dots && Backgrounds.size() > 2) Backgrounds[2]->SetMarkerColor(kGreen+3);
+  if (dots){ Backgrounds[0]->SetMarkerColor(kBlue); Backgrounds[0]->SetLineColor(kBlue); }
+  if (dots && Backgrounds.size() > 1){ Backgrounds[1]->SetMarkerColor(kRed); Backgrounds[1]->SetLineColor(kRed); }
+  if (dots && Backgrounds.size() > 2){ Backgrounds[2]->SetMarkerColor(kGreen+3); Backgrounds[2]->SetLineColor(kGreen+3); }
 
   //Draw
   if (!nostack && !dots && histoErrors) stack->Draw("histe");
-  if (!nostack && !dots && !histoErrors) stack->Draw("hist");
-  if (dots) stack->Draw("PE"); 
-  if (nostack) stack->Draw("nostack");
+  else if (!nostack && !dots && !histoErrors) stack->Draw("hist");
+  else if (dots && nostack) stack->Draw("nostack");
+  else if (dots) stack->Draw("PE"); 
+  else if (nostack) stack->Draw("histnostack");
   THStack *stack2 = new THStack("stack2", "stack2"); 
   Data->SetMarkerColor(dataColor);
   Data->SetLineColor(dataColor);
