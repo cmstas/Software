@@ -91,6 +91,7 @@ Supported flags for "options" string:
   - --markerStyle2: alternate marker style for signals (alternates between filled and unfilled)
   - --largeLabel: use larger legend and axis label size
   - --lumiUnit: change the lumi unit from its default of "fb" (the 'inverse' part is automatic)
+  - --noLumi: don't display lumi (for MC studies, for example)
 
 Example:
 ````
