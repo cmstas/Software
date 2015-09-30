@@ -33,7 +33,7 @@ Tables:
                          ( "row2", 0.22520, 0.97344,   0.0412)
                          ( "row3", 0.00867,  0.0404, "0.999146");
 ```
-  - You can use t1.SetPrecision(N) to get N units of precision.  This does NOT work if you type in the values, but works otherwise.
+  - You can use t1.setPrecision(N) to get N units of precision.  This does NOT work if you type in the values, but works otherwise.
   - Add title with: table.setTitle("Table Title"), table.useTitle();
   - Remove horiz. lines between rows: table.useLines(0);
   - Print column labels vertically: table.useVertColLabels();
