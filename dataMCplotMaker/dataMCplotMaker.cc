@@ -336,6 +336,9 @@ void dataMCplotMaker(TH1F* Data, std::vector <TH1F*> Backgrounds, std::vector <s
   //Print warnings
   if (normalize && !nostack) cout << "Warning! You set option to normalize, but not option --noStack.  This won't do much!" << endl;
 
+  //If no x-axis unit, turn off division label
+  if (xAxisUnit == "" || !showXaxisUnit) showDivisionLabel = 0;
+
   //Decode data color
   Color_t dataColor = kBlack;
   if (datacolor != ""){
@@ -558,6 +561,14 @@ void dataMCplotMaker(TH1F* Data, std::vector <TH1F*> Backgrounds, std::vector <s
   }
 
   //--------First pad: histogram------------
+
+  //Try this
+  if (!dots && !nostack) Backgrounds[0]->SetMarkerColor(0); 
+  if (dots){ Backgrounds[0]->SetMarkerColor(kBlue); Backgrounds[0]->SetLineColor(kBlue); }
+  if (dots && Backgrounds.size() > 1){ Backgrounds[1]->SetMarkerColor(kRed); Backgrounds[1]->SetLineColor(kRed); }
+  if (dots && Backgrounds.size() > 2){ Backgrounds[2]->SetMarkerColor(kGreen+3); Backgrounds[2]->SetLineColor(kGreen+3); }
+  if (dots && Backgrounds.size() > 3){ Backgrounds[3]->SetMarkerColor(kOrange+7); Backgrounds[3]->SetLineColor(kOrange+7); }
+
   //Stack of backgrounds
   THStack *stack = new THStack("stack", ""); 
   Data->SetMarkerStyle(20);
@@ -716,11 +727,12 @@ void dataMCplotMaker(TH1F* Data, std::vector <TH1F*> Backgrounds, std::vector <s
   if (dots){ Backgrounds[0]->SetMarkerColor(kBlue); Backgrounds[0]->SetLineColor(kBlue); }
   if (dots && Backgrounds.size() > 1){ Backgrounds[1]->SetMarkerColor(kRed); Backgrounds[1]->SetLineColor(kRed); }
   if (dots && Backgrounds.size() > 2){ Backgrounds[2]->SetMarkerColor(kGreen+3); Backgrounds[2]->SetLineColor(kGreen+3); }
+  if (dots && Backgrounds.size() > 3){ Backgrounds[3]->SetMarkerColor(kOrange+7); Backgrounds[3]->SetLineColor(kOrange+7); }
 
   //Draw
   if (!nostack && !dots && histoErrors) stack->Draw("histe");
   else if (!nostack && !dots && !histoErrors) stack->Draw("hist");
-  else if (dots && nostack) stack->Draw("nostack");
+  else if (dots && (nostack || Backgrounds.size() == 1)) stack->Draw("nostack");
   else if (dots) stack->Draw("PE"); 
   else if (nostack) stack->Draw("histnostack");
   THStack *stack2 = new THStack("stack2", "stack2"); 
