@@ -63,12 +63,15 @@ def addSlideTitle(title="", opts=""):
 
 
 def addSlidePlot(slideTitle, plotName,drawType="includegraphics",opts=""):
+    opts = utils.parseOptions(opts)
     code = """
     \\begin{frame}\\frametitle{%s}
     \\begin{center}
-    \\vspace*{-0.035\\textheight}\\%s[height=0.88\\textheight,keepaspectratio]{%s}
-    \\end{center}
-    """ % (slideTitle, drawType, plotName)
+    """
+    if(opts["fithorizontal"]): code += "\\vspace*{-0.035\\textheight}\\%s[width=0.99\\textwidth,keepaspectratio]{%s}"
+    else: code += "\\vspace*{-0.035\\textheight}\\%s[height=0.88\\textheight,keepaspectratio]{%s}"
+    code += "\\end{center}"
+    code = code % (slideTitle, drawType, plotName)
     return code
 
 def addSlidePlotPlot(slideTitle, plotName1, plotName2,drawType="includegraphics",opts=""):

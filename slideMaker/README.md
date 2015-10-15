@@ -39,6 +39,7 @@ Instead of test.py, you could execute slideMaker.py. This makes it simpler to te
   * --sizeratio: for slides with two figures, this is the fraction of the slide to give the first object
   * --textsize: for slides with text, this number (between -4 and 5) will change the text size (0 is normal)
   * --plottop: for slides with text and plot(s), this places the text on the bottom (default is on top)
+  * --fithorizontal: for slides with a single plot, this aligns the plot to fit the width of the slide (default is height)
 
 ### addObject options
   * supported object types: text, brace, arrow, line, box, circle

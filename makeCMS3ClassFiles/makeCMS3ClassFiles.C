@@ -123,6 +123,8 @@ void makeHeaderFile(TFile *f, const string& treeName, bool paranoid, const strin
     headerf << "#include <vector> " << endl;
     headerf << "#include <unistd.h> " << endl;
     headerf << "typedef ROOT::Math::LorentzVector<ROOT::Math::PxPyPzE4D<float> > LorentzVector;" << endl << endl;
+    headerf << "// Generated with the command" << endl;
+    headerf << "// makeCMS3ClassFiles(\"" << f->GetTitle() << "\", \"" << treeName << "\", \"" << Classname << "\", \"" << nameSpace << "\", \"" << objName << "\")" << endl << endl;
     if (paranoid)
         headerf << "#define PARANOIA" << endl << endl;
     headerf << "using namespace std; " << endl;
