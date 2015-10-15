@@ -126,4 +126,5 @@ Options:
   - --Yaxis X
   - --sciNot X: to put your bin contents into scientific notation.  X is a printf string (ie --sciNot .2 will give you two decimal places)
   - --colors: if you want each bin to be colored proportional to its value
+  - --text: if you want each bin to have value and error written on it 
   
