@@ -188,7 +188,21 @@ void singlePlotMaker(TH1F* h1, std::string title, std::string options_string) {
     dataMCplotMaker(null, Backgrounds, Titles, title, "", options_string);
 }
 
-void dataMCplotMaker(TH1F* Data, std::vector <TH1F*> Backgrounds, std::vector <string> Titles, std::string titleIn, std::string title2In, std::string options_string, std::vector <TH1F*> Signals, std::vector <string> SignalTitles, std::vector <Color_t> color_input){
+void dataMCplotMaker(TH1F* Data_in, std::vector <TH1F*> Backgrounds_in, std::vector <string> Titles, std::string titleIn, std::string title2In, std::string options_string, std::vector <TH1F*> Signals_in, std::vector <string> SignalTitles, std::vector <Color_t> color_input){
+
+  //Copy inputs
+  TH1F* Data = new TH1F(*Data_in); 
+  vector <TH1F*> Backgrounds; 
+  vector <TH1F*> Signals; 
+
+  for (unsigned int i = 0; i < Backgrounds_in.size(); i++){
+    TH1F* blah = new TH1F(*Backgrounds_in[i]); 
+    Backgrounds.push_back(blah);  
+  }
+  for (unsigned int i = 0; i < Signals_in.size(); i++){
+    TH1F* blah = new TH1F(*Signals_in[i]); 
+    Signals.push_back(blah);  
+  }
 
   char* title = (char *)alloca(titleIn.size() + 1);
   memcpy(title, titleIn.c_str(), titleIn.size() + 1);
@@ -333,6 +347,7 @@ void dataMCplotMaker(TH1F* Data, std::vector <TH1F*> Backgrounds, std::vector <s
     else cout << "Warning: Option not recognized!  Option: " << Options[i] << endl;
   }
 
+
   //Print warnings
   if (normalize && !nostack) cout << "Warning! You set option to normalize, but not option --noStack.  This won't do much!" << endl;
 
@@ -450,6 +465,8 @@ void dataMCplotMaker(TH1F* Data, std::vector <TH1F*> Backgrounds, std::vector <s
     if (!nostack) Colors.push_back(kYellow-4); 
     if (!nostack) Colors.push_back(kCyan-4);
     Colors.push_back(kViolet+4);
+    Colors.push_back(kRed);
+    Colors.push_back(kBlack);
   }
   //(e) Otherwise, default scheme for signals
   if (color_input.size() == 0 && use_signals == 1){ 
@@ -562,12 +579,6 @@ void dataMCplotMaker(TH1F* Data, std::vector <TH1F*> Backgrounds, std::vector <s
 
   //--------First pad: histogram------------
 
-  //Try this
-  if (!dots && !nostack) Backgrounds[0]->SetMarkerColor(0); 
-  if (dots){ Backgrounds[0]->SetMarkerColor(kBlue); Backgrounds[0]->SetLineColor(kBlue); }
-  if (dots && Backgrounds.size() > 1){ Backgrounds[1]->SetMarkerColor(kRed); Backgrounds[1]->SetLineColor(kRed); }
-  if (dots && Backgrounds.size() > 2){ Backgrounds[2]->SetMarkerColor(kGreen+3); Backgrounds[2]->SetLineColor(kGreen+3); }
-  if (dots && Backgrounds.size() > 3){ Backgrounds[3]->SetMarkerColor(kOrange+7); Backgrounds[3]->SetLineColor(kOrange+7); }
 
   //Stack of backgrounds
   THStack *stack = new THStack("stack", ""); 
@@ -617,6 +628,13 @@ void dataMCplotMaker(TH1F* Data, std::vector <TH1F*> Backgrounds, std::vector <s
       Backgrounds[i]->SetMarkerColor(Colors[i]);
     }
   }
+
+  //Try this
+  if (!dots && !nostack) Backgrounds[0]->SetMarkerColor(0); 
+  if (dots){ Backgrounds[0]->SetMarkerColor(kBlue); Backgrounds[0]->SetLineColor(kBlue); }
+  if (dots && Backgrounds.size() > 1){ Backgrounds[1]->SetMarkerColor(kRed); Backgrounds[1]->SetLineColor(kRed); }
+  if (dots && Backgrounds.size() > 2){ Backgrounds[2]->SetMarkerColor(kGreen+3); Backgrounds[2]->SetLineColor(kGreen+3); }
+  if (dots && Backgrounds.size() > 3){ Backgrounds[3]->SetMarkerColor(kOrange+7); Backgrounds[3]->SetLineColor(kOrange+7); }
 
   //Minimum and maximum
   float leftMax = AdjustedMaximum(1, Backgrounds, Data, Signals);
@@ -728,12 +746,13 @@ void dataMCplotMaker(TH1F* Data, std::vector <TH1F*> Backgrounds, std::vector <s
   if (dots && Backgrounds.size() > 1){ Backgrounds[1]->SetMarkerColor(kRed); Backgrounds[1]->SetLineColor(kRed); }
   if (dots && Backgrounds.size() > 2){ Backgrounds[2]->SetMarkerColor(kGreen+3); Backgrounds[2]->SetLineColor(kGreen+3); }
   if (dots && Backgrounds.size() > 3){ Backgrounds[3]->SetMarkerColor(kOrange+7); Backgrounds[3]->SetLineColor(kOrange+7); }
+  if (dots && Backgrounds.size() > 4){ Backgrounds[4]->SetMarkerColor(kMagenta+2); Backgrounds[4]->SetLineColor(kMagenta+2); }
+  if (dots && Backgrounds.size() > 5){ Backgrounds[5]->SetMarkerColor(kYellow-4); Backgrounds[5]->SetLineColor(kYellow-4); }
 
   //Draw
   if (!nostack && !dots && histoErrors) stack->Draw("histe");
   else if (!nostack && !dots && !histoErrors) stack->Draw("hist");
-  else if (dots && (nostack || Backgrounds.size() == 1)) stack->Draw("nostack");
-  else if (dots) stack->Draw("PE"); 
+  else if (dots) stack->Draw("PEnostack"); 
   else if (nostack) stack->Draw("histnostack");
   THStack *stack2 = new THStack("stack2", "stack2"); 
   Data->SetMarkerColor(dataColor);
@@ -960,4 +979,5 @@ void dataMCplotMaker(TH1F* Data, std::vector <TH1F*> Backgrounds, std::vector <s
     else if (png) c0.Print(Form("%s.png", outputName.c_str()));
     else c0.Print(Form("%s.pdf", outputName.c_str()));
   }
+
 }
