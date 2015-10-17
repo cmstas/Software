@@ -45,6 +45,12 @@ sm.addSlide(p1="tables/table1.pdf", p2="tables/table1.pdf")
 sm.addSlide(p1="tables/table1.pdf",p2="zmass.pdf", opts="--vertical --sizeratio 0.2")
 ### END TABLE EXAMPLE ###
 
+# four plots with text
+sm.addSlide(p1="tables/table1.pdf",p2="tables/table1.pdf", p3="tables/table1.pdf", p4="tables/table1.pdf", text="""
+--four plots here...
+--another bullet
+""")
+
 sm.addSlide(text1="""
 - this is text that goes in the left column
 """,

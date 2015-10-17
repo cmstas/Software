@@ -19,6 +19,7 @@ commonHeader = """
 \\usepackage{slashed}
 \\usepackage{appendixnumberbeamer} 
 \\usepackage{amssymb}
+\\usepackage{multicol}
 \\graphicspath{ GRAPHICSPATHHERE }
 \\setbeamertemplate{navigation symbols}{}
 
