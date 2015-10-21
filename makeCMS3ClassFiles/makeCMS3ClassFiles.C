@@ -123,6 +123,8 @@ void makeHeaderFile(TFile *f, const string& treeName, bool paranoid, const strin
     headerf << "#include <vector> " << endl;
     headerf << "#include <unistd.h> " << endl;
     headerf << "typedef ROOT::Math::LorentzVector<ROOT::Math::PxPyPzE4D<float> > LorentzVector;" << endl << endl;
+    headerf << "// Generated with the command" << endl;
+    headerf << "// makeCMS3ClassFiles(\"" << f->GetTitle() << "\", \"" << treeName << "\", \"" << Classname << "\", \"" << nameSpace << "\", \"" << objName << "\")" << endl << endl;
     if (paranoid)
         headerf << "#define PARANOIA" << endl << endl;
     headerf << "using namespace std; " << endl;
@@ -340,6 +342,7 @@ void makeHeaderFile(TFile *f, const string& treeName, bool paranoid, const strin
     bool haveHLT8E29Info = false;
     bool haveTauIDInfo = false;
     bool havebtagInfo = false;
+    bool havebtagInfoPuppi = false;
     for(int i = 0; i < aliasarray->GetSize(); i++) {
         TString aliasname(aliasarray->At(i)->GetName());
         if(aliasname=="hlt_trigNames") 
@@ -352,6 +355,8 @@ void makeHeaderFile(TFile *f, const string& treeName, bool paranoid, const strin
             haveTauIDInfo = true;
         if(aliasname=="pfjets_bDiscriminatorNames") 
 		    havebtagInfo = true;
+        if(aliasname=="pfjets_puppi_bDiscriminatorNames") 
+		    havebtagInfoPuppi = true;
     }
    
     if(haveHLTInfo) {
@@ -375,10 +380,15 @@ void makeHeaderFile(TFile *f, const string& treeName, bool paranoid, const strin
         headerf << "\t" << "float passTauID(TString idName, unsigned int tauIndx);" << endl;
     }//if(haveTauIDInfo)
     
-    if(havebtagInfo) {
+    if(havebtagInfo && !havebtagInfoPuppi) {
 	  //functions to return whether or not trigger fired - HLT
 	  headerf << "\t" << "float getbtagvalue(TString bDiscriminatorName, unsigned int jetIndx);" << endl;
     }//if(haveTauIDInfo)
+
+    if(havebtagInfo && havebtagInfoPuppi) {
+	  //functions to return b taggers
+	  headerf << "\t" << "float getbtagvalue(TString bDiscriminatorName, unsigned int jetIndx, bool use_puppi = false);" << endl;
+    }
     
     headerf << endl;
     headerf << "  static void progress( int nEventsTotal, int nEventsChain );" << endl;
@@ -457,10 +467,14 @@ void makeHeaderFile(TFile *f, const string& treeName, bool paranoid, const strin
         //functions to return whether or not trigger fired - HLT
         headerf << "\t" << "float passTauID(TString idName, unsigned int tauIndx);" << endl;
     }//if(haveTauIDInfo) 
-    if(havebtagInfo) {
-        //functions to return whether or not trigger fired - HLT
-        headerf << "\t" << "float getbtagvalue(TString bDiscriminatorName, unsigned int jetIndx);" << endl;
-    }//if(haveTauIDInfo) 
+    if(havebtagInfo && !havebtagInfoPuppi) {
+	  //functions to return whether or not trigger fired - HLT
+	  headerf << "\t" << "float getbtagvalue(TString bDiscriminatorName, unsigned int jetIndx);" << endl;
+    }//if(haveTauIDInfo)
+    if(havebtagInfo && havebtagInfoPuppi) {
+	  //functions to return b taggers
+	  headerf << "\t" << "float getbtagvalue(TString bDiscriminatorName, unsigned int jetIndx, bool use_puppi = false);" << endl;
+    }
 
     headerf << "}" << endl;
     headerf << "#endif" << endl;
@@ -812,6 +826,7 @@ void makeCCFile(TFile *f, const string& Classname, const string& nameSpace, cons
     bool haveHLT8E29Info = false;
     bool haveTauIDInfo = false;
     bool havebtagInfo = false;
+    bool havebtagInfoPuppi = false;
     for(int i = 0; i < aliasarray->GetSize(); i++) {
         TString aliasname(aliasarray->At(i)->GetName());
         if(aliasname=="hlt_trigNames") 
@@ -823,7 +838,9 @@ void makeCCFile(TFile *f, const string& Classname, const string& nameSpace, cons
         if(aliasname=="taus_pf_IDnames") 
             haveTauIDInfo = true;
         if(aliasname=="pfjets_bDiscriminatorNames") 
-		    havebtagInfo = true;
+	  havebtagInfo = true;
+        if(aliasname=="pfjets_puppi_bDiscriminatorNames") 
+	  havebtagInfoPuppi = true;
     }
    
     if(haveHLTInfo) {
@@ -937,7 +954,7 @@ void makeCCFile(TFile *f, const string& Classname, const string& nameSpace, cons
         implf << "\t" << "}" << endl;
     }//if(haveTauIDInfo)
     
-    if(havebtagInfo) {
+    if(havebtagInfo && !havebtagInfoPuppi) {
 	  //functions to return whether or not trigger fired - HLT
 	  implf << "\t" << "float " << Classname << "::getbtagvalue(TString bDiscriminatorName, unsigned int jetIndx) {" << endl;
 	  implf << "\t\t" << "size_t bDiscriminatorIndx;" << endl;
@@ -953,6 +970,28 @@ void makeCCFile(TFile *f, const string& Classname, const string& nameSpace, cons
 	  implf << "\t\t" << "if (jetIndx < pfjets_bDiscriminators().size()) " << endl;
 	  implf << "\t\t\t" << "return pfjets_bDiscriminators().at(jetIndx).at(bDiscriminatorIndx);" << endl;
 	  implf << "\t\t" << "else {" << endl;
+	  implf << "\t\t\t" << "cout << \"Cannot find jet # \"<< jetIndx << endl;" << endl;
+	  implf << "\t\t\t" << "return 0;" << endl;
+	  implf << "\t\t" << "}" << endl;
+	  implf << "\t" << "}" << endl;
+    }//if(haveTauIDInfo)
+    if(havebtagInfo && havebtagInfoPuppi) {
+	  implf << "\t" << "float " << Classname << "::getbtagvalue(TString bDiscriminatorName, unsigned int jetIndx, bool use_puppi) {" << endl;
+	  implf << "\t\t" << "size_t bDiscriminatorIndx;" << endl;
+	  implf << "\t\t" << "vector<TString>::const_iterator begin_it = use_puppi ? pfjets_puppi_bDiscriminatorNames().begin() : pfjets_bDiscriminatorNames().begin();" << endl;
+	  implf << "\t\t" << "vector<TString>::const_iterator end_it = use_puppi ? pfjets_puppi_bDiscriminatorNames().end() : pfjets_bDiscriminatorNames().end();" << endl;
+	  implf << "\t\t" << "vector<TString>::const_iterator found_it = find(begin_it, end_it, bDiscriminatorName);" << endl;
+	  implf << "\t\t" << "if(found_it != end_it)" << endl;
+	  implf << "\t\t\t" << "bDiscriminatorIndx = found_it - begin_it;" << endl;
+	  implf << "\t\t" << "else {" << endl;
+	  implf << "\t\t\t" << "cout << \"Cannot find b discriminator \" << bDiscriminatorName << endl; " << endl;
+	  implf << "\t\t\t" << "return 0;" << endl;
+	  implf << "\t\t" << "}" << endl << endl;
+	  implf << "\t\t" << "uint maxIndx = use_puppi ? pfjets_puppi_bDiscriminators().size() : pfjets_bDiscriminators().size();" << endl;
+	  implf << "\t\t" << "if (jetIndx < maxIndx) { " << endl;
+	  implf << "\t\t\t" << "float retval = use_puppi ? pfjets_puppi_bDiscriminators().at(jetIndx).at(bDiscriminatorIndx) : pfjets_bDiscriminators().at(jetIndx).at(bDiscriminatorIndx);" << endl;
+	  implf << "\t\t\t" << "return retval;" << endl;
+	  implf << "\t\t" << "} else {" << endl;
 	  implf << "\t\t\t" << "cout << \"Cannot find jet # \"<< jetIndx << endl;" << endl;
 	  implf << "\t\t\t" << "return 0;" << endl;
 	  implf << "\t\t" << "}" << endl;
@@ -1050,9 +1089,13 @@ void makeCCFile(TFile *f, const string& Classname, const string& nameSpace, cons
         //functions to return whether or not trigger fired - HLT
         implf   << "\t" << "float passTauID(TString idName, unsigned int tauIndx) { return " << objName << ".passTauID(idName, tauIndx); }" << endl;
     }//if(haveTauIDInfo) 
-    if(havebtagInfo) {
+    if(havebtagInfo && !havebtagInfoPuppi) {
         //functions to return whether or not trigger fired - HLT
         implf   << "\t" << "float getbtagvalue(TString bDiscriminatorName, unsigned int jetIndx) { return " << objName << ".getbtagvalue( bDiscriminatorName, jetIndx); }" << endl;
+    }//if(haveTauIDInfo) 
+    if(havebtagInfo && havebtagInfoPuppi) {
+        //functions to return whether or not trigger fired - HLT
+        implf   << "\t" << "float getbtagvalue(TString bDiscriminatorName, unsigned int jetIndx, bool use_puppi) { return " << objName << ".getbtagvalue( bDiscriminatorName, jetIndx, use_puppi); }" << endl;
     }//if(haveTauIDInfo) 
     
     implf << "}" << endl;
