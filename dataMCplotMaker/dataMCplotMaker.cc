@@ -26,7 +26,11 @@ void DrawVerticalLine(Double_t x){
 
 //Function to determine maximum of each histogram, including error bars.  Side = 1 left, 2 right, 3 both, 4 = overflow
 TH1F *null = new TH1F("", "", 1,0,1);
-float AdjustedMaximum(int side, std::vector <TH1F*> Plots, TH1F* data = null, std::vector <TH1F*> Signals = std::vector<TH1F*>()){
+float AdjustedMaximum(int side, std::vector <std::pair<TH1F*, TH1F*> > Plots_in, TH1F* data = null, std::vector <TH1F*> Signals = std::vector<TH1F*>()){
+  std::vector <TH1F*> Plots;
+  std::vector <TH1F*> Plots_syst;
+  for (unsigned int i = 0; i < Plots_in.size(); i++) Plots.push_back(Plots_in[i].first); 
+  for (unsigned int i = 0; i < Plots_in.size(); i++) Plots_syst.push_back(Plots_in[i].second); 
   int lowerBound = 1;
   if (side == 2) lowerBound = 0.5*Plots[0]->GetNbinsX()+1;
   int upperBound = Plots[0]->GetNbinsX();
@@ -42,7 +46,7 @@ float AdjustedMaximum(int side, std::vector <TH1F*> Plots, TH1F* data = null, st
   vector <float> heights;
   for (int i = lowerBound; i < upperBound; i++){
     float temp = 0;
-    for (unsigned int j = 0; j < Plots.size(); j++) temp += Plots[j]->GetBinContent(i);
+    for (unsigned int j = 0; j < Plots.size(); j++) temp += Plots[j]->GetBinContent(i)+Plots_syst[j]->GetBinError(i);
     heights.push_back(temp);
   }
   if (Signals.size() > 0 && Signals[0]->GetEntries() > 0){
@@ -188,22 +192,31 @@ void singlePlotMaker(TH1F* h1, std::string title, std::string options_string) {
     dataMCplotMaker(null, Backgrounds, Titles, title, "", options_string);
 }
 
-void dataMCplotMaker(TH1F* Data_in, std::vector <TH1F*> Backgrounds_in, std::vector <string> Titles, std::string titleIn, std::string title2In, std::string options_string, std::vector <TH1F*> Signals_in, std::vector <string> SignalTitles, std::vector <Color_t> color_input){
+void dataMCplotMaker(TH1F* Data_in, std::vector <std::pair <TH1F*, TH1F*> > Backgrounds_pair_in, std::vector <string> Titles, std::string titleIn, std::string title2In, std::string options_string, std::vector <TH1F*> Signals_in, std::vector <string> SignalTitles, std::vector <Color_t> color_input){
 
   //Copy inputs
   TH1F* Data = new TH1F(*Data_in); 
   vector <TH1F*> Backgrounds; 
+  vector <TH1F*> Background_systs; 
   vector <TH1F*> Signals; 
-
-  for (unsigned int i = 0; i < Backgrounds_in.size(); i++){
-    TH1F* blah = new TH1F(*Backgrounds_in[i]); 
+  for (unsigned int i = 0; i < Backgrounds_pair_in.size(); i++){
+    TH1F* blah  = new TH1F(*Backgrounds_pair_in[i].first); 
+    TH1F* blah2; 
+    if (Backgrounds_pair_in[i].second->GetEntries() > 0) blah2 = new TH1F(*Backgrounds_pair_in[i].second); 
     Backgrounds.push_back(blah);  
+    Background_systs.push_back(blah2); 
   }
   for (unsigned int i = 0; i < Signals_in.size(); i++){
     TH1F* blah = new TH1F(*Signals_in[i]); 
     Signals.push_back(blah);  
   }
+  std::vector <std::pair<TH1F*, TH1F*> > Backgrounds_pair; 
+  for (unsigned int i = 0; i < Backgrounds_pair_in.size(); i++){
+    std::pair<TH1F*, TH1F*> blah = make_pair(Backgrounds[i], Background_systs[i]->GetEntries() > 0 ? Background_systs[i] : null); 
+    Backgrounds_pair.push_back(blah); 
+  } 
 
+  //Convert titles to fucking char*s 
   char* title = (char *)alloca(titleIn.size() + 1);
   memcpy(title, titleIn.c_str(), titleIn.size() + 1);
 
@@ -351,8 +364,8 @@ void dataMCplotMaker(TH1F* Data_in, std::vector <TH1F*> Backgrounds_in, std::vec
   //Print warnings
   if (normalize && !nostack) cout << "Warning! You set option to normalize, but not option --noStack.  This won't do much!" << endl;
 
-  //If no x-axis unit, turn off division label
-  if (xAxisUnit == "" || !showXaxisUnit) showDivisionLabel = 0;
+  //Try to guess if we should turn off division label
+  if (xAxisUnit == "" || xAxisUnit.find("SR") < xAxisUnit.length() || !showXaxisUnit) showDivisionLabel = 0;
 
   //Decode data color
   Color_t dataColor = kBlack;
@@ -637,8 +650,8 @@ void dataMCplotMaker(TH1F* Data_in, std::vector <TH1F*> Backgrounds_in, std::vec
   if (dots && Backgrounds.size() > 3){ Backgrounds[3]->SetMarkerColor(kOrange+7); Backgrounds[3]->SetLineColor(kOrange+7); }
 
   //Minimum and maximum
-  float leftMax = AdjustedMaximum(1, Backgrounds, Data, Signals);
-  float rightMax = AdjustedMaximum(2, Backgrounds, Data, Signals);
+  float leftMax = AdjustedMaximum(1, Backgrounds_pair, Data, Signals);
+  float rightMax = AdjustedMaximum(2, Backgrounds_pair, Data, Signals);
   float myMin = 0.1;
   if (setMinimum != -1) myMin = setMinimum;
   if (setMinimum == -1 && !linear && Backgrounds[0]->GetMinimum() > 0) myMin = min(0.1, 0.9*Backgrounds[0]->GetMinimum());
@@ -650,13 +663,13 @@ void dataMCplotMaker(TH1F* Data_in, std::vector <TH1F*> Backgrounds_in, std::vec
   float myMax = stack->GetMaximum();
   if (setMaximum != -1) myMax = setMaximum; 
   else if (setMaximum == -1 && !linear){
-    myMax = pow(AdjustedMaximum(3, Backgrounds, Data, Signals), 1.0/0.69)*pow(myMin, (0.69-1)/0.69); 
-    if (leftMax > 5*rightMax) myMax = pow(AdjustedMaximum(3, Backgrounds, Data, Signals), 1.0/0.74)*pow(myMin, (0.74-1)/0.74);
+    myMax = pow(AdjustedMaximum(3, Backgrounds_pair, Data, Signals), 1.0/0.69)*pow(myMin, (0.69-1)/0.69); 
+    if (leftMax > 5*rightMax) myMax = pow(AdjustedMaximum(3, Backgrounds_pair, Data, Signals), 1.0/0.74)*pow(myMin, (0.74-1)/0.74);
     if (rightMax > leftMax)   myMax = myMax*10; 
   }
-  else if (setMaximum == -1 && linear && noLegend)  myMax = (AdjustedMaximum(3, Backgrounds, Data, Signals))*(1.2) - (stack->GetMinimum())*(1.0/3.0);
+  else if (setMaximum == -1 && linear && noLegend)  myMax = (AdjustedMaximum(3, Backgrounds_pair, Data, Signals))*(1.2) - (stack->GetMinimum())*(1.0/3.0);
   else if (setMaximum == -1 && linear){
-    myMax = (AdjustedMaximum(3, Backgrounds, Data, Signals))*1.46 - (stack->GetMinimum())*(1.0/3.0);  
+    myMax = (AdjustedMaximum(3, Backgrounds_pair, Data, Signals))*1.46 - (stack->GetMinimum())*(1.0/3.0);  
     if (rightMax < 0.7*leftMax){
       myMax = myMax*0.88;
       if (strcmp(title2, "") == 0) myMax = myMax*0.94; 
@@ -738,7 +751,7 @@ void dataMCplotMaker(TH1F* Data_in, std::vector <TH1F*> Backgrounds_in, std::vec
     for(int i=0; i< (100-ptotal); i++) percent[roundings[i].second] += 1;
   }
 
-  gStyle->SetErrorX(0.001); 
+  if (Background_systs.size() == 0) gStyle->SetErrorX(0.001); //why the fuck is this even here?
 
   //Try this
   if (!dots && !nostack) Backgrounds[0]->SetMarkerColor(0); 
@@ -789,6 +802,18 @@ void dataMCplotMaker(TH1F* Data_in, std::vector <TH1F*> Backgrounds_in, std::vec
     if ( markerStyle2) Signals[i]->SetMarkerStyle(markerStyle2_[i%7]);
   }
   if (compareMultiple) signalsAG.Draw("SAMEHISTP");
+
+  //Draw syst errors
+  TH1F *background_syst;
+  if (Background_systs.size() > 0){
+    background_syst = new TH1F(*Background_systs[0]); 
+    background_syst->SetFillColor(kGray+3); 
+    background_syst->SetFillStyle(3003); 
+  }
+  for (unsigned int iSyst = 1; iSyst < Background_systs.size(); iSyst++){
+    background_syst->Add(Background_systs[iSyst]); 
+  }
+  background_syst->Draw("E2 SAME");
 
   //Legend
   TLegend *leg;
@@ -843,27 +868,20 @@ void dataMCplotMaker(TH1F* Data_in, std::vector <TH1F*> Backgrounds_in, std::vec
   for (unsigned int i = 0; i < Backgrounds.size(); i++){
       nEventsMC += Backgrounds[i]->Integral(0,Backgrounds[i]->GetNbinsX()+doOverflow);
   }
+
   //Draw title & subtitle on plot 
   TLatex *tex = new TLatex();
   tex->SetNDC();
   tex->SetTextSize(0.035);
+  float title_y_coord = 0.88;
+  if (noData) title_y_coord = 0.78; 
+  if (outOfFrame) title_y_coord += 0.09;
   if (colorTitle) title = Form("#color[4]{%s}",title);
-  if (noData == false){
-    tex->DrawLatex(0.16,0.88,title);
-    tex->DrawLatex(0.16,0.83,title2);
-    if(doCounts) {
-        float yCounts = (strcmp(title2, "") == 0) ? 0.83 : 0.78;
-        tex->DrawLatex(0.16,yCounts,Form("%i (Data), %0.1f (MC)",nEventsData,nEventsMC)); 
-    }
-  }
-  if (noData == true){
-    tex->DrawLatex(0.16,0.78,title);
-    tex->DrawLatex(0.16,0.73,title2);
-    if(doCounts) {
-        float yCounts = (strcmp(title2, "") == 0) ? 0.73 : 0.68;
-        tex->DrawLatex(0.16,yCounts,Form("%0.1f (MC)",nEventsMC)); 
-    }
-  }
+  tex->DrawLatex(0.16,title_y_coord,title);
+  tex->DrawLatex(0.16,title_y_coord-0.05,title2);
+  float yCounts = (strcmp(title2, "") == 0) ? title_y_coord-0.05 : title_y_coord-0.10; 
+  if (!noData && doCounts) tex->DrawLatex(0.16,yCounts,Form("%i (Data), %0.1f (MC)",nEventsData,nEventsMC)); 
+  if ( noData && doCounts) tex->DrawLatex(0.16,yCounts,Form("%0.1f (MC)",nEventsMC)); 
 
   //Draw vertical lines
   c0.Update();
@@ -979,5 +997,20 @@ void dataMCplotMaker(TH1F* Data_in, std::vector <TH1F*> Backgrounds_in, std::vec
     else if (png) c0.Print(Form("%s.png", outputName.c_str()));
     else c0.Print(Form("%s.pdf", outputName.c_str()));
   }
+
+}
+
+//Overload function for case of no stat errors
+void dataMCplotMaker(TH1F* Data_in, std::vector <TH1F*> Backgrounds_in, std::vector <string> Titles, std::string titleIn, std::string title2In, std::string options_string, std::vector <TH1F*> Signals_in, std::vector <string> SignalTitles, std::vector <Color_t> color_input){
+
+  //Make a null pair for each 
+  std::vector< std::pair<TH1F*, TH1F*> > Backgrounds_pair_in;
+  for (unsigned int i = 0; i < Backgrounds_in.size(); i++){
+    TH1F* null_hist = new TH1F(Form("dummy_bkgd_syst_%i", i), Form("dummy_bkgd_syst_%i", i), 1, 0, 1); 
+    std::pair<TH1F*, TH1F*> temp = std::make_pair( Backgrounds_in[i], null_hist ); 
+    Backgrounds_pair_in.push_back(temp); 
+  }
+
+  dataMCplotMaker(Data_in, Backgrounds_pair_in, Titles, titleIn, title2In, options_string, Signals_in, SignalTitles, color_input); 
 
 }

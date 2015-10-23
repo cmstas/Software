@@ -29,6 +29,10 @@ Mandatory arguments:
   - title: the title of the distribution
   - title2: the subtitle of the distribution
 
+Systematic Uncertainties:
+  - You can replace the background vector with a vector of pairs, where the second entry is equal to the first but has the bin error set to the systematic error.
+  - The errors will always appear around the total (even with --noStack, --noFill, etc.), no other options are supported.
+
 Optional arguments:
   - options: a string with any optional flags you want (see supported options below)
   - signals: a vector of histograms, each representing a signal (enter std::vector <TH1F*>() if you have no signal but want to specify colors)
