@@ -178,7 +178,29 @@ def addSlideTextPlotPlot(slideTitle,bullets,plotName1,plotName2,drawType="includ
         code += "\\end{center}"
     return code
 
-def addSlide(title=None,text=None,text1=None,text2=None,p1=None,p2=None,opts="",textobjects=[],arrowobjects=[],boxobjects=[],objects=[]):
+def addSlideTextPlotPlotPlotPlot(slideTitle,bullets,plotName1,plotName2,plotName3,plotName4,drawType="includegraphics",opts=""):
+    opts = utils.parseOptions(opts)
+    code = "\\begin{frame}\\frametitle{%s} \n" % (slideTitle)
+    height = 0.5*utils.textLinesToPlotHeight(utils.bulletNLines(bullets))
+    width = 1.0
+
+    code += utils.bulletsToCode(bullets, opts)
+    code += "\\begin{columns}[t]\n"
+
+    code += "\\column{0.5\\textwidth}\n"
+    code += "\\centering"
+    code += "\\%s[height=%.2f\\textheight,width=%.2f\\textwidth,keepaspectratio]{%s}\\\\ \n" % (drawType,height,width,plotName1)
+    code += "\\%s[height=%.2f\\textheight,width=%.2f\\textwidth,keepaspectratio]{%s}     \n" % (drawType,height,width,plotName3)
+
+    code += "\\column{0.5\\textwidth}\n"
+    code += "\\centering"
+    code += "\\%s[height=%.2f\\textheight,width=%.2f\\textwidth,keepaspectratio]{%s}\\\\ \n" % (drawType,height,width,plotName2)
+    code += "\\%s[height=%.2f\\textheight,width=%.2f\\textwidth,keepaspectratio]{%s}     \n" % (drawType,height,width,plotName4)
+
+    code += "\\end{columns}"
+    return code
+
+def addSlide(title=None,text=None,text1=None,text2=None,p1=None,p2=None,p3=None,p4=None,opts="",textobjects=[],arrowobjects=[],boxobjects=[],objects=[]):
     global source, slideNumber
     slideNumber += 1
 
@@ -199,12 +221,18 @@ def addSlide(title=None,text=None,text1=None,text2=None,p1=None,p2=None,opts="",
         else: title = "\\phantom{}"
 
     if( p1 and p2 ):
-        if( text ):
-            print "[SM] Adding TextPlotPlot slide #%s" % slideNumber
-            source += addSlideTextPlotPlot(title,bullets,p1,p2,drawType=drawtype,opts=opts)
+        if( p3 and p4 ):
+            print "[SM] Adding TextPlotPlotPlotPlot slide #%s" % slideNumber
+            if not text: bullets = []
+            source += addSlideTextPlotPlotPlotPlot(title,bullets,p1,p2,p3,p4,drawType=drawtype,opts=opts)
         else:
-            print "[SM] Adding PlotPlot slide #%s" % slideNumber
-            source += addSlidePlotPlot(title,p1,p2,drawType=drawtype,opts=opts)
+            if( text ):
+                print "[SM] Adding TextPlotPlot slide #%s" % slideNumber
+                source += addSlideTextPlotPlot(title,bullets,p1,p2,drawType=drawtype,opts=opts)
+            else:
+                print "[SM] Adding PlotPlot slide #%s" % slideNumber
+                source += addSlidePlotPlot(title,p1,p2,drawType=drawtype,opts=opts)
+
     elif( p1 ):
         if( text ):
             print "[SM] Adding TextPlot slide #%s" % slideNumber
