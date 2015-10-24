@@ -199,22 +199,24 @@ void dataMCplotMaker(TH1F* Data_in, std::vector <std::pair <TH1F*, TH1F*> > Back
   vector <TH1F*> Backgrounds; 
   vector <TH1F*> Background_systs; 
   vector <TH1F*> Signals; 
+  std::vector <std::pair<TH1F*, TH1F*> > Backgrounds_pair; 
   for (unsigned int i = 0; i < Backgrounds_pair_in.size(); i++){
     TH1F* blah  = new TH1F(*Backgrounds_pair_in[i].first); 
-    TH1F* blah2; 
-    if (Backgrounds_pair_in[i].second->GetEntries() > 0) blah2 = new TH1F(*Backgrounds_pair_in[i].second); 
     Backgrounds.push_back(blah);  
-    Background_systs.push_back(blah2); 
+    TH1F* blah2 = 0; 
+    TH1F* blah3 = 0; 
+    if (Backgrounds_pair_in[i].second->GetEntries() > 0){
+      blah2 = new TH1F(*Backgrounds_pair_in[i].second); 
+      Background_systs.push_back(blah2); 
+    }
+    else blah3 = new TH1F(*Backgrounds_pair_in[i].second);
+    std::pair<TH1F*, TH1F*> blah4 = make_pair(blah, Backgrounds_pair_in[i].second->GetEntries() > 0 ? blah2 : blah3); 
+    Backgrounds_pair.push_back(blah4); 
   }
   for (unsigned int i = 0; i < Signals_in.size(); i++){
     TH1F* blah = new TH1F(*Signals_in[i]); 
     Signals.push_back(blah);  
   }
-  std::vector <std::pair<TH1F*, TH1F*> > Backgrounds_pair; 
-  for (unsigned int i = 0; i < Backgrounds_pair_in.size(); i++){
-    std::pair<TH1F*, TH1F*> blah = make_pair(Backgrounds[i], Background_systs[i]->GetEntries() > 0 ? Background_systs[i] : null); 
-    Backgrounds_pair.push_back(blah); 
-  } 
 
   //Convert titles to fucking char*s 
   char* title = (char *)alloca(titleIn.size() + 1);
@@ -359,7 +361,6 @@ void dataMCplotMaker(TH1F* Data_in, std::vector <std::pair <TH1F*, TH1F*> > Back
     else if (Options[i].find("noLumi") < Options[i].length()) noLumi = true;
     else cout << "Warning: Option not recognized!  Option: " << Options[i] << endl;
   }
-
 
   //Print warnings
   if (normalize && !nostack) cout << "Warning! You set option to normalize, but not option --noStack.  This won't do much!" << endl;
@@ -592,7 +593,6 @@ void dataMCplotMaker(TH1F* Data_in, std::vector <std::pair <TH1F*, TH1F*> > Back
 
   //--------First pad: histogram------------
 
-
   //Stack of backgrounds
   THStack *stack = new THStack("stack", ""); 
   Data->SetMarkerStyle(20);
@@ -810,10 +810,11 @@ void dataMCplotMaker(TH1F* Data_in, std::vector <std::pair <TH1F*, TH1F*> > Back
     background_syst->SetFillColor(kGray+3); 
     background_syst->SetFillStyle(3003); 
   }
-  for (unsigned int iSyst = 1; iSyst < Background_systs.size(); iSyst++){
+  for (unsigned int iSyst = 0; iSyst < Background_systs.size(); iSyst++){
+    if (iSyst == 0) continue;
     background_syst->Add(Background_systs[iSyst]); 
   }
-  background_syst->Draw("E2 SAME");
+  if (background_syst != 0) background_syst->Draw("E2 SAME");
 
   //Legend
   TLegend *leg;
@@ -998,6 +999,13 @@ void dataMCplotMaker(TH1F* Data_in, std::vector <std::pair <TH1F*, TH1F*> > Back
     else c0.Print(Form("%s.pdf", outputName.c_str()));
   }
 
+  //Clean up
+  for (unsigned int i = 0; i < Signals.size(); i++) delete Signals[i];
+  for (unsigned int i = 0; i < Backgrounds_pair.size(); i++){
+    if (Backgrounds_pair[i].first  != 0) delete Backgrounds_pair[i].first;
+    if (Backgrounds_pair[i].second != 0) delete Backgrounds_pair[i].second;
+  }
+
 }
 
 //Overload function for case of no stat errors
@@ -1013,11 +1021,14 @@ void dataMCplotMaker(TH1F* Data_in, std::vector <TH1F*> Backgrounds_in, std::vec
 
   dataMCplotMaker(Data_in, Backgrounds_pair_in, Titles, titleIn, title2In, options_string, Signals_in, SignalTitles, color_input); 
 
+  for (unsigned int i = 0; i < Backgrounds_in.size(); i++){
+    delete Backgrounds_pair_in[i].second;
+  }
+
 }
 
 void dataMCplotMaker(TH1F* Data_in, std::vector <std::pair <TH1F*, float> > Backgrounds_in, std::vector <string> Titles, std::string titleIn, std::string title2In, std::string options_string, std::vector <TH1F*> Signals_in, std::vector <string> SignalTitles, std::vector <Color_t> color_input){
 
-  //Make a null pair for each 
   std::vector< std::pair<TH1F*, TH1F*> > Backgrounds_pair_in;
   for (unsigned int i = 0; i < Backgrounds_in.size(); i++){
     TH1F* temp_hist = new TH1F(*Backgrounds_in[i].first); 
