@@ -37,7 +37,7 @@ void PlotMaker2D(TH2F* hist, std::string options_string){
   if ( color) gStyle->SetPadRightMargin(0.14); 
 
   //Declare canvas
-  TCanvas *canvas = new TCanvas("canvas");
+  TCanvas *canvas = new TCanvas("canvas","canvas",700,700);
 
   //Turn off text box
   gStyle->SetOptStat(0);
@@ -58,6 +58,8 @@ void PlotMaker2D(TH2F* hist, std::string options_string){
   //Set scientific notation if needed
   if (sciNot != "") gStyle->SetPaintTextFormat(Form("%sE", sciNot.c_str()));
 
+  hist->GetZaxis()->SetRangeUser(0,0.5);
+  
   //Make it a contour plot
 
   //Draw it
