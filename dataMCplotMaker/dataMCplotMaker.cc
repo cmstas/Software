@@ -804,7 +804,7 @@ void dataMCplotMaker(TH1F* Data_in, std::vector <std::pair <TH1F*, TH1F*> > Back
   if (compareMultiple) signalsAG.Draw("SAMEHISTP");
 
   //Draw syst errors
-  TH1F *background_syst;
+  TH1F *background_syst = 0;
   if (Background_systs.size() > 0){
     background_syst = new TH1F(*Background_systs[0]); 
     background_syst->SetFillColor(kGray+3); 
@@ -1008,6 +1008,21 @@ void dataMCplotMaker(TH1F* Data_in, std::vector <TH1F*> Backgrounds_in, std::vec
   for (unsigned int i = 0; i < Backgrounds_in.size(); i++){
     TH1F* null_hist = new TH1F(Form("dummy_bkgd_syst_%i", i), Form("dummy_bkgd_syst_%i", i), 1, 0, 1); 
     std::pair<TH1F*, TH1F*> temp = std::make_pair( Backgrounds_in[i], null_hist ); 
+    Backgrounds_pair_in.push_back(temp); 
+  }
+
+  dataMCplotMaker(Data_in, Backgrounds_pair_in, Titles, titleIn, title2In, options_string, Signals_in, SignalTitles, color_input); 
+
+}
+
+void dataMCplotMaker(TH1F* Data_in, std::vector <std::pair <TH1F*, float> > Backgrounds_in, std::vector <string> Titles, std::string titleIn, std::string title2In, std::string options_string, std::vector <TH1F*> Signals_in, std::vector <string> SignalTitles, std::vector <Color_t> color_input){
+
+  //Make a null pair for each 
+  std::vector< std::pair<TH1F*, TH1F*> > Backgrounds_pair_in;
+  for (unsigned int i = 0; i < Backgrounds_in.size(); i++){
+    TH1F* temp_hist = new TH1F(*Backgrounds_in[i].first); 
+    for (int j = 0; j < Backgrounds_in[i].first->GetNbinsX(); j++) temp_hist->SetBinError(j, Backgrounds_in[i].first->GetBinContent(j)*Backgrounds_in[i].second);
+    std::pair <TH1F*, TH1F*> temp = std::make_pair( Backgrounds_in[i].first, temp_hist ); 
     Backgrounds_pair_in.push_back(temp); 
   }
 

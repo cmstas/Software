@@ -30,8 +30,10 @@ Mandatory arguments:
   - title2: the subtitle of the distribution
 
 Systematic Uncertainties:
-  - You can replace the background vector with a vector of pairs, where the second entry is equal to the first but has the bin error set to the systematic error.
-  - The errors will always appear around the total (even with --noStack, --noFill, etc.), no other options are supported.
+  - You can replace the background vector with a vector of pairs.  The first part of the pair is the normal background.  The second part of the pair can be:
+    - Another histogram with the error set equal to the syst error you want, OR
+    - A float showing a fractional syst error (ie 0.3)
+  - **The errors will always appear around the total (even with --noStack, --noFill, etc.), no other options are supported.**
 
 Optional arguments:
   - options: a string with any optional flags you want (see supported options below)
