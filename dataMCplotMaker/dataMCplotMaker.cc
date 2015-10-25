@@ -812,6 +812,7 @@ void dataMCplotMaker(TH1F* Data_in, std::vector <std::pair <TH1F*, TH1F*> > Back
   }
   for (unsigned int iSyst = 0; iSyst < Background_systs.size(); iSyst++){
     if (iSyst == 0) continue;
+    background_syst->Sumw2(); 
     background_syst->Add(Background_systs[iSyst]); 
   }
   if (background_syst != 0) background_syst->Draw("E2 SAME");
