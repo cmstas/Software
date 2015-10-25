@@ -69,7 +69,7 @@ def addSlidePlot(slideTitle, plotName,drawType="includegraphics",opts=""):
     \\begin{center}
     """
     if(opts["fithorizontal"]): code += "\\vspace*{-0.035\\textheight}\\%s[width=0.99\\textwidth,keepaspectratio]{%s}"
-    else: code += "\\vspace*{-0.035\\textheight}\\%s[height=0.88\\textheight,keepaspectratio]{%s}"
+    else: code += "\\vspace*{-0.025\\textheight}\\%s[height=0.87\\textheight,keepaspectratio]{%s}"
     code += "\\end{center}"
     code = code % (slideTitle, drawType, plotName)
     return code
@@ -200,6 +200,27 @@ def addSlideTextPlotPlotPlotPlot(slideTitle,bullets,plotName1,plotName2,plotName
     code += "\\end{columns}"
     return code
 
+def addSlideTextPlotPlotPlot(slideTitle,bullets,plotName1,plotName2,plotName3,drawType="includegraphics",opts=""):
+    opts = utils.parseOptions(opts)
+    code = "\\begin{frame}\\frametitle{%s} \n" % (slideTitle)
+    height = 0.5*utils.textLinesToPlotHeight(utils.bulletNLines(bullets))
+    width = 1.0
+
+    code += utils.bulletsToCode(bullets, opts)
+    code += "\\begin{columns}[c]\n"
+
+    code += "\\column{0.5\\textwidth}\n"
+    code += "\\centering"
+    code += "\\%s[height=%.2f\\textheight,width=%.2f\\textwidth,keepaspectratio]{%s}\\\\ \n" % (drawType,height,width,plotName1)
+    code += "\\%s[height=%.2f\\textheight,width=%.2f\\textwidth,keepaspectratio]{%s}     \n" % (drawType,height,width,plotName2)
+
+    code += "\\column{0.6\\textwidth}\n"
+    code += "\\centering"
+    code += "\\hspace*{-0.3\\textwidth}\\%s[height=%.2f\\textheight,width=%.2f\\textwidth,keepaspectratio]{%s} \n" % (drawType,1.5*height,width,plotName3)
+
+    code += "\\end{columns}"
+    return code
+
 def addSlide(title=None,text=None,text1=None,text2=None,p1=None,p2=None,p3=None,p4=None,opts="",textobjects=[],arrowobjects=[],boxobjects=[],objects=[]):
     global source, slideNumber
     slideNumber += 1
@@ -221,9 +242,12 @@ def addSlide(title=None,text=None,text1=None,text2=None,p1=None,p2=None,p3=None,
         else: title = "\\phantom{}"
 
     if( p1 and p2 ):
-        if( p3 and p4 ):
+        if not text: bullets = []
+        if( p3 and not p4 ):
+            print "[SM] Adding TextPlotPlotPlot slide #%s" % slideNumber
+            source += addSlideTextPlotPlotPlot(title,bullets,p1,p2,p3,drawType=drawtype,opts=opts)
+        elif( p3 and p4 ):
             print "[SM] Adding TextPlotPlotPlotPlot slide #%s" % slideNumber
-            if not text: bullets = []
             source += addSlideTextPlotPlotPlotPlot(title,bullets,p1,p2,p3,p4,drawType=drawtype,opts=opts)
         else:
             if( text ):
