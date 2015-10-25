@@ -19,6 +19,7 @@ void PlotMaker2D(TH2F* hist, std::string options_string){
   string Yaxis = "";
   string sciNot = "";
   bool color = 0;
+  bool text = 0; 
 
   //Loop over options and change default settings to user-defined settings
   for (unsigned int i = 0; i < Options.size(); i++){
@@ -29,6 +30,7 @@ void PlotMaker2D(TH2F* hist, std::string options_string){
     else if (Options[i].find("Yaxis") < Options[i].length()) Yaxis = getString(Options[i], "Yaxis"); 
     else if (Options[i].find("sciNot") < Options[i].length()){ sciNot = getString(Options[i], "sciNot"); if (sciNot == "") cout << "Warning!  --sciNot requires an argument for the precision.  Ex: .2"; }
     else if (Options[i].find("color") < Options[i].length()) color = 1;
+    else if (Options[i].find("text") < Options[i].length()) text = 1;
     else cout << "Warning: Option not recognized!  Option: " << Options[i] << endl;
   }
 
@@ -63,7 +65,8 @@ void PlotMaker2D(TH2F* hist, std::string options_string){
   //Make it a contour plot
 
   //Draw it
-  string opt = "TEXTE";
+  string opt = ""; 
+  if (text) opt += "TEXTE";
   if (color) opt += "COLZ";
   hist->Draw(opt.c_str()); 
 

@@ -29,6 +29,12 @@ Mandatory arguments:
   - title: the title of the distribution
   - title2: the subtitle of the distribution
 
+Systematic Uncertainties:
+  - You can replace the background vector with a vector of pairs.  The first part of the pair is the normal background.  The second part of the pair can be:
+    - Another histogram with the error set equal to the syst error you want, OR
+    - A float showing a fractional syst error (ie 0.3)
+  - **The errors will always appear around the total (even with --noStack, --noFill, etc.), no other options are supported.**
+
 Optional arguments:
   - options: a string with any optional flags you want (see supported options below)
   - signals: a vector of histograms, each representing a signal (enter std::vector <TH1F*>() if you have no signal but want to specify colors)
@@ -126,4 +132,5 @@ Options:
   - --Yaxis X
   - --sciNot X: to put your bin contents into scientific notation.  X is a printf string (ie --sciNot .2 will give you two decimal places)
   - --colors: if you want each bin to be colored proportional to its value
+  - --text: if you want each bin to have value and error written on it 
   
