@@ -214,9 +214,9 @@ def addSlideTextPlotPlotPlot(slideTitle,bullets,plotName1,plotName2,plotName3,dr
     code += "\\%s[height=%.2f\\textheight,width=%.2f\\textwidth,keepaspectratio]{%s}\\\\ \n" % (drawType,height,width,plotName1)
     code += "\\%s[height=%.2f\\textheight,width=%.2f\\textwidth,keepaspectratio]{%s}     \n" % (drawType,height,width,plotName2)
 
-    code += "\\column{0.6\\textwidth}\n"
+    code += "\\column{0.55\\textwidth}\n"
     code += "\\centering"
-    code += "\\hspace*{-0.3\\textwidth}\\%s[height=%.2f\\textheight,width=%.2f\\textwidth,keepaspectratio]{%s} \n" % (drawType,1.5*height,width,plotName3)
+    code += "\\hspace*{-0.15\\textwidth}\\%s[height=%.2f\\textheight,width=%.2f\\textwidth,keepaspectratio]{%s} \n" % (drawType,1.5*height,width,plotName3)
 
     code += "\\end{columns}"
     return code
@@ -411,21 +411,40 @@ def initSlides(me="Nick", themeName="nick", opts=""):
     if(opts["casual"]): institute = "\\large{%s}" % opts["casual"].replace("ENDL", "\\\\ \\vspace{0.4cm}")
     source = source.replace("INSTITUTEHERE", institute)
 
+    school = "ucsb"
+
+
+    # ucsb.pdf
+
     fullname = ""
     if("Nick" in me): 
         source = source.replace("AUTHORHERE", "Nick Amin")
         source = source.replace("N. Amin", "\\underline{\\textbf{N. Amin}}")
+        school = "ucsb"
     elif("Sicheng" in me): 
         source = source.replace("AUTHORHERE", "Sicheng Wang")
         source = source.replace("S. Wang", "\\underline{\\textbf{S. Wang}}")
+        school = "ucsb"
     elif("Alex" in me): 
         source = source.replace("AUTHORHERE", "Alex George")
         source = source.replace("A. George", "\\underline{\\textbf{A. George}}")
+        school = "ucsb"
     elif("Jason" in me): 
         source = source.replace("AUTHORHERE", "Jason Gran")
         source = source.replace("J. Gran", "\\underline{\\textbf{J. Gran}}")
+        school = "ucsb"
+    elif("Giuseppe" in me): 
+        source = source.replace("AUTHORHERE", "G. Cerati")
+        source = source.replace("G. Cerati", "\\underline{\\textbf{G. Cerati}}")
+        school = "ucsd"
     else:
         print "who are you? add your name to slideMaker."
+
+    if school == "ucsb":
+        source = source.replace("SCHOOLLOGO", "ucsb.pdf")
+    elif school == "ucsd":
+        source = source.replace("SCHOOLLOGO", "ucsd.png")
+
 
 
     source = source.replace("GRAPHICSPATHHERE", "".join(["{"+p+"}" for p in graphicspaths]))
@@ -436,6 +455,7 @@ def writeSlides(output="output.tex", opts="--compile"):
     global source
     source += footer
     output = output.replace(".pdf",".tex")
+    output = output.replace(".py",".tex") # just so I don't idiotically overwrite the slides!!! SO MAD.
     fh = open(output,"w")
     fh.write(source)
     fh.close()

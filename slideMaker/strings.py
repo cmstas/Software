@@ -27,6 +27,7 @@ commonHeader = """
 \\definecolor{gray}{RGB}{128,128,128}
 \\definecolor{grey}{RGB}{128,128,128}
 \\definecolor{orange}{RGB}{230,97,1}
+\\definecolor{darkcyan}{RGB}{6,147,194}
 \\definecolor{coolblue}{RGB}{51,51,179}
 \\definecolor{nickcolor}{RGB}{51,51,179}
 \\definecolor{alexcolor}{RGB}{0,0,255}
@@ -38,6 +39,7 @@ commonHeader = """
 \\newcommand{\\mt}{m_{T}}
 \\newcommand{\\mtmin}{m_{T}^\\text{min}}
 \\newcommand{\\red}[1]{\\textcolor{red}{#1}}
+\\newcommand{\\cyan}[1]{\\textcolor{darkcyan}{#1}}
 \\newcommand{\\blue}[1]{\\textcolor{blue}{#1}}
 \\newcommand{\\coolblue}[1]{\\textcolor{coolblue}{#1}}
 \\newcommand{\\orange}[1]{\\textcolor{orange}{#1}}
@@ -143,7 +145,7 @@ themeAlex = """
   \\end{center}
   \\end{textblock*}
   \\begin{textblock*}{2.7cm}(0cm, 0.1cm)
-  \\includegraphics[width=2.7cm]{ucsb.pdf}
+  \\includegraphics[width=2.7cm]{SCHOOLLOGO}
   \\end{textblock*}
   \\begin{textblock*}{2.2cm}(10.3cm, 0.2cm)
   \\includegraphics[width=2.2cm]{CMS.pdf}
