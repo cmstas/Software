@@ -80,6 +80,7 @@ Supported flags for "options" string:
   - --noLegend: to suppress the legend
   - --png: to make output as png rather than pdf (must specify output name)
   - --dataColor: to change the data color to something other than black
+  - --ratioColor: to change the ratio color to something other than black
   - --drawDots: to draw the backgrounds as dots rather than lines (recommended only for ratios like fake or flip rates) 
   - --showPercentage: to show the percentage of the integral of each MC plot contributing to the total background
   - --percentageInBox: visual alternative to showPercentage which puts the percentage in the marker boxes of the legend
@@ -98,6 +99,8 @@ Supported flags for "options" string:
   - --largeLabel: use larger legend and axis label size
   - --lumiUnit: change the lumi unit from its default of "fb" (the 'inverse' part is automatic)
   - --noLumi: don't display lumi (for MC studies, for example)
+  - --ratio N: show the ratio plot with the denominator = the Nth background rather than the sum of backgrounds
+  - --ratioOnly: don't show data on the plot, just use it for the ratio plot on top 
 
 Example:
 ````
