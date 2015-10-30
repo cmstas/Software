@@ -7,6 +7,7 @@ struct PlotInfo {
   TH1F* Plot;
   string Title;
   Color_t Color;
+  int Number; 
   TH1F* Signal;
   Color_t SignalColor;
   string SignalTitle;
