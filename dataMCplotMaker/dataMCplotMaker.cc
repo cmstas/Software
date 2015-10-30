@@ -300,6 +300,7 @@ void dataMCplotMaker(TH1F* Data_in, std::vector <std::pair <TH1F*, TH1F*> > Back
   bool noLumi = 0; 
   int ratio = -1; 
   bool ratioOnly = 0; 
+  bool ratioLine = 0; 
 
   //Loop over options and change default settings to user-defined settings
   for (unsigned int i = 0; i < Options.size(); i++){
@@ -363,6 +364,7 @@ void dataMCplotMaker(TH1F* Data_in, std::vector <std::pair <TH1F*, TH1F*> > Back
     else if (Options[i].find("yTitleOffset") < Options[i].length()) yTitleOffset_ = atof( getString(Options[i], "yTitleOffset").c_str() ); 
     else if (Options[i].find("compareMultiple") < Options[i].length()) compareMultiple = true;
     else if (Options[i].find("ratioOnly") < Options[i].length()) ratioOnly = true;
+    else if (Options[i].find("ratioLine") < Options[i].length()) ratioLine = true;
     else if (Options[i].find("ratio") < Options[i].length()) ratio = atoi( getString(Options[i], "ratio").c_str() );
     else if (Options[i].find("noLumi") < Options[i].length()) noLumi = true;
     else cout << "Warning: Option not recognized!  Option: " << Options[i] << endl;
@@ -370,6 +372,7 @@ void dataMCplotMaker(TH1F* Data_in, std::vector <std::pair <TH1F*, TH1F*> > Back
 
   //Print warnings
   if (normalize && !nostack) cout << "Warning! You set option to normalize, but not option --noStack.  This won't do much!" << endl;
+  if (ratioLine && !noErrBars) cout << "Warning!  ratioLine won't do much without noErrBars!" << endl;
 
   //Try to guess if we should turn off division label
   if (xAxisUnit == "" || xAxisUnit.find("SR") < xAxisUnit.length() || !showXaxisUnit) showDivisionLabel = 0;
@@ -973,7 +976,7 @@ void dataMCplotMaker(TH1F* Data_in, std::vector <std::pair <TH1F*, TH1F*> > Back
     err_hist->SetTitle("");
     err_hist->Draw();
     err_hist->SetLineColor(ratioColor);
-    err_hist->SetMarkerColor(ratioColor);
+    if (!ratioLine) err_hist->SetMarkerColor(ratioColor);
     err_hist->GetYaxis()->SetTitle("Data/MC");
     err_hist->GetYaxis()->SetTitleSize(0.08);
     err_hist->GetYaxis()->SetTitleOffset(1.8);
@@ -992,8 +995,9 @@ void dataMCplotMaker(TH1F* Data_in, std::vector <std::pair <TH1F*, TH1F*> > Back
       float data_err = Data->GetBinError(ib);
       if(!noErrBars) err_hist->SetBinError(ib, (data_value == 0 || MC_value == 0) ? 0.001 : (value * sqrt( pow(MC_err/MC_value, 2) + pow(data_err/data_value, 2)) ) );
     }
-    err_hist->SetMarkerStyle(20);
-    if(noErrBars) err_hist->Draw("P");
+    if (!ratioLine) err_hist->SetMarkerStyle(20);
+    if(noErrBars && ratioLine) err_hist->Draw("HIST");
+    else if(noErrBars) err_hist->Draw("P");
     else err_hist->Draw("PE");
     TText *blah = new TText();
     blah->SetTextFont(42);
@@ -1005,8 +1009,9 @@ void dataMCplotMaker(TH1F* Data_in, std::vector <std::pair <TH1F*, TH1F*> > Back
     line.SetLineWidth(2);
     int maxbin = err_hist->GetXaxis()->GetNbins();
     line.DrawLine(err_hist->GetXaxis()->GetBinLowEdge(1),1,err_hist->GetXaxis()->GetBinUpEdge(maxbin),1);
-    if(noErrBars)err_hist->Draw("pSAME");
-    else err_hist->Draw("pESAME");
+    if(noErrBars && ratioLine) err_hist->Draw("HIST SAME");
+    else if(noErrBars) err_hist->Draw("pSAME");
+    else err_hist->Draw("pESAME"); 
     err_hist->GetXaxis()->SetLabelSize(0);
     err_hist->GetYaxis()->SetLabelSize(0.2);
     err_hist->GetYaxis()->SetRangeUser(0., 2.);
