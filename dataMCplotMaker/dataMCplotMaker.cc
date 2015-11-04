@@ -449,6 +449,9 @@ void dataMCplotMaker(TH1F* Data_in, std::vector <std::pair <TH1F*, TH1F*> > Back
     for (unsigned int i = 0; i < Backgrounds.size(); i++){
       Backgrounds[i]->SetBinContent(Backgrounds[i]->GetNbinsX(), Backgrounds[i]->GetBinContent(Backgrounds[i]->GetNbinsX())+Backgrounds[i]->GetBinContent(Backgrounds[i]->GetNbinsX()+1) );
     }
+    for (unsigned int i = 0; i < Background_systs.size(); i++){
+      Background_systs[i]->SetBinContent(Background_systs[i]->GetNbinsX(), Background_systs[i]->GetBinContent(Background_systs[i]->GetNbinsX())+Background_systs[i]->GetBinContent(Background_systs[i]->GetNbinsX()+1) );
+    }
     for (unsigned int i = 0; i < Signals.size(); i++){
       Signals[i]->SetBinContent(Signals[i]->GetNbinsX(), Signals[i]->GetBinContent(Signals[i]->GetNbinsX())+Signals[i]->GetBinContent(Signals[i]->GetNbinsX()+1) );
     }
@@ -459,6 +462,9 @@ void dataMCplotMaker(TH1F* Data_in, std::vector <std::pair <TH1F*, TH1F*> > Back
   if (doOverflow == 1){
     for (unsigned int i = 0; i < Backgrounds.size(); i++){
       Backgrounds[i]->SetBinContent(1, Backgrounds[i]->GetBinContent(1)+Backgrounds[i]->GetBinContent(0) );
+    }
+    for (unsigned int i = 0; i < Background_systs.size(); i++){
+      Background_systs[i]->SetBinContent(1, Background_systs[i]->GetBinContent(1)+Background_systs[i]->GetBinContent(0) );
     }
     for (unsigned int i = 0; i < Signals.size(); i++){
       Signals[i]->SetBinContent(1, Signals[i]->GetBinContent(1)+Signals[i]->GetBinContent(0) );
