@@ -19,17 +19,17 @@
 #include "TROOT.h"
 
 //Parse Parameters from options input string
-vector <std::string> GetParms(std::string blah){
+std::vector <std::string> GetParms(std::string blah){
   int a = -1;
   int length = blah.length();
-  vector <std::string> options;
+  std::vector <std::string> options;
   while (a < length){
     int temp = a;
     a = blah.find("--", temp+1);
     if (a <= temp) break;
     int b = blah.find("--", a+3)-1;
     unsigned int myLength = b - a - 2;
-    string mySubstring;
+	std::string mySubstring;
     if (a + 2 + myLength > blah.length()) mySubstring = blah.substr(a+2);
     else mySubstring = blah.substr(a+2, b-a-2);
     options.push_back(mySubstring);
@@ -38,7 +38,7 @@ vector <std::string> GetParms(std::string blah){
 }
 
 //Turn parsed argument from string into const char*.  Remove leading and trailing whitespace
-string getString(std::string initial, std::string result){
+std::string getString(std::string initial, std::string result){
   int temp = initial.find(result); 
   std::string substring = initial.substr(temp+result.length());
   while (substring[0] == ' '){

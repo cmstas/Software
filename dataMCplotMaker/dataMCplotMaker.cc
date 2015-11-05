@@ -43,7 +43,7 @@ float AdjustedMaximum(int side, std::vector <std::pair<TH1F*, TH1F*> > Plots_in,
     lowerBound = 1;
     upperBound = nbins;
   }
-  vector <float> heights;
+  std::vector <float> heights;
   for (int i = lowerBound; i < upperBound; i++){
     float temp = 0;
     for (unsigned int j = 0; j < Plots.size(); j++) temp += Plots[j]->GetBinContent(i)+Plots_syst[j]->GetBinError(i);
@@ -66,7 +66,7 @@ float AdjustedMaximum(int side, std::vector <std::pair<TH1F*, TH1F*> > Plots_in,
   }
   std::sort( heights.begin(), heights.end() );
   float data_height = heights[heights.size()-1];
-  return max(data_height, bkgd_height);
+  return std::max(data_height, bkgd_height);
 }
 
 //Set style -- this is completely ripped off from TDRStyle.cc
@@ -192,13 +192,13 @@ void singlePlotMaker(TH1F* h1, std::string title, std::string options_string) {
     dataMCplotMaker(null, Backgrounds, Titles, title, "", options_string);
 }
 
-void dataMCplotMaker(TH1F* Data_in, std::vector <std::pair <TH1F*, TH1F*> > Backgrounds_pair_in, std::vector <string> Titles, std::string titleIn, std::string title2In, std::string options_string, std::vector <TH1F*> Signals_in, std::vector <string> SignalTitles, std::vector <Color_t> color_input){
+void dataMCplotMaker(TH1F* Data_in, std::vector <std::pair <TH1F*, TH1F*> > Backgrounds_pair_in, std::vector <std::string> Titles, std::string titleIn, std::string title2In, std::string options_string, std::vector <TH1F*> Signals_in, std::vector <std::string> SignalTitles, std::vector <Color_t> color_input){
 
   //Copy inputs
   TH1F* Data = new TH1F(*Data_in); 
-  vector <TH1F*> Backgrounds; 
-  vector <TH1F*> Background_systs; 
-  vector <TH1F*> Signals; 
+  std::vector <TH1F*> Backgrounds; 
+  std::vector <TH1F*> Background_systs; 
+  std::vector <TH1F*> Signals; 
   std::vector <std::pair<TH1F*, TH1F*> > Backgrounds_pair; 
   for (unsigned int i = 0; i < Backgrounds_pair_in.size(); i++){
     TH1F* blah  = new TH1F(*Backgrounds_pair_in[i].first); 
@@ -210,7 +210,7 @@ void dataMCplotMaker(TH1F* Data_in, std::vector <std::pair <TH1F*, TH1F*> > Back
       Background_systs.push_back(blah2); 
     }
     else blah3 = new TH1F(*Backgrounds_pair_in[i].second);
-    std::pair<TH1F*, TH1F*> blah4 = make_pair(blah, Backgrounds_pair_in[i].second->GetEntries() > 0 ? blah2 : blah3); 
+    std::pair<TH1F*, TH1F*> blah4 = std::make_pair(blah, Backgrounds_pair_in[i].second->GetEntries() > 0 ? blah2 : blah3); 
     Backgrounds_pair.push_back(blah4); 
   }
   for (unsigned int i = 0; i < Signals_in.size(); i++){
@@ -268,8 +268,8 @@ void dataMCplotMaker(TH1F* Data_in, std::vector <std::pair <TH1F*, TH1F*> > Back
   float legendUp = 0;
   float legendRight = 0;
   float legendTextSize = 0.035;
-  vector <float> vLines;
-  vector <float> hLines;
+  std::vector <float> vLines;
+  std::vector <float> hLines;
   bool doHalf = 0;
   Int_t nDivisions = -1;
   bool noLegend = false;
@@ -367,12 +367,12 @@ void dataMCplotMaker(TH1F* Data_in, std::vector <std::pair <TH1F*, TH1F*> > Back
     else if (Options[i].find("ratioLine") < Options[i].length()) ratioLine = true;
     else if (Options[i].find("ratio") < Options[i].length()) ratio = atoi( getString(Options[i], "ratio").c_str() );
     else if (Options[i].find("noLumi") < Options[i].length()) noLumi = true;
-    else cout << "Warning: Option not recognized!  Option: " << Options[i] << endl;
+    else std::cout << "Warning: Option not recognized!  Option: " << Options[i] << std::endl;
   }
 
   //Print warnings
-  if (normalize && !nostack) cout << "Warning! You set option to normalize, but not option --noStack.  This won't do much!" << endl;
-  if (ratioLine && !noErrBars) cout << "Warning!  ratioLine won't do much without noErrBars!" << endl;
+  if (normalize && !nostack) std::cout << "Warning! You set option to normalize, but not option --noStack.  This won't do much!" << std::endl;
+  if (ratioLine && !noErrBars) std::cout << "Warning!  ratioLine won't do much without noErrBars!" << std::endl;
 
   //Try to guess if we should turn off division label
   if (xAxisUnit == "" || xAxisUnit.find("SR") < xAxisUnit.length() || !showXaxisUnit) showDivisionLabel = 0;
@@ -408,16 +408,16 @@ void dataMCplotMaker(TH1F* Data_in, std::vector <std::pair <TH1F*, TH1F*> > Back
 
   //Make sure there is at least one background and enough titles
   if (Backgrounds.size() < 1){ 
-    cout << "Error: Running with no backgrounds!" << endl;
+    std::cout << "Error: Running with no backgrounds!" << std::endl;
     return;
   }
-  if (Titles.size() != Backgrounds.size()) cout << "Warning! Wrong number of titles for your backgrounds!" << endl;
+  if (Titles.size() != Backgrounds.size()) std::cout << "Warning! Wrong number of titles for your backgrounds!" << std::endl;
   while (Titles.size() < Backgrounds.size()){
     char* blank = new char[strlen("")+2];
     std::strcpy(blank, "");
     Titles.push_back(blank);
   }
-  if (use_signals && SignalTitles.size() != Signals.size()) cout << "Warning! Wrong number of titles for your signals!" << endl;
+  if (use_signals && SignalTitles.size() != Signals.size()) std::cout << "Warning! Wrong number of titles for your signals!" << std::endl;
   while (SignalTitles.size() < Signals.size()){
     char* blank = new char[strlen("")+2];
     std::strcpy(blank, "");
@@ -426,7 +426,7 @@ void dataMCplotMaker(TH1F* Data_in, std::vector <std::pair <TH1F*, TH1F*> > Back
 
   //Format Titles
   for (unsigned int i = 0; i < Titles.size(); i++){
-    string title_temp = Titles[i];
+    std::string title_temp = Titles[i];
     if (title_temp == "ttsl" || title_temp == "1ltop" || title_temp == "1lep" || title_temp == "singlelep" || title_temp == "singlelepton"){
        char* temp = new char[strlen("1 #font[12]{l} top")+2];
        std::strcpy(temp, "1 #font[12]{l} top");
@@ -524,7 +524,7 @@ void dataMCplotMaker(TH1F* Data_in, std::vector <std::pair <TH1F*, TH1F*> > Back
     for (unsigned int i = Backgrounds.size(); i < Colors.size(); i++) Colors[i] = kBlack; 
   }
 
-  vector <int> Backgrounds_number; 
+  std::vector <int> Backgrounds_number; 
 
   //Sort Backgrounds, with Titles and Colors
   if (preserveBackgroundOrder == 0){
@@ -627,7 +627,7 @@ void dataMCplotMaker(TH1F* Data_in, std::vector <std::pair <TH1F*, TH1F*> > Back
   Data->SetMarkerStyle(20);
   Data->UseCurrentStyle();
   if(!compareMultiple && noFill == 0 && Signals.size() >= 5 && !nostack){
-    vector <int> Style;
+    std::vector <int> Style;
     Style.push_back(3003);
     Style.push_back(3004);
     Style.push_back(3005);
@@ -683,8 +683,8 @@ void dataMCplotMaker(TH1F* Data_in, std::vector <std::pair <TH1F*, TH1F*> > Back
   float rightMax = AdjustedMaximum(2, Backgrounds_pair, Data, Signals);
   float myMin = 0.1;
   if (setMinimum != -1) myMin = setMinimum;
-  if (setMinimum == -1 && !linear && Backgrounds[0]->GetMinimum() > 0) myMin = min(0.1, 0.9*Backgrounds[0]->GetMinimum());
-  else if (setMinimum == -1 && !linear && stack->GetMinimum() > 0) myMin = min(0.1, 0.5*stack->GetMinimum());
+  if (setMinimum == -1 && !linear && Backgrounds[0]->GetMinimum() > 0) myMin = std::min(0.1, 0.9*Backgrounds[0]->GetMinimum());
+  else if (setMinimum == -1 && !linear && stack->GetMinimum() > 0) myMin = std::min(0.1, 0.5*stack->GetMinimum());
   else if (setMinimum == -1 && !linear) myMin = 0.1;
   if (setMinimum == -1 && linear) myMin = 0; 
   if (!nostack) stack->Draw("hist");
@@ -725,7 +725,7 @@ void dataMCplotMaker(TH1F* Data_in, std::vector <std::pair <TH1F*, TH1F*> > Back
   else if (yAxisOverride[0] == '\0' && showDivisionLabel && yAxisUnit[0] == '\0' && bin_width < 2) stack->GetYaxis()->SetTitle(Form("%s / %.2f %s  ", yAxisLabel.c_str(), bin_width, xAxisUnit.c_str())); 
   else if (yAxisOverride[0] == '\0' && !showDivisionLabel && yAxisUnit[0] != '\0')stack->GetYaxis()->SetTitle(Form("%s [%s]  ", yAxisLabel.c_str(), yAxisUnit.c_str())); 
   else if (yAxisOverride[0] == '\0' && !showDivisionLabel && yAxisUnit[0] == '\0')stack->GetYaxis()->SetTitle(Form("%s  ", yAxisLabel.c_str()));
-  else cout << "nothing" << endl;
+  else std::cout << "nothing" << std::endl;
 
   //X-axis titles
   if (xAxisLabel == "HT" || xAxisLabel == "ht" || xAxisLabel == "Ht") xAxisLabel = "H_{T}"; 
@@ -802,7 +802,7 @@ void dataMCplotMaker(TH1F* Data_in, std::vector <std::pair <TH1F*, TH1F*> > Back
   if (!ratioOnly) stack2->Add(Data);
   if(noErrBars) stack2->Draw("PSAME");
   else stack2->Draw("PSAMEE");
-  vector<int> markerStyle;
+  std::vector<int> markerStyle;
   markerStyle.push_back(20);
   markerStyle.push_back(21);
   markerStyle.push_back(22);
@@ -810,7 +810,7 @@ void dataMCplotMaker(TH1F* Data_in, std::vector <std::pair <TH1F*, TH1F*> > Back
   markerStyle.push_back(29);
   markerStyle.push_back(33);
   markerStyle.push_back(34);
-  vector <int> markerStyle2_;
+  std::vector <int> markerStyle2_;
   markerStyle2_.push_back(24);
   markerStyle2_.push_back(20);
   markerStyle2_.push_back(25);
@@ -1042,7 +1042,7 @@ void dataMCplotMaker(TH1F* Data_in, std::vector <std::pair <TH1F*, TH1F*> > Back
 }
 
 //Overload function for case of no stat errors
-void dataMCplotMaker(TH1F* Data_in, std::vector <TH1F*> Backgrounds_in, std::vector <string> Titles, std::string titleIn, std::string title2In, std::string options_string, std::vector <TH1F*> Signals_in, std::vector <string> SignalTitles, std::vector <Color_t> color_input){
+void dataMCplotMaker(TH1F* Data_in, std::vector <TH1F*> Backgrounds_in, std::vector <std::string> Titles, std::string titleIn, std::string title2In, std::string options_string, std::vector <TH1F*> Signals_in, std::vector <std::string> SignalTitles, std::vector <Color_t> color_input){
 
   //Make a null pair for each 
   std::vector< std::pair<TH1F*, TH1F*> > Backgrounds_pair_in;
@@ -1060,7 +1060,7 @@ void dataMCplotMaker(TH1F* Data_in, std::vector <TH1F*> Backgrounds_in, std::vec
 
 }
 
-void dataMCplotMaker(TH1F* Data_in, std::vector <std::pair <TH1F*, float> > Backgrounds_in, std::vector <string> Titles, std::string titleIn, std::string title2In, std::string options_string, std::vector <TH1F*> Signals_in, std::vector <string> SignalTitles, std::vector <Color_t> color_input){
+void dataMCplotMaker(TH1F* Data_in, std::vector <std::pair <TH1F*, float> > Backgrounds_in, std::vector <std::string> Titles, std::string titleIn, std::string title2In, std::string options_string, std::vector <TH1F*> Signals_in, std::vector <std::string> SignalTitles, std::vector <Color_t> color_input){
 
   std::vector< std::pair<TH1F*, TH1F*> > Backgrounds_pair_in;
   for (unsigned int i = 0; i < Backgrounds_in.size(); i++){
