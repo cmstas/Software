@@ -774,10 +774,12 @@ void dataMCplotMaker(TH1F* Data_in, std::vector <std::pair <TH1F*, TH1F*> > Back
     // Get the rounded percentage add up to 100
     int ptotal = 0;
     for(unsigned int i=0; i<percent.size(); i++)  ptotal += percent[i];
-    std::vector< std::pair<float,int> > roundings;
-    for(unsigned int i=0; i< percent.size(); i++) roundings.push_back(std::make_pair((each[i]-percent[i]),i));
-    std::sort(roundings.begin(), roundings.end(), pairCompare);
-    for(int i=0; i< (100-ptotal); i++) percent[roundings[i].second] += 1;
+    if (ptotal > 0){ //need this in case the plots are empty!
+      std::vector< std::pair<float,int> > roundings;
+      for(unsigned int i=0; i< percent.size(); i++) roundings.push_back(std::make_pair((each[i]-percent[i]),i));
+      std::sort(roundings.begin(), roundings.end(), pairCompare);
+      for(int i=0; i< (100-ptotal); i++) percent[roundings[i].second] += 1;
+    }
   }
 
   if (Background_systs.size() == 0) gStyle->SetErrorX(0.001); //why the fuck is this even here?
