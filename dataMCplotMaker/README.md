@@ -42,6 +42,7 @@ Optional arguments:
   - colors: a vector of kColors that you want to use instead of the defaults [ex: vector.push_back(kRed)], starting with the backgrounds and ending with signals
 
 Supported flags for "options" string:
+
   **Output**
   - --outputName X: change the name of the output file produced from its default of "data_MC_plot" in pdf (you may also specify other file type like xxx.ps)
   - --png: to make output as png rather than pdf (must specify output name)
