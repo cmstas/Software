@@ -107,11 +107,13 @@ Supported flags for "options" string:
   - --histoErrors: if you want your backgrounds to have error bars (usually only the data does)
   - --sigError: show statistical error on signal plots
   - --markerStyle2: alternate marker style for signals (alternates between filled and unfilled)
+
   **Ratio plot**
   - --ratioOnly: don't show data on the plot, just use it for the ratio plot on top 
   - --errHistAtBottom: to make the Data/MC comparison histogram at the bottom
   - --ratio N: show the ratio plot with the denominator = the Nth background rather than the sum of backgrounds
   - --noErrBars: if by any chance you don't want the data points to have error bars (it may be annoying when error bars are too big) (effective at both main hist and err hist)
+
   **Alternative running modes**
   - --compareMultiple: useful for when validating new MC.  Put the old plots under backgrounds and the new plots under signals and enable this option.  This will stack the signals and manipulate the colors so you can see the agreement for each background.  Also prints the ratio for the total.
 
