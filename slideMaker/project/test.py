@@ -30,6 +30,9 @@ sm.addSlide(title="Perturbation Theory on $H_m(dS_n,\\mathbb{R})$ Orbifolds", op
 sm.addSlide(p1="yields.pdf",p2="yields.pdf", objects=["t1","t2","a1","a2"])
 sm.addSlide(p1="yields.pdf",p2="yields.pdf")
 
+# or EVEN better, you can pass in a list of plots
+sm.addSlide(title="Many plots",plots=["zmass.pdf", "zmass.pdf", "zmass.pdf", "zmass.pdf", "zmass.pdf"])
+
 
 # when I specify an empty object, a helper grid gets printed on the slide if I've specified
 # the global option "--makegrid". A gui is produced if I specify "--makegui" instead

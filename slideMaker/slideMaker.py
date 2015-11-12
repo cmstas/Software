@@ -150,11 +150,17 @@ def addSlideTextPlot(slideTitle,bullets,plotName,drawType="includegraphics",opts
     else:
         code += utils.bulletsToCode(bullets, opts)
         code += "\\begin{center}"
-        code += "  \\%s[height=%.2f\\textheight,keepaspectratio]{%s} \n" \
-                    % (drawType, utils.textLinesToPlotHeight(utils.bulletNLines(bullets)),plotName)
+        if(opts["fithorizontal"]):
+            code += "  \\vspace*{%.2f\\textheight}\\%s[width=0.99\\textwidth,keepaspectratio]{%s} \n" \
+                        % (0.9-utils.textLinesToPlotHeight(utils.bulletNLines(bullets)),drawType,plotName)
+        else:
+            code += "  \\%s[height=%.2f\\textheight,keepaspectratio]{%s} \n" \
+                        % (drawType, utils.textLinesToPlotHeight(utils.bulletNLines(bullets)),plotName)
+
         code += "\\end{center}\n"
 
     return code
+
 
 def addSlideTextPlotPlot(slideTitle,bullets,plotName1,plotName2,drawType="includegraphics",opts=""):
     opts = utils.parseOptions(opts)
@@ -200,6 +206,32 @@ def addSlideTextPlotPlotPlotPlot(slideTitle,bullets,plotName1,plotName2,plotName
     code += "\\end{columns}"
     return code
 
+def addSlideTextPlots(slideTitle,bullets,plots=[],drawType="includegraphics",opts=""):
+    opts = utils.parseOptions(opts)
+    code = "\\begin{frame}\\frametitle{%s} \n" % (slideTitle)
+    height = 0.5*utils.textLinesToPlotHeight(utils.bulletNLines(bullets))
+    width = 1.0
+
+    code += utils.bulletsToCode(bullets, opts)
+    code += "\\begin{columns}[t]\n"
+
+    isEven = len(plots) % 2 == 0
+    if isEven: nCols = len(plots) // 2
+    else: nCols = len(plots) // 2 + 1
+
+    for i in range(nCols):
+        code += "\\column{%.2f\\textwidth}\n" % (1.0/nCols)
+        code += "\\centering"
+        code += "\\%s[height=%.2f\\textheight,width=%.2f\\textwidth,keepaspectratio]{%s}\\\\ \n" % (drawType,height,width,plots[2*i + 0])
+        if(i == nCols-1 and not isEven):
+            pass
+            # do something if there's nothing to plot
+        else:
+            code += "\\%s[height=%.2f\\textheight,width=%.2f\\textwidth,keepaspectratio]{%s}\\\\ \n" % (drawType,height,width,plots[2*i + 1])
+
+    code += "\\end{columns}"
+    return code
+
 def addSlideTextPlotPlotPlot(slideTitle,bullets,plotName1,plotName2,plotName3,drawType="includegraphics",opts=""):
     opts = utils.parseOptions(opts)
     code = "\\begin{frame}\\frametitle{%s} \n" % (slideTitle)
@@ -221,7 +253,7 @@ def addSlideTextPlotPlotPlot(slideTitle,bullets,plotName1,plotName2,plotName3,dr
     code += "\\end{columns}"
     return code
 
-def addSlide(title=None,text=None,text1=None,text2=None,p1=None,p2=None,p3=None,p4=None,opts="",textobjects=[],arrowobjects=[],boxobjects=[],objects=[]):
+def addSlide(title=None,text=None,text1=None,text2=None,p1=None,p2=None,p3=None,p4=None,opts="",plots=[],textobjects=[],arrowobjects=[],boxobjects=[],objects=[]):
     global source, slideNumber
     slideNumber += 1
 
@@ -256,6 +288,10 @@ def addSlide(title=None,text=None,text1=None,text2=None,p1=None,p2=None,p3=None,
             else:
                 print "[SM] Adding PlotPlot slide #%s" % slideNumber
                 source += addSlidePlotPlot(title,p1,p2,drawType=drawtype,opts=opts)
+
+    elif( len(plots) > 0):
+        print "[SM] Adding TextPlots slide #%s" % slideNumber
+        source += addSlideTextPlots(title,bullets,plots,drawType=drawtype,opts=opts)
 
     elif( p1 ):
         if( text ):
