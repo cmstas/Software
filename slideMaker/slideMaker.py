@@ -209,27 +209,24 @@ def addSlideTextPlotPlotPlotPlot(slideTitle,bullets,plotName1,plotName2,plotName
 def addSlideTextPlots(slideTitle,bullets,plots=[],drawType="includegraphics",opts=""):
     opts = utils.parseOptions(opts)
     code = "\\begin{frame}\\frametitle{%s} \n" % (slideTitle)
-    height = 0.5*utils.textLinesToPlotHeight(utils.bulletNLines(bullets))
+    
+    nRows = int(opts["numrows"]) if opts["numrows"] else 2
+    plotChunks = [plots[i:i+nRows] for i in range(0,len(plots),nRows)]
+    nCols = len(plotChunks)
+    height = (1.0/nRows)*utils.textLinesToPlotHeight(utils.bulletNLines(bullets))
     width = 1.0
 
     code += utils.bulletsToCode(bullets, opts)
     code += "\\begin{columns}[t]\n"
 
-    isEven = len(plots) % 2 == 0
-    if isEven: nCols = len(plots) // 2
-    else: nCols = len(plots) // 2 + 1
-
-    for i in range(nCols):
+    for chunk in plotChunks:
         code += "\\column{%.2f\\textwidth}\n" % (1.0/nCols)
         code += "\\centering"
-        code += "\\%s[height=%.2f\\textheight,width=%.2f\\textwidth,keepaspectratio]{%s}\\\\ \n" % (drawType,height,width,plots[2*i + 0])
-        if(i == nCols-1 and not isEven):
-            pass
-            # do something if there's nothing to plot
-        else:
-            code += "\\%s[height=%.2f\\textheight,width=%.2f\\textwidth,keepaspectratio]{%s}\\\\ \n" % (drawType,height,width,plots[2*i + 1])
+        for plot in chunk:
+            code += "\\%s[height=%.2f\\textheight,width=%.2f\\textwidth,keepaspectratio]{%s}\\\\ \n" % (drawType,height,width,plot)
 
     code += "\\end{columns}"
+        
     return code
 
 def addSlideTextPlotPlotPlot(slideTitle,bullets,plotName1,plotName2,plotName3,drawType="includegraphics",opts=""):
