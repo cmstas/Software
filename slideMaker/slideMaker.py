@@ -209,7 +209,7 @@ def addSlideTextPlotPlotPlotPlot(slideTitle,bullets,plotName1,plotName2,plotName
 def addSlideTextPlots(slideTitle,bullets,plots=[],drawType="includegraphics",opts=""):
     opts = utils.parseOptions(opts)
     code = "\\begin{frame}\\frametitle{%s} \n" % (slideTitle)
-    height = 0.5*utils.textLinesToPlotHeight(utils.bulletNLines(bullets))
+    height = 0.49*utils.textLinesToPlotHeight(utils.bulletNLines(bullets))
     width = 1.0
 
     code += utils.bulletsToCode(bullets, opts)
