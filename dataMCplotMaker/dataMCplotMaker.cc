@@ -782,7 +782,7 @@ void dataMCplotMaker(TH1F* Data_in, std::vector <std::pair <TH1F*, TH1F*> > Back
     }
   }
 
-  if (Background_systs.size() == 0) gStyle->SetErrorX(0.001); //why the fuck is this even here?
+  //if (Background_systs.size() == 0) gStyle->SetErrorX(0.001); //why the fuck is this even here?
 
   //Try this
   if (!dots && !nostack) Backgrounds[0]->SetMarkerColor(0); 
@@ -855,7 +855,7 @@ void dataMCplotMaker(TH1F* Data_in, std::vector <std::pair <TH1F*, TH1F*> > Back
   else leg = new TLegend(0.7+legendRight,0.59+legendUp,0.92+legendRight+legendWider_,0.87+legendUp+legendTaller_);
   leg->SetTextSize(legendTextSize);
   leg->SetTextFont(42);
-  if (!noData && !ratioOnly ) leg->AddEntry(Data, dataName.c_str(), "lp");
+  if (!noData && !ratioOnly ) leg->AddEntry(Data, dataName.c_str(), "lep");
   if (showPercentage) for (int i = Titles.size()-1; i > -1; i--) Titles[i] =  Form("%s [%i%%]", Titles[i].c_str(), percent[i]);
   if (!dots && !nostack) for (int i = Titles.size()-1; i > -1; i--) leg->AddEntry(Backgrounds[i], Titles[i].c_str(), "f");
   if (dots || nostack) for (int i = Titles.size()-1; i > -1; i--) leg->AddEntry(Backgrounds[i], Titles[i].c_str(), "LPE");
