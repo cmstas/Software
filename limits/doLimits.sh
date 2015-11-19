@@ -30,12 +30,12 @@ cd "$OUTDIR"
 
 for i in "${samples[@]}"
 do
-  echo "Running command: combine -M Asymptotic -n "$i" "$INDIR/card_all_$i.txt" > "log/limit_$i.txt" 2>&1"
-  combine -M Asymptotic -n "$i" "$INDIR/card_all_$i.txt" > "log/limit_$i.log" 2>&1
+  echo "Running command: combine -M Asymptotic -n "$i" "$INDIR/card_all_$i.txt --noFitAsimov" > "log/limit_$i.txt" 2>&1"
+  combine -M Asymptotic -n "$i" "$INDIR/card_all_$i.txt" --noFitAsimov > "log/limit_$i.log" 2>&1
   mv "higgsCombine"$i".Asymptotic.mH120.root" "limit_"$i".root"
-  echo "Running command: combine -M ProfileLikelihood --significance -t -1 --expectSignal=1 -n "$i" "$INDIR/card_all_$i.txt" > "log/significance_$i.log" 2>&1"
-  combine -M ProfileLikelihood --significance -t -1 --expectSignal=1 -n "$i" "$INDIR/card_all_$i.txt" > "log/significance_$i.log" 2>&1
-  mv "higgsCombine"$i".ProfileLikelihood.mH120.root" "significance_"$i".root"
+  #echo "Running command: combine -M ProfileLikelihood --significance -t -1 --expectSignal=1 -n "$i" "$INDIR/card_all_$i.txt" > "log/significance_$i.log" 2>&1"
+  #combine -M ProfileLikelihood --significance -t -1 --expectSignal=1 -n "$i" "$INDIR/card_all_$i.txt" > "log/significance_$i.log" 2>&1
+  #mv "higgsCombine"$i".ProfileLikelihood.mH120.root" "significance_"$i".root"
   MODEL=$(echo "$i"|awk -F- 'split($1,a,"_")&&$0=a[1]') #because awk
   MASS1=$(echo "$i"|awk -F- 'split($1,a,"_")&&$0=a[2]')
   MASS2=$(echo "$i"|awk -F- 'split($1,a,"_")&&$0=a[3]')
