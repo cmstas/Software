@@ -174,6 +174,19 @@ def addSlideTextPlotPlot(slideTitle,bullets,plotName1,plotName2,drawType="includ
                     % (drawType, utils.textLinesToPlotHeight(utils.bulletNLines(bullets)),plotName2)
         code += "\\end{center}"
         code += utils.bulletsToCode(bullets, opts)
+    elif(opts["plotsleft"]):
+        height = 0.45
+        width = 0.55
+        code += "\\begin{columns}\n"
+        code += "\\column{%.2f\\textwidth}\n" % width
+        code += "\\centering"
+        code += "\\%s[height=%.2f\\textheight,width=%.2f\\textwidth,keepaspectratio]{%s}\\\\ \n" % (drawType,height,1.0,plotName1)
+        code += "\\%s[height=%.2f\\textheight,width=%.2f\\textwidth,keepaspectratio]{%s}     \n" % (drawType,height,1.0,plotName2)
+        code += "\\column{%.2f\\textwidth}\n" % (1.0-width)
+        code += "\\centering"
+        code += utils.bulletsToCode(bullets, opts)
+
+        code += "\\end{columns}"
     else:
         code += utils.bulletsToCode(bullets, opts)
         code += "\\begin{center}"
