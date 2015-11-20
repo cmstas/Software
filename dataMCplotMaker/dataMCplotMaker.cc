@@ -927,7 +927,7 @@ void dataMCplotMaker(TH1F* Data_in, std::vector <std::pair <TH1F*, TH1F*> > Back
     linecut.SetLineStyle(2);
     linecut.SetLineWidth(2);
     linecut.SetLineColor(kGray+2);
-    linecut.DrawLine(0.0, hLines[i], Backgrounds.size() > 0 ? Backgrounds[0]->GetXaxis()->GetXmax() : Signals[0]->GetXaxis()->GetXmax(), hLines[i]);
+    linecut.DrawLine(Backgrounds.size() > 0 ? Backgrounds[0]->GetXaxis()->GetXmin() : Signals[0]->GetXaxis()->GetXmin(), hLines[i], Backgrounds.size() > 0 ? Backgrounds[0]->GetXaxis()->GetXmax() : Signals[0]->GetXaxis()->GetXmax(), hLines[i]);
   }
 
   //Draw header
