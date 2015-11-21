@@ -301,6 +301,7 @@ void dataMCplotMaker(TH1F* Data_in, std::vector <std::pair <TH1F*, TH1F*> > Back
   int ratio = -1; 
   bool ratioOnly = 0; 
   bool ratioLine = 0; 
+  int bkgd_width = 1; 
 
   //Loop over options and change default settings to user-defined settings
   for (unsigned int i = 0; i < Options.size(); i++){
@@ -367,6 +368,7 @@ void dataMCplotMaker(TH1F* Data_in, std::vector <std::pair <TH1F*, TH1F*> > Back
     else if (Options[i].find("ratioLine") < Options[i].length()) ratioLine = true;
     else if (Options[i].find("ratio") < Options[i].length()) ratio = atoi( getString(Options[i], "ratio").c_str() );
     else if (Options[i].find("noLumi") < Options[i].length()) noLumi = true;
+    else if (Options[i].find("bkgd_width") < Options[i].length()) bkgd_width = atoi( getString(Options[i], "bkgd_width").c_str() ); 
     else std::cout << "Warning: Option not recognized!  Option: " << Options[i] << std::endl;
   }
 
@@ -793,6 +795,12 @@ void dataMCplotMaker(TH1F* Data_in, std::vector <std::pair <TH1F*, TH1F*> > Back
   if (dots && Backgrounds.size() > 4){ Backgrounds[4]->SetMarkerColor(kMagenta+2); Backgrounds[4]->SetLineColor(kMagenta+2); }
   if (dots && Backgrounds.size() > 5){ Backgrounds[5]->SetMarkerColor(kYellow-4); Backgrounds[5]->SetLineColor(kYellow-4); }
 
+  if (bkgd_width > 1){
+    for (unsigned int i = 0; i < Backgrounds.size(); i++){
+      Backgrounds[i]->SetLineWidth(bkgd_width); 
+    }
+  }
+
   //Draw
   if (!nostack && !dots && histoErrors) stack->Draw("histe");
   else if (!nostack && !dots && !histoErrors) stack->Draw("hist");
@@ -927,7 +935,7 @@ void dataMCplotMaker(TH1F* Data_in, std::vector <std::pair <TH1F*, TH1F*> > Back
     linecut.SetLineStyle(2);
     linecut.SetLineWidth(2);
     linecut.SetLineColor(kGray+2);
-    linecut.DrawLine(0.0, hLines[i], Backgrounds.size() > 0 ? Backgrounds[0]->GetXaxis()->GetXmax() : Signals[0]->GetXaxis()->GetXmax(), hLines[i]);
+    linecut.DrawLine(Backgrounds.size() > 0 ? Backgrounds[0]->GetXaxis()->GetXmin() : Signals[0]->GetXaxis()->GetXmin(), hLines[i], Backgrounds.size() > 0 ? Backgrounds[0]->GetXaxis()->GetXmax() : Signals[0]->GetXaxis()->GetXmax(), hLines[i]);
   }
 
   //Draw header
