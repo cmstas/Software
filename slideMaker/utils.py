@@ -1,5 +1,5 @@
 ### utility functions that don't directly touch the latex source go here
-import commands, os, sys, json
+import commands, os, sys, json, random
 
 basepath = os.path.dirname(os.path.abspath(__file__))
 listOfOptions = ["dump", "copy", "compile", "graphicspaths", "shorttitle", "themecolor", "sidebyside", "modernfont", "noarrowhead","rotate","drawtype","crayon","shadow","makegrid","makegui","dashed","brace","flip","casual","texttop", "textbottom", "resetnumbering", "vertical", "sizeratio","textsize","movedowntext","plottop","fithorizontal","numrows","plotsleft"]
@@ -231,6 +231,13 @@ def splitTitle(title):
     else:
         return title[:cutoff]+title[cutoff:].split()[0] + "\\\\ \\vspace{0.4cm}" + " ".join(title[cutoff:].split()[1:])
 
+def randomColor():
+    r,g,b = -1, -1, -1
+    while r+g+b < 70:
+        r,g,b = 255*random.random(), 255*random.random(), 255*random.random()
+    return int(r),int(g),int(b)
+
+
 def slideToPng(slidenumber,output,outdir):
     # note that output is the pdf file we produce from writeSlides()
     # but outdir is where we want to store the individual pages
@@ -275,4 +282,3 @@ def makeGUI(guiInfo, output, workingdir):
     stat,out = commands.getstatusoutput("chmod 755 ~/public_html/dump/pages/copy.py")
 
     print "[SM] Copied GUI to uaf-6.t2.ucsd.edu/~%s/dump/pages/gui.html" % (os.getenv("USER"))
-
