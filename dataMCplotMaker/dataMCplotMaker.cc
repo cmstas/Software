@@ -786,6 +786,18 @@ void dataMCplotMaker(TH1F* Data_in, std::vector <std::pair <TH1F*, TH1F*> > Back
 
   //if (Background_systs.size() == 0) gStyle->SetErrorX(0.001); //why the fuck is this even here?
 
+  //Stupid dots thing
+  if (dots && myMin == 0){
+    for (unsigned int i = 0; i < Backgrounds.size(); i++){
+      for (int j = 1; j <= Backgrounds[i]->GetNbinsX(); j++){
+        if (Backgrounds[i]->GetBinContent(j) == 0){
+          Backgrounds[i]->SetBinContent(j, 0.0000001); 
+          cout << "Warning! One of your 'dots' is 0 and won't show up.  Setting it to 0.0000001" << endl;  
+        }
+      }
+    }
+  }
+
   //Try this
   if (!dots && !nostack) Backgrounds[0]->SetMarkerColor(0); 
   if (dots){ Backgrounds[0]->SetMarkerColor(kBlue); Backgrounds[0]->SetLineColor(kBlue); }
