@@ -440,16 +440,22 @@ def initSlides(me="Nick", themeName="nick", opts=""):
     if(opts["modernfont"]):
         source += "\\usepackage{helvet} %% only modern font that works on uaf?"
 
+    if(opts["themecolor"]):
+        themecolor = opts["themecolor"]
+        if "random" in themecolor:
+            themecolor = "%s,%s,%s" % utils.randomColor()
+            print "[SM] Using random theme color: %s" % themecolor
+
 
     if(theme == "nick"):
         source += themeNick
-        if(opts["themecolor"]): source = source.replace("\\definecolor{nickcolor}{RGB}{51,51,179}","\\definecolor{nickcolor}{RGB}{%s}" % opts["themecolor"])
+        if(opts["themecolor"]): source = source.replace("\\definecolor{nickcolor}{RGB}{51,51,179}","\\definecolor{nickcolor}{RGB}{%s}" % themecolor)
     elif(theme == "alex"):
         source += themeAlex
-        if(opts["themecolor"]): source = source.replace("\\definecolor{alexcolor}{RGB}{0,0,255}","\\definecolor{alexcolor}{RGB}{%s}" % opts["themecolor"])
+        if(opts["themecolor"]): source = source.replace("\\definecolor{alexcolor}{RGB}{0,0,255}","\\definecolor{alexcolor}{RGB}{%s}" % themecolor)
     elif(theme == "madrid"):
         source += themeMadrid
-        if(opts["themecolor"]): source = source.replace("\\definecolor{madridcolor}{RGB}{51,51,179}","\\definecolor{madridcolor}{RGB}{%s}" % opts["themecolor"])
+        if(opts["themecolor"]): source = source.replace("\\definecolor{madridcolor}{RGB}{51,51,179}","\\definecolor{madridcolor}{RGB}{%s}" % themecolor)
     else:
         print "unsupported theme:", theme
     
