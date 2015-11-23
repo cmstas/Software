@@ -1008,6 +1008,8 @@ void dataMCplotMaker(TH1F* Data_in, std::vector <std::pair <TH1F*, TH1F*> > Back
     err_hist->GetYaxis()->SetTitle("Data/MC");
     err_hist->GetYaxis()->SetTitleSize(0.08);
     err_hist->GetYaxis()->SetTitleOffset(1.8);
+    TH1F* background_syst_ratio = 0; 
+    if (Background_systs.size() > 0) background_syst_ratio = (TH1F*)background_syst->Clone();
     for (int ib = 1; ib < err_hist->GetNbinsX()+1; ib++){
       float MC_value = 0;
       float MC_error_2 = 0;
@@ -1022,9 +1024,9 @@ void dataMCplotMaker(TH1F* Data_in, std::vector <std::pair <TH1F*, TH1F*> > Back
       float MC_err = sqrt(MC_error_2);
       float data_err = Data->GetBinError(ib);
       if(!noErrBars) err_hist->SetBinError(ib, (data_value == 0 || MC_value == 0) ? 0.001 : (value * sqrt( pow(MC_err/MC_value, 2) + pow(data_err/data_value, 2)) ) );
-      if (Background_systs.size() > 0 && background_syst->GetBinContent(ib) > 0) background_syst->SetBinError(ib, background_syst->GetBinError(ib)/background_syst->GetBinContent(ib)); 
-      else if (Background_systs.size() > 0) background_syst->SetBinError(ib, 0); 
-      if (Background_systs.size() > 0) background_syst->SetBinContent(ib, 1); 
+      if (Background_systs.size() > 0 && background_syst->GetBinContent(ib) > 0) background_syst_ratio->SetBinError(ib, background_syst->GetBinError(ib)/background_syst->GetBinContent(ib)); 
+      else if (Background_systs.size() > 0) background_syst_ratio->SetBinError(ib, 0); 
+      if (Background_systs.size() > 0) background_syst_ratio->SetBinContent(ib, 1); 
     }
     if (!ratioLine) err_hist->SetMarkerStyle(20);
     if(noErrBars && ratioLine) err_hist->Draw("HIST");
@@ -1047,7 +1049,7 @@ void dataMCplotMaker(TH1F* Data_in, std::vector <std::pair <TH1F*, TH1F*> > Back
     err_hist->GetYaxis()->SetLabelSize(0.2);
     err_hist->GetYaxis()->SetRangeUser(0., 2.);
     err_hist->GetYaxis()->SetNdivisions(505);
-    if (Background_systs.size() > 0) background_syst->Draw("E2 SAME"); 
+    if (Background_systs.size() > 0) background_syst_ratio->Draw("E2 SAME"); 
   }
   //--------------------------------
 
