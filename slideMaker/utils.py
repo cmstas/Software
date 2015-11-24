@@ -2,7 +2,7 @@
 import commands, os, sys, json, random
 
 basepath = os.path.dirname(os.path.abspath(__file__))
-listOfOptions = ["dump", "copy", "compile", "graphicspaths", "shorttitle", "themecolor", "sidebyside", "modernfont", "noarrowhead","rotate","drawtype","crayon","shadow","makegrid","makegui","dashed","brace","flip","casual","texttop", "textbottom", "resetnumbering", "vertical", "sizeratio","textsize","movedowntext","plottop","fithorizontal","numrows","plotsleft"]
+listOfOptions = ["dump", "copy", "compile", "graphicspaths", "shorttitle", "themecolor", "sidebyside", "modernfont", "noarrowhead","rotate","drawtype","crayon","shadow","makegrid","makegui","dashed","brace","flip","casual","texttop", "textbottom", "resetnumbering", "vertical", "sizeratio","textsize","movedowntext","plottop","fithorizontal","numrows","plotsleft", "font"]
 def parseOptions(optString):
     opts = { }
     for optName in listOfOptions:

@@ -440,6 +440,11 @@ def initSlides(me="Nick", themeName="nick", opts=""):
     if(opts["modernfont"]):
         source += "\\usepackage{helvet} %% only modern font that works on uaf?"
 
+    if(opts["font"]):
+        # list at http://www.tug.dk/FontCatalogue/sansseriffonts.html
+        # I personally like "--font gillius"
+        source += "\\usepackage{%s}" % opts["font"]
+
     if(opts["themecolor"]):
         themecolor = opts["themecolor"]
         if "random" in themecolor:
