@@ -23,15 +23,16 @@ commonHeader = """
 \\graphicspath{ GRAPHICSPATHHERE }
 \\setbeamertemplate{navigation symbols}{}
 
+
 \\definecolor{darkgreen}{RGB}{0,100,0}
 \\definecolor{gray}{RGB}{128,128,128}
 \\definecolor{grey}{RGB}{128,128,128}
 \\definecolor{orange}{RGB}{230,97,1}
 \\definecolor{babyblue}{RGB}{56,147,214}
 \\definecolor{coolblue}{RGB}{51,51,179}
-\\definecolor{nickcolor}{RGB}{51,51,179}
-\\definecolor{alexcolor}{RGB}{0,0,255}
-\\definecolor{madridcolor}{RGB}{51,51,179}
+\\definecolor{thethemecolor}{RGB}{0,0,255}
+\\setbeamercolor{alerted text}{fg=thethemecolor}
+
 
 \\newcommand{\\met}{\\slashed{E}_T}
 \\newcommand{\\pt}{p_{T}}
@@ -43,6 +44,7 @@ commonHeader = """
 \\newcommand{\\blue}[1]{\\textcolor{blue}{#1}}
 \\newcommand{\\coolblue}[1]{\\textcolor{coolblue}{#1}}
 \\newcommand{\\orange}[1]{\\textcolor{orange}{#1}}
+\\newcommand{\\themecolor}[1]{\\textcolor{thethemecolor}{#1}}
 
 
 
@@ -95,6 +97,8 @@ commonHeader = """
 \\drawshadow{image}
 \\end{tikzpicture}}
 
+
+
 """
 
 themeNick = """
@@ -116,25 +120,27 @@ themeNick = """
 \\setbeamercolor{title}{fg=white,bg=blue!70!yellow}
 \\setbeamertemplate{headline}{} % suppress that top bar
 \\useinnertheme{rectangles}
-\\setlist[itemize]{label=$\\textcolor{nickcolor}{\\blacktriangleright}$,leftmargin=*}
+\\setlist[itemize]{label=$\\textcolor{thethemecolor}{\\blacktriangleright}$,leftmargin=*}
 
 \\begin{document}
 """
 
 themeAlex = """
 \\setbeamertemplate{footline}[frame number]
-\\setbeamertemplate{itemize item}{\\color{alexcolor}$\\blacktriangleright$}
-\\setbeamertemplate{itemize subitem}{\\color{alexcolor}$\\blacktriangleright$}
-\\setbeamercolor{frametitle}{fg=alexcolor}
+\\setbeamertemplate{itemize item}{\\color{thethemecolor}$\\blacktriangleright$}
+\\setbeamertemplate{itemize subitem}{\\color{thethemecolor}$\\blacktriangleright$}
+\\setbeamertemplate{itemize subsubitem}{\\color{thethemecolor}$\\blacktriangleright$}
+\\setbeamercolor{frametitle}{fg=thethemecolor}
 \\setbeamerfont{frametitle}{size=\\LARGE \\bfseries}
 \\setbeamertemplate{footline}{\\raisebox{5pt}{\\makebox[\\paperwidth]{\\hfill\\makebox[10pt]{\\scriptsize\\textcolor{white}{\\insertframenumber\\hspace{2mm}}}}}}\\setbeamersize{text margin left=10pt,text margin right=10pt}
+
 
 \\defbeamertemplate*{title page}{customized}[1][]{ 
   \\begin{textblock*}{12.8cm}(0cm,1.5cm)
   \\begin{center}
   \\usebeamerfont{title}
-  \\textcolor{alexcolor}{\\textbf{\\huge TITLEHERE} } %% Allowed 20 characters upstairs and 30 downstairs
-  \\textcolor{alexcolor}{\\rule{10cm}{2pt}}
+  \\textcolor{thethemecolor}{\\textbf{\\huge TITLEHERE} } %% Allowed 20 characters upstairs and 30 downstairs
+  \\textcolor{thethemecolor}{\\rule{10cm}{2pt}}
   \\end{center}
   \\end{textblock*}
   \\begin{center}
@@ -153,8 +159,59 @@ themeAlex = """
 }
 
 \\usebackgroundtemplate{
-\\begin{tikzpicture}[thick]
-\\draw[fill=alexcolor, draw=alexcolor](0cm,0.0cm) -- (21.3cm,0.0cm) -- (21.3cm,21.3cm) -- (0.0cm,0.0cm);
+\\begin{tikzpicture}
+   \\draw[fill=thethemecolor, draw=thethemecolor](0.0cm,0.0cm) -- (21.3cm,0.0cm) -- (21.3cm,21.3cm) -- (0.0cm,0.0cm);
+\\end{tikzpicture}
+}
+
+  %% \\draw[fill=thethemecolor, draw=thethemecolor](0.0cm,0.0cm) -- (21.3cm,0.0cm) -- (21.3cm,21.3cm) -- (0.0cm,0.0cm);
+    %% \\shade[top color=thethemecolor!15,bottom color=white,middle color=white] (0,0) rectangle (21.3cm,3cm);
+
+\\begin{document}
+"""
+
+themeAlexMod = """
+\\setbeamertemplate{footline}[frame number]
+\\setbeamertemplate{itemize item}{\\color{thethemecolor}$\\blacktriangleright$}
+\\setbeamertemplate{itemize subitem}{\\color{thethemecolor}$\\blacktriangleright$}
+\\setbeamertemplate{itemize subsubitem}{\\color{thethemecolor}$\\blacktriangleright$}
+\\setbeamercolor{frametitle}{fg=thethemecolor}
+\\setbeamerfont{frametitle}{size=\\LARGE \\bfseries}
+\\setbeamertemplate{footline}{\\raisebox{5pt}{\\makebox[\\paperwidth]{\\hfill\\makebox[10pt]{\\scriptsize\\textcolor{white}{\\insertframenumber\\hspace{2mm}}}}}}\\setbeamersize{text margin left=10pt,text margin right=10pt}
+\\addtobeamertemplate{frametitle}{\\vskip-0.23cm}{}
+
+
+\\defbeamertemplate*{title page}{customized}[1][]{ 
+  \\begin{textblock*}{12.8cm}(0cm,1.5cm)
+  \\begin{center}
+  \\usebeamerfont{title}
+  \\textcolor{thethemecolor}{\\textbf{\\huge TITLEHERE} } %% Allowed 20 characters upstairs and 30 downstairs
+  \\textcolor{thethemecolor}{\\rule{10cm}{2pt}}
+  \\end{center}
+  \\end{textblock*}
+  \\begin{center}
+  \\end{center}
+  \\begin{textblock*}{12.8cm}(0cm,4.0cm)
+  \\begin{center}
+  INSTITUTEHERE
+  \\end{center}
+  \\end{textblock*}
+  \\begin{textblock*}{2.7cm}(0cm, 0.0cm)
+  \\includegraphics[width=2.7cm]{SCHOOLLOGO}
+  \\end{textblock*}
+  \\begin{textblock*}{2.2cm}(10.3cm, 0.2cm)
+  \\includegraphics[width=2.2cm]{CMS.pdf}
+  \\end{textblock*}
+}
+
+\\usebackgroundtemplate{
+\\begin{tikzpicture}
+   %\\shade[top color=thethemecolor!15,middle color=thethemecolor!20,bottom color=white!0] (0cm,0cm) rectangle (12.8cm,0.6cm);
+   %\\draw[thick, draw=thethemecolor] (0cm,-0.21cm) -- (12.8cm,-0.21cm);
+   %\\draw[fill=thethemecolor,thick,draw=thethemecolor](11.8cm,-9cm) -- (12.8cm,-9cm) -- (12.8cm,-8cm) -- (11.8cm,-9cm);
+   \\shade[top color=thethemecolor!15,middle color=thethemecolor!20,bottom color=white!0] (0cm,0cm) rectangle (12.8cm,0.8cm);
+   \\draw[thick, draw=thethemecolor] (0cm,-0.00cm) -- (12.8cm,-0.00cm);
+   \\draw[fill=thethemecolor,thick,draw=thethemecolor](11.8cm,-8.8cm) -- (12.8cm,-8.8cm) -- (12.8cm,-7.8cm) -- (11.8cm,-8.8cm);
 \\end{tikzpicture}
 }
 
@@ -175,7 +232,7 @@ themeMadrid = """
 \\usetheme{AnnArbor}
 \\usecolortheme{wolverine}
 \\setbeamertemplate{headline}{} % suppress that top bar
-\\setlist[itemize]{label=$\\textcolor{madridcolor}{\\blacktriangleright}$,leftmargin=*}
+\\setlist[itemize]{label=$\\textcolor{thethemecolor}{\\blacktriangleright}$,leftmargin=*}
 
 \\begin{document}
 """

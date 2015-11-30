@@ -34,7 +34,8 @@ def addSlideTitle(title="", opts=""):
     \\begin{frame}[plain]
         %% draw over global triangle so that it doesn't show up on the title slide
         \\begin{tikzpicture}[thick]
-        \\draw[fill=white, draw=white](0cm,0.0cm) -- (20.3cm,0.0cm) -- (20.3cm,20.3cm) -- (0.0cm,0.0cm);
+        %% \\draw[fill=white, draw=white](0cm,0.0cm) -- (20.3cm,0.0cm) -- (20.3cm,20.3cm) -- (0.0cm,0.0cm);
+        \\draw[fill=white, draw=white](0cm,0cm) -- (20.3cm,0cm) -- (20.3cm,20.3cm) -- (0cm,20.3cm) -- (0cm,0cm);
         \\end{tikzpicture}
         \\titlepage 
     """
@@ -53,7 +54,7 @@ def addSlideTitle(title="", opts=""):
 
     if(theme == "nick"):
         source += titlePageNick
-    elif(theme == "alex"):
+    elif(theme == "alex" or theme == "alexmod"):
         source = source.replace("TITLEHERE",utils.splitTitle(title))
         source += titlePageAlex
     elif(theme == "madrid"):
@@ -426,7 +427,7 @@ def addGlobalOptions(optstr):
 
 
 def initSlides(me="Nick", themeName="nick", opts=""):
-    global source, commonHeader, theme, themeAlex, slideNumber, institute
+    global source, commonHeader, theme, themeAlex, themeAlexMod, slideNumber, institute
     source = ""
     theme = themeName.lower()
     opts = utils.parseOptions(opts)
@@ -445,32 +446,24 @@ def initSlides(me="Nick", themeName="nick", opts=""):
         # I personally like "--font gillius"
         source += "\\usepackage{%s}" % opts["font"]
 
+    if(theme == "nick"): source += themeNick
+    elif(theme == "alex"): source += themeAlex
+    elif(theme == "alexmod"): source += themeAlexMod
+    elif(theme == "madrid"): source += themeMadrid
+    else: print "unsupported theme:", theme
+
     if(opts["themecolor"]):
         themecolor = opts["themecolor"]
         if "random" in themecolor:
             themecolor = "%s,%s,%s" % utils.randomColor()
             print "[SM] Using random theme color: %s" % themecolor
 
-
-    if(theme == "nick"):
-        source += themeNick
-        if(opts["themecolor"]): source = source.replace("\\definecolor{nickcolor}{RGB}{51,51,179}","\\definecolor{nickcolor}{RGB}{%s}" % themecolor)
-    elif(theme == "alex"):
-        source += themeAlex
-        if(opts["themecolor"]): source = source.replace("\\definecolor{alexcolor}{RGB}{0,0,255}","\\definecolor{alexcolor}{RGB}{%s}" % themecolor)
-    elif(theme == "madrid"):
-        source += themeMadrid
-        if(opts["themecolor"]): source = source.replace("\\definecolor{madridcolor}{RGB}{51,51,179}","\\definecolor{madridcolor}{RGB}{%s}" % themecolor)
-    else:
-        print "unsupported theme:", theme
+        source = source.replace("\\definecolor{thethemecolor}{RGB}{0,0,255}","\\definecolor{thethemecolor}{RGB}{%s}" % themecolor)
     
     if(opts["casual"]): institute = "\\large{%s}" % opts["casual"].replace("ENDL", "\\\\ \\vspace{0.4cm}")
     source = source.replace("INSTITUTEHERE", institute)
 
     school = "ucsb"
-
-
-    # ucsb.pdf
 
     fullname = ""
     if("Nick" in me): 
@@ -548,9 +541,9 @@ def startBackup(opts=""):
     print "[SM] Beginning backup"
 
     color = "black"
-    if(theme == "alex"): color = "alexcolor"
-    if(theme == "nick"): color = "nickcolor"
-    if(theme == "madrid"): color = "madridcolor"
+    # if(theme == "alex"): color = "alexcolor"
+    # if(theme == "nick"): color = "nickcolor"
+    # if(theme == "madrid"): color = "madridcolor"
 
     if(opts["resetnumbering"]): source += "\n\\appendix\n"
 
@@ -558,10 +551,10 @@ def startBackup(opts=""):
     \\begin{frame}[plain]
     \\centering
     \\begin{textblock*}{12.8cm}[0.5,0.5](6.4cm,4.8cm)
-    \\begin{LARGE} \\centering \\textcolor{%s}{\\textbf{Backup}} \\end{LARGE}
+    \\begin{LARGE} \\centering \\textcolor{thethemecolor}{\\textbf{Backup}} \\end{LARGE}
     \\end{textblock*}
     \\end{frame}
-    """ % (color)
+    """
 
 if __name__ == '__main__':
     content = """

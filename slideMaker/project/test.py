@@ -23,7 +23,7 @@ sm.addObject("c0","circle")
 # supported themes are "nick", "alex", and "madrid"
 # themecolor takes RGB. could put in explicit color names, but RGB more robust
 # also try the --modernfont option
-sm.initSlides(me="Nick",themeName="nick",opts="--themecolor 51,51,179 --font gillius")
+sm.initSlides(me="Nick",themeName="alexmod",opts="--themecolor 51,51,179 --font gillius")
 sm.addSlide(title="Perturbation Theory on $H_m(dS_n,\\mathbb{R})$ Orbifolds", opts="--shorttitle snarxiv hep-th")
 
 # pass in a list of textobjects (which are just dicts, so they can be modified too)
