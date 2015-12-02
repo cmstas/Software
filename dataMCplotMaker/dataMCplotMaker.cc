@@ -1044,8 +1044,8 @@ void dataMCplotMaker(TH1F* Data_in, std::vector <std::pair <TH1F*, TH1F*> > Back
       }
       float data_value = Data->GetBinContent(ib);
       float value = (MC_value > 0 ? data_value/MC_value : 1000);
-      if (dontShowZeroRatios && data_value == 0) value = 1000; 
       if (data_value != 0 || MC_value != 0) err_hist->SetBinContent(ib, value);
+      if (dontShowZeroRatios && data_value == 0){ err_hist->SetBinContent(ib, -9999);  cout << __LINE__ << endl; } 
       float MC_err = sqrt(MC_error_2);
       float data_err = Data->GetBinError(ib);
       if(!noErrBars) err_hist->SetBinError(ib, (data_value == 0 || MC_value == 0) ? 0.001 : (value * sqrt( pow(MC_err/MC_value, 2) + pow(data_err/data_value, 2)) ) );
