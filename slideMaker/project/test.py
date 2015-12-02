@@ -23,12 +23,15 @@ sm.addObject("c0","circle")
 # supported themes are "nick", "alex", and "madrid"
 # themecolor takes RGB. could put in explicit color names, but RGB more robust
 # also try the --modernfont option
-sm.initSlides(me="Nick",themeName="nick",opts="--themecolor 51,51,179")
+sm.initSlides(me="Nick",themeName="alexmod",opts="--themecolor 51,51,179 --font gillius")
 sm.addSlide(title="Perturbation Theory on $H_m(dS_n,\\mathbb{R})$ Orbifolds", opts="--shorttitle snarxiv hep-th")
 
 # pass in a list of textobjects (which are just dicts, so they can be modified too)
 sm.addSlide(p1="yields.pdf",p2="yields.pdf", objects=["t1","t2","a1","a2"])
 sm.addSlide(p1="yields.pdf",p2="yields.pdf")
+
+# or EVEN better, you can pass in a list of plots
+sm.addSlide(title="Many plots",plots=["zmass.pdf", "zmass.pdf", "zmass.pdf", "zmass.pdf", "zmass.pdf"])
 
 
 # when I specify an empty object, a helper grid gets printed on the slide if I've specified

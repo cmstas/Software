@@ -34,7 +34,8 @@ def addSlideTitle(title="", opts=""):
     \\begin{frame}[plain]
         %% draw over global triangle so that it doesn't show up on the title slide
         \\begin{tikzpicture}[thick]
-        \\draw[fill=white, draw=white](0cm,0.0cm) -- (20.3cm,0.0cm) -- (20.3cm,20.3cm) -- (0.0cm,0.0cm);
+        %% \\draw[fill=white, draw=white](0cm,0.0cm) -- (20.3cm,0.0cm) -- (20.3cm,20.3cm) -- (0.0cm,0.0cm);
+        \\draw[fill=white, draw=white](0cm,0cm) -- (20.3cm,0cm) -- (20.3cm,20.3cm) -- (0cm,20.3cm) -- (0cm,0cm);
         \\end{tikzpicture}
         \\titlepage 
     """
@@ -53,7 +54,7 @@ def addSlideTitle(title="", opts=""):
 
     if(theme == "nick"):
         source += titlePageNick
-    elif(theme == "alex"):
+    elif(theme == "alex" or theme == "alexmod"):
         source = source.replace("TITLEHERE",utils.splitTitle(title))
         source += titlePageAlex
     elif(theme == "madrid"):
@@ -150,11 +151,17 @@ def addSlideTextPlot(slideTitle,bullets,plotName,drawType="includegraphics",opts
     else:
         code += utils.bulletsToCode(bullets, opts)
         code += "\\begin{center}"
-        code += "  \\%s[height=%.2f\\textheight,keepaspectratio]{%s} \n" \
-                    % (drawType, utils.textLinesToPlotHeight(utils.bulletNLines(bullets)),plotName)
+        if(opts["fithorizontal"]):
+            code += "  \\vspace*{%.2f\\textheight}\\%s[width=0.99\\textwidth,keepaspectratio]{%s} \n" \
+                        % (0.9-utils.textLinesToPlotHeight(utils.bulletNLines(bullets)),drawType,plotName)
+        else:
+            code += "  \\%s[height=%.2f\\textheight,keepaspectratio]{%s} \n" \
+                        % (drawType, utils.textLinesToPlotHeight(utils.bulletNLines(bullets)),plotName)
+
         code += "\\end{center}\n"
 
     return code
+
 
 def addSlideTextPlotPlot(slideTitle,bullets,plotName1,plotName2,drawType="includegraphics",opts=""):
     opts = utils.parseOptions(opts)
@@ -168,6 +175,19 @@ def addSlideTextPlotPlot(slideTitle,bullets,plotName1,plotName2,drawType="includ
                     % (drawType, utils.textLinesToPlotHeight(utils.bulletNLines(bullets)),plotName2)
         code += "\\end{center}"
         code += utils.bulletsToCode(bullets, opts)
+    elif(opts["plotsleft"]):
+        height = 0.45
+        width = 0.55
+        code += "\\begin{columns}\n"
+        code += "\\column{%.2f\\textwidth}\n" % width
+        code += "\\centering"
+        code += "\\%s[height=%.2f\\textheight,width=%.2f\\textwidth,keepaspectratio]{%s}\\\\ \n" % (drawType,height,1.0,plotName1)
+        code += "\\%s[height=%.2f\\textheight,width=%.2f\\textwidth,keepaspectratio]{%s}     \n" % (drawType,height,1.0,plotName2)
+        code += "\\column{%.2f\\textwidth}\n" % (1.0-width)
+        code += "\\centering"
+        code += utils.bulletsToCode(bullets, opts)
+
+        code += "\\end{columns}"
     else:
         code += utils.bulletsToCode(bullets, opts)
         code += "\\begin{center}"
@@ -200,6 +220,28 @@ def addSlideTextPlotPlotPlotPlot(slideTitle,bullets,plotName1,plotName2,plotName
     code += "\\end{columns}"
     return code
 
+def addSlideTextPlots(slideTitle,bullets,plots=[],drawType="includegraphics",opts=""):
+    opts = utils.parseOptions(opts)
+    code = "\\begin{frame}\\frametitle{%s} \n" % (slideTitle)
+    nRows = int(opts["numrows"]) if opts["numrows"] else 2
+    plotChunks = [plots[i:i+nRows] for i in range(0,len(plots),nRows)]
+    nCols = len(plotChunks)
+    height = (1.0/nRows)*utils.textLinesToPlotHeight(utils.bulletNLines(bullets))
+    width = 1.0
+
+    code += utils.bulletsToCode(bullets, opts)
+    code += "\\begin{columns}[t]\n"
+
+    for chunk in plotChunks:
+        code += "\\column{%.2f\\textwidth}\n" % (1.0/nCols)
+        code += "\\centering"
+        for plot in chunk:
+            code += "\\%s[height=%.2f\\textheight,width=%.2f\\textwidth,keepaspectratio]{%s}\\\\ \n" % (drawType,height,width,plot)
+
+    code += "\\end{columns}"
+        
+    return code
+
 def addSlideTextPlotPlotPlot(slideTitle,bullets,plotName1,plotName2,plotName3,drawType="includegraphics",opts=""):
     opts = utils.parseOptions(opts)
     code = "\\begin{frame}\\frametitle{%s} \n" % (slideTitle)
@@ -214,14 +256,14 @@ def addSlideTextPlotPlotPlot(slideTitle,bullets,plotName1,plotName2,plotName3,dr
     code += "\\%s[height=%.2f\\textheight,width=%.2f\\textwidth,keepaspectratio]{%s}\\\\ \n" % (drawType,height,width,plotName1)
     code += "\\%s[height=%.2f\\textheight,width=%.2f\\textwidth,keepaspectratio]{%s}     \n" % (drawType,height,width,plotName2)
 
-    code += "\\column{0.6\\textwidth}\n"
+    code += "\\column{0.55\\textwidth}\n"
     code += "\\centering"
-    code += "\\hspace*{-0.3\\textwidth}\\%s[height=%.2f\\textheight,width=%.2f\\textwidth,keepaspectratio]{%s} \n" % (drawType,1.5*height,width,plotName3)
+    code += "\\hspace*{-0.15\\textwidth}\\%s[height=%.2f\\textheight,width=%.2f\\textwidth,keepaspectratio]{%s} \n" % (drawType,1.5*height,width,plotName3)
 
     code += "\\end{columns}"
     return code
 
-def addSlide(title=None,text=None,text1=None,text2=None,p1=None,p2=None,p3=None,p4=None,opts="",textobjects=[],arrowobjects=[],boxobjects=[],objects=[]):
+def addSlide(title=None,text=None,text1=None,text2=None,p1=None,p2=None,p3=None,p4=None,opts="",plots=[],textobjects=[],arrowobjects=[],boxobjects=[],objects=[]):
     global source, slideNumber
     slideNumber += 1
 
@@ -256,6 +298,10 @@ def addSlide(title=None,text=None,text1=None,text2=None,p1=None,p2=None,p3=None,
             else:
                 print "[SM] Adding PlotPlot slide #%s" % slideNumber
                 source += addSlidePlotPlot(title,p1,p2,drawType=drawtype,opts=opts)
+
+    elif( len(plots) > 0):
+        print "[SM] Adding TextPlots slide #%s" % slideNumber
+        source += addSlideTextPlots(title,bullets,plots,drawType=drawtype,opts=opts)
 
     elif( p1 ):
         if( text ):
@@ -381,7 +427,7 @@ def addGlobalOptions(optstr):
 
 
 def initSlides(me="Nick", themeName="nick", opts=""):
-    global source, commonHeader, theme, themeAlex, slideNumber, institute
+    global source, commonHeader, theme, themeAlex, themeAlexMod, slideNumber, institute
     source = ""
     theme = themeName.lower()
     opts = utils.parseOptions(opts)
@@ -395,37 +441,59 @@ def initSlides(me="Nick", themeName="nick", opts=""):
     if(opts["modernfont"]):
         source += "\\usepackage{helvet} %% only modern font that works on uaf?"
 
+    if(opts["font"]):
+        # list at http://www.tug.dk/FontCatalogue/sansseriffonts.html
+        # I personally like "--font gillius"
+        source += "\\usepackage{%s}" % opts["font"]
 
-    if(theme == "nick"):
-        source += themeNick
-        if(opts["themecolor"]): source = source.replace("\\definecolor{nickcolor}{RGB}{51,51,179}","\\definecolor{nickcolor}{RGB}{%s}" % opts["themecolor"])
-    elif(theme == "alex"):
-        source += themeAlex
-        if(opts["themecolor"]): source = source.replace("\\definecolor{alexcolor}{RGB}{0,0,255}","\\definecolor{alexcolor}{RGB}{%s}" % opts["themecolor"])
-    elif(theme == "madrid"):
-        source += themeMadrid
-        if(opts["themecolor"]): source = source.replace("\\definecolor{madridcolor}{RGB}{51,51,179}","\\definecolor{madridcolor}{RGB}{%s}" % opts["themecolor"])
-    else:
-        print "unsupported theme:", theme
+    if(theme == "nick"): source += themeNick
+    elif(theme == "alex"): source += themeAlex
+    elif(theme == "alexmod"): source += themeAlexMod
+    elif(theme == "madrid"): source += themeMadrid
+    else: print "unsupported theme:", theme
+
+    if(opts["themecolor"]):
+        themecolor = opts["themecolor"]
+        if "random" in themecolor:
+            themecolor = "%s,%s,%s" % utils.randomColor()
+            print "[SM] Using random theme color: %s" % themecolor
+
+        source = source.replace("\\definecolor{thethemecolor}{RGB}{0,0,255}","\\definecolor{thethemecolor}{RGB}{%s}" % themecolor)
     
     if(opts["casual"]): institute = "\\large{%s}" % opts["casual"].replace("ENDL", "\\\\ \\vspace{0.4cm}")
     source = source.replace("INSTITUTEHERE", institute)
+
+    school = "ucsb"
 
     fullname = ""
     if("Nick" in me): 
         source = source.replace("AUTHORHERE", "Nick Amin")
         source = source.replace("N. Amin", "\\underline{\\textbf{N. Amin}}")
+        school = "ucsb"
     elif("Sicheng" in me): 
         source = source.replace("AUTHORHERE", "Sicheng Wang")
         source = source.replace("S. Wang", "\\underline{\\textbf{S. Wang}}")
+        school = "ucsb"
     elif("Alex" in me): 
         source = source.replace("AUTHORHERE", "Alex George")
         source = source.replace("A. George", "\\underline{\\textbf{A. George}}")
+        school = "ucsb"
     elif("Jason" in me): 
         source = source.replace("AUTHORHERE", "Jason Gran")
         source = source.replace("J. Gran", "\\underline{\\textbf{J. Gran}}")
+        school = "ucsb"
+    elif("Giuseppe" in me): 
+        source = source.replace("AUTHORHERE", "G. Cerati")
+        source = source.replace("G. Cerati", "\\underline{\\textbf{G. Cerati}}")
+        school = "ucsd"
     else:
         print "who are you? add your name to slideMaker."
+
+    if school == "ucsb":
+        source = source.replace("SCHOOLLOGO", "ucsb.pdf")
+    elif school == "ucsd":
+        source = source.replace("SCHOOLLOGO", "ucsd.png")
+
 
 
     source = source.replace("GRAPHICSPATHHERE", "".join(["{"+p+"}" for p in graphicspaths]))
@@ -436,6 +504,7 @@ def writeSlides(output="output.tex", opts="--compile"):
     global source
     source += footer
     output = output.replace(".pdf",".tex")
+    output = output.replace(".py",".tex") # just so I don't idiotically overwrite the slides!!! SO MAD.
     fh = open(output,"w")
     fh.write(source)
     fh.close()
@@ -472,9 +541,9 @@ def startBackup(opts=""):
     print "[SM] Beginning backup"
 
     color = "black"
-    if(theme == "alex"): color = "alexcolor"
-    if(theme == "nick"): color = "nickcolor"
-    if(theme == "madrid"): color = "madridcolor"
+    # if(theme == "alex"): color = "alexcolor"
+    # if(theme == "nick"): color = "nickcolor"
+    # if(theme == "madrid"): color = "madridcolor"
 
     if(opts["resetnumbering"]): source += "\n\\appendix\n"
 
@@ -482,10 +551,10 @@ def startBackup(opts=""):
     \\begin{frame}[plain]
     \\centering
     \\begin{textblock*}{12.8cm}[0.5,0.5](6.4cm,4.8cm)
-    \\begin{LARGE} \\centering \\textcolor{%s}{\\textbf{Backup}} \\end{LARGE}
+    \\begin{LARGE} \\centering \\textcolor{thethemecolor}{\\textbf{Backup}} \\end{LARGE}
     \\end{textblock*}
     \\end{frame}
-    """ % (color)
+    """
 
 if __name__ == '__main__':
     content = """

@@ -42,20 +42,12 @@ Optional arguments:
   - colors: a vector of kColors that you want to use instead of the defaults [ex: vector.push_back(kRed)], starting with the backgrounds and ending with signals
 
 Supported flags for "options" string:
+
   - --outputName X: change the name of the output file produced from its default of "data_MC_plot" in pdf (you may also specify other file type like xxx.ps)
+  - --png: to make output as png rather than pdf (must specify output name)
+  - --noOutput: if by any chance you don't want an output to file
   - --xAxisLabel X: change the x-axis label from its default of "M_T"
-  - --energy X: change the energy from its default of 13 TeV
-  - --lumi X: change the lumi from its default of 10.0 fb-1.
   - --noDivisionLabel: to remove the divisions label on the y-axis (ex: "Entries/30 GeV" becomes "Entries")
-  - --noStack: to prevent backgrounds from being stacked (useful for comparisons)
-  - --noFill: set all colors to white
-  - --normalize: to normalize all backgrounds
-  - --isLinear: to use linear instead of log on y-axis
-  - --preserveBackgroundOrder: to keep the backgrounds in the order you specified, rather than putting the smallest backgrounds on the bottom
-  - --noOverflow: do not make the last bin an overflow bin (important if your last bin is already an overflow bin).  Also underflow.
-  - --noType: suppress CMS Preliminary text
-  - --doCounts: show event counts: "__ (Data), __ (MC)"
-  - --colorTitle: apply a color to the distribution title (blue)
   - --yAxisLabel X: change the y-axis label from its default of "Entries"
   - --yAxisUnit X: change the y-axis unit from its default of ""
   - --yAxisOverride X: replace the entire y-axis label with X
@@ -68,36 +60,51 @@ Supported flags for "options" string:
   - --topYaxisTitle X: change the y-axis label in the top histogram from its default of "data/MC"
   - --type X: change the top-left label from its default of "CMS Preliminary"
   - --overrideHeader X: override the entire top line to the user-defined value
+  - --energy X: change the energy from its default of 13 TeV
+  - --lumi X: change the lumi from its default of 10.0 fb-1.
+  - --noStack: to prevent backgrounds from being stacked (useful for comparisons)
+  - --noType: suppress CMS Preliminary text
+  - --doCounts: show event counts: "__ (Data), __ (MC)"
+  - --outOfFrame: CMS Preliminary goes on top instead of in the frame
+  - --lumiUnit: change the lumi unit from its default of "fb" (the 'inverse' part is automatic)
+  - --noLumi: don't display lumi (for MC studies, for example)
+  - --noFill: set all colors to white
+  - --colorTitle: apply a color to the distribution title (blue)
+  - --dataColor: to change the data color to something other than black
+  - --ratioColor: to change the ratio color to something other than black
+  - --blackSignals: make signals black
+  - --normalize: to normalize all backgrounds
+  - --isLinear: to use linear instead of log on y-axis
+  - --preserveBackgroundOrder: to keep the backgrounds in the order you specified, rather than putting the smallest backgrounds on the bottom
+  - --noOverflow: do not make the last bin an overflow bin (important if your last bin is already an overflow bin).  Also underflow.
+  - --noBlackLines: don't put a black line between the various backgrounds
   - --vLine X: insert a vertical line where the x-axis = X
   - --hLine X: insert a horizontal line where the y-axis = X
+  **Max and Min**
   - --setMaximum X: change the y-axis maximum from its default value (originally chosen such that the top of the top-most error bar appears at 3/4 of the histogram's height)
   - --setMinimum X: change the y-axis minimum from its default value (originally chosen to be 90% of the smallest bin's height on the bottom background)
+  - --noLegend: to suppress the legend
+  - --percentageInBox: visual alternative to showPercentage which puts the percentage in the marker boxes of the legend
   - --legendUp X: move the legend up by X (number from 0 to 1; you probably want around 0.05), negative numbers to move it down
   - --legendRight X: move the legend to the right by X (number from 0 to 1; you probably want around 0.05), negative numbers to move it to the left
   - --legendTextSize X: change the legend text size from its default value of 0.035
-  - --divHalf: reduce the number of x-axis divisions by half
-  - --nDivisions X: change the number of x-axis divisions to X, where X = number of primary divisions + 100*number of secondary divisions + 10000*number of tertiary divisions; positive to allow it to optimize (strongly recommended), negative to require it to use your values
-  - --noLegend: to suppress the legend
-  - --png: to make output as png rather than pdf (must specify output name)
-  - --dataColor: to change the data color to something other than black
-  - --drawDots: to draw the backgrounds as dots rather than lines (recommended only for ratios like fake or flip rates) 
-  - --showPercentage: to show the percentage of the integral of each MC plot contributing to the total background
-  - --percentageInBox: visual alternative to showPercentage which puts the percentage in the marker boxes of the legend
-  - --errHistAtBottom: to make the Data/MC comparison histogram at the bottom
-  - --noOutput: if by any chance you don't want an output to file
-  - --noErrBars: if by any chance you don't want the data points to have error bars (it may be annoying when error bars are too big) (effective at both main hist and err hist)
-  - --noBlackLines: don't put a black line between the various backgrounds
-  - --histoErrors: if you want your backgrounds to have error bars (usually only the data does)
-  - --sigError: show statistical error on signal plots
-  - --blackSignals: make signals black
   - --legendBox: put stupid box around legend
+  - --largeLabel: use larger legend and axis label size
   -- --legendTaller X: increase legend size by X (only when using legendBox)
   -- --legendWider X: increase legend size by X (only when using legendBox)
-  - --outOfFrame: CMS Preliminary goes on top instead of in the frame
+  - --divHalf: reduce the number of x-axis divisions by half
+  - --nDivisions X: change the number of x-axis divisions to X, where X = number of primary divisions + 100*number of secondary divisions + 10000*number of tertiary divisions; positive to allow it to optimize (strongly recommended), negative to require it to use your values
+  - --drawDots: to draw the backgrounds as dots rather than lines (recommended only for ratios like fake or flip rates) 
+  - --showPercentage: to show the percentage of the integral of each MC plot contributing to the total background
+  - --histoErrors: if you want your backgrounds to have error bars (usually only the data does)
+  - --sigError: show statistical error on signal plots
   - --markerStyle2: alternate marker style for signals (alternates between filled and unfilled)
-  - --largeLabel: use larger legend and axis label size
-  - --lumiUnit: change the lumi unit from its default of "fb" (the 'inverse' part is automatic)
-  - --noLumi: don't display lumi (for MC studies, for example)
+  - --bkgd_width N: set background thickness to an integer larger than 1 
+  - --ratioOnly: don't show data on the plot, just use it for the ratio plot on top 
+  - --errHistAtBottom: to make the Data/MC comparison histogram at the bottom
+  - --ratio N: show the ratio plot with the denominator = the Nth background rather than the sum of backgrounds
+  - --noErrBars: if by any chance you don't want the data points to have error bars (it may be annoying when error bars are too big) (effective at both main hist and err hist)
+  - --compareMultiple: useful for when validating new MC.  Put the old plots under backgrounds and the new plots under signals and enable this option.  This will stack the signals and manipulate the colors so you can see the agreement for each background.  Also prints the ratio for the total.
 
 Example:
 ````

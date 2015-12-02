@@ -16,6 +16,7 @@ namespace = you can change the default namepace of "tas" to whatever you want
 ojbname = you can change the default classname object of "cms2" to whatever you want
 BranchNamesFile are hardcoded below!
  --BranchNamesFile is a const string&: see See http://www.t2.ucsd.edu/tastwiki/bin/view/CMS/SkimNtuples   */
+
 const string& branchNamesFile_ = "";
 
 #include "TBranch.h"
@@ -32,6 +33,7 @@ const string& branchNamesFile_ = "";
 #include <sys/stat.h>
 
 using namespace std;
+
 ofstream headerf;
 ofstream codef;
 ofstream implf;
@@ -49,6 +51,7 @@ void makeCMS3ClassFiles (const std::string& fname, const std::string& treeName="
                          const std::string& nameSpace="tas", const std::string& objName="cms3", const bool paranoid = false) {
 
     using namespace std;
+ 
 
     const string& branchNamesFile = branchNamesFile_;
   
@@ -95,7 +98,7 @@ void makeCMS3ClassFiles (const std::string& fname, const std::string& treeName="
     implf.close();
     headerf.close();
 
-  
+
     codef.close();
 
     makeDriverFile(fname, treeName);
@@ -173,7 +176,9 @@ void makeHeaderFile(TFile *f, const string& treeName, bool paranoid, const strin
 
     TList *aliasarray = new TList();
     for(Int_t i = 0; i < fullarray->GetSize(); ++i) {
+
         TBranch *branch = 0;
+    if (fullarray->At(i) == 0) continue;
         TString aliasname(fullarray->At(i)->GetName());
         if (have_aliases){
             branch = ev->GetBranch(ev->GetAlias(aliasname.Data()));
@@ -280,8 +285,6 @@ void makeHeaderFile(TFile *f, const string& treeName, bool paranoid, const strin
         headerf << "\tTBranch *" << Form("%s_branch",aliasname.Data()) << ";" << endl;
         headerf << "\tbool " << Form("%s_isLoaded",aliasname.Data()) << ";" << endl;
     }
-  
-  
     headerf << "public: " << endl;
     headerf << "void Init(TTree *tree);" << endl;
     
@@ -515,6 +518,7 @@ void makeCCFile(TFile *f, const string& Classname, const string& nameSpace, cons
     TList *aliasarray = new TList();
     for(Int_t i = 0; i < fullarray->GetSize(); ++i) {
         TBranch *branch = 0;
+        if (fullarray->At(i) == 0) continue;
         TString aliasname(fullarray->At(i)->GetName());
         if (have_aliases){
             branch = ev->GetBranch(ev->GetAlias(aliasname.Data()));
@@ -1186,7 +1190,7 @@ void makeBranchFile(std::string branchNamesFile, std::string treeName) {
         vector<TString> v_line;
         TIter objIt((TObjArray*)line.Tokenize(" "));
         while(TObject *obj = (TObject*)objIt.Next()) {
-            if(obj==NULL) 
+            if(obj==NULL || obj==0) 
                 continue;
             v_line.push_back(obj->GetName());
         }

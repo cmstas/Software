@@ -25,7 +25,8 @@ Instead of test.py, you could execute slideMaker.py. This makes it simpler to te
 
 ### initSlides options
   * --modernfont: use Helvetica font
-  * --themecolor r,g,b: takes RGB values for overall theme color
+  * --themecolor r,g,b: takes RGB values for overall theme color.
+  * --themecolor random: the "random" keyword will make slideMaker pick one for you
   * --casual X: only display X as your name on title slide, not full SNT list
 
 ### addSlide options
@@ -40,6 +41,7 @@ Instead of test.py, you could execute slideMaker.py. This makes it simpler to te
   * --textsize: for slides with text, this number (between -4 and 5) will change the text size (0 is normal)
   * --plottop: for slides with text and plot(s), this places the text on the bottom (default is on top)
   * --fithorizontal: for slides with a single plot, this aligns the plot to fit the width of the slide (default is height)
+  * --numrows: for slides with a list of plots, this specifies the number of rows for the grid of plots (default is 2)
 
 ### addObject options
   * supported object types: text, brace, arrow, line, box, circle

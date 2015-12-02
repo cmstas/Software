@@ -1,0 +1,20 @@
+set contour base
+#set surface
+unset surface
+set xrange [100:1000]
+set yrange [0:900]
+set zrange [0:20]
+set view 50,10,1.0,1.0
+#set cntrparam bspline
+set cntrparam levels discrete 1
+set cntrparam bspline
+set cntrparam points 10
+set cntrparam order 10
+set dgrid3d 20,20, splines
+show contour
+unset table
+set table "dummy.dat"
+splot "dummy.txt" 
+unset table
+#show dgrid3d
+#replot

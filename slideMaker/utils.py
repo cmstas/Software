@@ -1,8 +1,8 @@
 ### utility functions that don't directly touch the latex source go here
-import commands, os, sys, json
+import commands, os, sys, json, random
 
 basepath = os.path.dirname(os.path.abspath(__file__))
-listOfOptions = ["dump", "copy", "compile", "graphicspaths", "shorttitle", "themecolor", "sidebyside", "modernfont", "noarrowhead","rotate","drawtype","crayon","shadow","makegrid","makegui","dashed","brace","flip","casual","texttop", "textbottom", "resetnumbering", "vertical", "sizeratio","textsize","movedowntext","plottop","fithorizontal"]
+listOfOptions = ["dump", "copy", "compile", "graphicspaths", "shorttitle", "themecolor", "sidebyside", "modernfont", "noarrowhead","rotate","drawtype","crayon","shadow","makegrid","makegui","dashed","brace","flip","casual","texttop", "textbottom", "resetnumbering", "vertical", "sizeratio","textsize","movedowntext","plottop","fithorizontal","numrows","plotsleft", "font"]
 def parseOptions(optString):
     opts = { }
     for optName in listOfOptions:
@@ -30,33 +30,38 @@ def bulletsToCode(bullets, opts):
     if(opts["textsize"]): textSize = opts["textsize"]
     if(opts["movedowntext"]): code += "\\vspace{%.2f\\textheight}\n" % float(opts["movedowntext"])
 
-
     code += "  \\begin{%s}\n" % numToSize(textSize)
     code += "  \\begin{itemize}\n"
     wasSubpoint=False
     bullets = [bullet.strip() for bullet in bullets if len(bullet.strip()) > 3]
     if(len(bullets) < 1): return ""
-    for i,bullet in enumerate(bullets):
-        isSubpoint = bullet.strip().startswith("--")
-        isLast = i == (len(bullets)-1)
-        while bullet[0] == "-":
-            bullet = bullet[1:]
 
-        if(isSubpoint and not wasSubpoint):
-            code += "      \\begin{itemize}\n"
-            code += "        \\item %s \n" % (bullet)
-        elif(wasSubpoint and not isSubpoint):
-            code += "      \\end{itemize}\n"
-            code += "    \\item %s \n" % (bullet)
-        elif(wasSubpoint and isSubpoint):
-            code += "        \\item %s \n" % (bullet)
-        elif(not wasSubpoint and not isSubpoint):
-            code += "    \\item %s \n" % (bullet)
-        else: print "You goofed with your logic"
+    cleanbullets = []
+    for line in bullets:
+        level = 0
+        if line.startswith("-----"): level = 4
+        elif line.startswith("----"): level = 3
+        elif line.startswith("---"): level = 2
+        elif line.startswith("--"): level = 1
+        elif line.startswith("-"): level = 0
+        while line[0] == "-": line = line[1:].strip()
+        cleanbullets.append( [ level, line ] )
 
-        if(isLast and isSubpoint): code += "    \\end{itemize}\n"
+    prevLevel = 0
+    for iline, (level, text) in enumerate(cleanbullets):
+        if level > prevLevel:
+            for i in range(level - prevLevel):
+                code += "  "*(level+i+1)+"\\begin{itemize}\n"
+        elif level < prevLevel:
+            for i in range(prevLevel - level):
+                code += "  "*(prevLevel-i+1)+"\\end{itemize}\n"
+        code += "  "*(level+2) + "\\item " + text + "\n"
+        prevLevel = level
 
-        wasSubpoint = isSubpoint
+        if iline == len(bullets) - 1:
+            # if last one, close all remaining inner itemizes
+            for i in range(level):
+                code += "  "*(level-i)+"\\end{itemize}\n"
 
     code += "  \\end{itemize}\n"
     code += "  \\end{%s}\n" % numToSize(textSize)
@@ -226,6 +231,13 @@ def splitTitle(title):
     else:
         return title[:cutoff]+title[cutoff:].split()[0] + "\\\\ \\vspace{0.4cm}" + " ".join(title[cutoff:].split()[1:])
 
+def randomColor():
+    r,g,b = -1, -1, -1
+    while r+g+b < 70:
+        r,g,b = 255*random.random(), 255*random.random(), 255*random.random()
+    return int(r),int(g),int(b)
+
+
 def slideToPng(slidenumber,output,outdir):
     # note that output is the pdf file we produce from writeSlides()
     # but outdir is where we want to store the individual pages
@@ -270,4 +282,3 @@ def makeGUI(guiInfo, output, workingdir):
     stat,out = commands.getstatusoutput("chmod 755 ~/public_html/dump/pages/copy.py")
 
     print "[SM] Copied GUI to uaf-6.t2.ucsd.edu/~%s/dump/pages/gui.html" % (os.getenv("USER"))
-
