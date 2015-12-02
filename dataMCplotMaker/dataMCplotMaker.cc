@@ -302,6 +302,9 @@ void dataMCplotMaker(TH1F* Data_in, std::vector <std::pair <TH1F*, TH1F*> > Back
   bool ratioOnly = 0; 
   bool ratioLine = 0; 
   int bkgd_width = 1; 
+  bool dontShowZeroRatios = 0; 
+  bool systInclStat = 0; 
+  bool noRatioPlot = 0; 
 
   //Loop over options and change default settings to user-defined settings
   for (unsigned int i = 0; i < Options.size(); i++){
@@ -369,9 +372,13 @@ void dataMCplotMaker(TH1F* Data_in, std::vector <std::pair <TH1F*, TH1F*> > Back
     else if (Options[i].find("ratio") < Options[i].length()) ratio = atoi( getString(Options[i], "ratio").c_str() );
     else if (Options[i].find("noLumi") < Options[i].length()) noLumi = true;
     else if (Options[i].find("bkgd_width") < Options[i].length()) bkgd_width = atoi( getString(Options[i], "bkgd_width").c_str() ); 
+    else if (Options[i].find("dontShowZeroRatios") < Options[i].length()) dontShowZeroRatios = true; 
+    else if (Options[i].find("systInclStat") < Options[i].length()) systInclStat = true; 
+    else if (Options[i].find("noRatioPlot") < Options[i].length()) noRatioPlot = true; 
     else std::cout << "Warning: Option not recognized!  Option: " << Options[i] << std::endl;
   }
 
+ 
   //Print warnings
   if (normalize && !nostack) std::cout << "Warning! You set option to normalize, but not option --noStack.  This won't do much!" << std::endl;
   if (ratioLine && !noErrBars) std::cout << "Warning!  ratioLine won't do much without noErrBars!" << std::endl;
@@ -404,9 +411,9 @@ void dataMCplotMaker(TH1F* Data_in, std::vector <std::pair <TH1F*, TH1F*> > Back
   //Set Style
   SetTDRStyle();
   gStyle->SetOptStat(0);
-  if (noData) gStyle->SetPadBottomMargin(.12);
-  if (noData) gStyle->SetPadLeftMargin(.12);
-  if (noData) gStyle->SetPadTopMargin(.07);
+  if (noData || noRatioPlot) gStyle->SetPadBottomMargin(.12);
+  if (noData || noRatioPlot) gStyle->SetPadLeftMargin(.12);
+  if (noData || noRatioPlot) gStyle->SetPadTopMargin(.07);
 
   //Make sure there is at least one background and enough titles
   if (Backgrounds.size() < 1){ 
@@ -596,7 +603,7 @@ void dataMCplotMaker(TH1F* Data_in, std::vector <std::pair <TH1F*, TH1F*> > Back
   //Draw histogram with two pads
   TCanvas c0("c0", "c0");
   TPad* finPad[2];
-  if (noData == false || compareMultiple){
+  if ((noData == false && !noRatioPlot) || compareMultiple){
     c0.SetCanvasSize(600, 700);
     if (errHistAtBottom == false){
       finPad[0] = new TPad("1", "1", 0.0, 0.0, 1.0, 0.84);
@@ -615,7 +622,7 @@ void dataMCplotMaker(TH1F* Data_in, std::vector <std::pair <TH1F*, TH1F*> > Back
     finPad[0]->Draw();
     finPad[0]->cd();
   }
-  if (noData == true && !compareMultiple){
+  else {
     c0.SetCanvasSize(600, 550);
     finPad[0] = new TPad();
     finPad[1] = new TPad();
@@ -722,10 +729,10 @@ void dataMCplotMaker(TH1F* Data_in, std::vector <std::pair <TH1F*, TH1F*> > Back
   //Y-axis titles
   float bin_width = Backgrounds[0]->GetXaxis()->GetBinWidth(1);
   if (yAxisOverride != "" && yAxisOverride[0] != '\0') stack->GetYaxis()->SetTitle(Form("%s", yAxisOverride.c_str()));
-  else if (yAxisOverride[0] == '\0' && showDivisionLabel && yAxisUnit[0] != '\0') stack->GetYaxis()->SetTitle(Form("%s [%s] / %.0f %s  ", yAxisLabel.c_str(), yAxisUnit.c_str(), bin_width, xAxisUnit.c_str()));
+  else if (yAxisOverride[0] == '\0' && showDivisionLabel && yAxisUnit[0] != '\0') stack->GetYaxis()->SetTitle(Form("%s (%s) / %.0f %s  ", yAxisLabel.c_str(), yAxisUnit.c_str(), bin_width, xAxisUnit.c_str()));
   else if (yAxisOverride[0] == '\0' && showDivisionLabel && yAxisUnit[0] == '\0' && bin_width >= 2) stack->GetYaxis()->SetTitle(Form("%s / %.0f %s  ", yAxisLabel.c_str(), bin_width, xAxisUnit.c_str())); 
   else if (yAxisOverride[0] == '\0' && showDivisionLabel && yAxisUnit[0] == '\0' && bin_width < 2) stack->GetYaxis()->SetTitle(Form("%s / %.2f %s  ", yAxisLabel.c_str(), bin_width, xAxisUnit.c_str())); 
-  else if (yAxisOverride[0] == '\0' && !showDivisionLabel && yAxisUnit[0] != '\0')stack->GetYaxis()->SetTitle(Form("%s [%s]  ", yAxisLabel.c_str(), yAxisUnit.c_str())); 
+  else if (yAxisOverride[0] == '\0' && !showDivisionLabel && yAxisUnit[0] != '\0')stack->GetYaxis()->SetTitle(Form("%s (%s)  ", yAxisLabel.c_str(), yAxisUnit.c_str())); 
   else if (yAxisOverride[0] == '\0' && !showDivisionLabel && yAxisUnit[0] == '\0')stack->GetYaxis()->SetTitle(Form("%s  ", yAxisLabel.c_str()));
   else std::cout << "nothing" << std::endl;
 
@@ -733,11 +740,11 @@ void dataMCplotMaker(TH1F* Data_in, std::vector <std::pair <TH1F*, TH1F*> > Back
   if (xAxisLabel == "HT" || xAxisLabel == "ht" || xAxisLabel == "Ht") xAxisLabel = "H_{T}"; 
   if (xAxisLabel == "MT" || xAxisLabel == "mt" || xAxisLabel == "Mt") xAxisLabel = "M_{T}"; 
   if (xAxisOverride[0] == '\0' && showXaxisUnit == 0) stack->GetXaxis()->SetTitle(Form("%s", xAxisLabel.c_str()));
-  if (xAxisOverride[0] == '\0' && showXaxisUnit == 1) stack->GetXaxis()->SetTitle(Form("%s [%s]", xAxisLabel.c_str(), xAxisUnit.c_str()));
+  if (xAxisOverride[0] == '\0' && showXaxisUnit == 1) stack->GetXaxis()->SetTitle(Form("%s (%s)", xAxisLabel.c_str(), xAxisUnit.c_str()));
   if (xAxisOverride[0] != '\0' || xAxisOverrideGiven) stack->GetXaxis()->SetTitle(Form("%s", xAxisOverride.c_str()));
-  if (!noData) stack->GetYaxis()->SetTitleOffset(1.5);
-  if (noData && !linear) stack->GetYaxis()->SetTitleOffset(1.4+yTitleOffset_);
-  if (noData &&  linear) stack->GetYaxis()->SetTitleOffset(1.6+yTitleOffset_);
+  if (!noData && !noRatioPlot) stack->GetYaxis()->SetTitleOffset(1.5);
+  if ((noData || noRatioPlot) && !linear) stack->GetYaxis()->SetTitleOffset(1.4+yTitleOffset_);
+  if ((noData || noRatioPlot) &&  linear) stack->GetYaxis()->SetTitleOffset(1.6+yTitleOffset_);
   if (linear && myMax > 1000) stack->GetYaxis()->SetTitleOffset(0.5+stack->GetYaxis()->GetTitleOffset()); 
 
   //Title size
@@ -856,22 +863,39 @@ void dataMCplotMaker(TH1F* Data_in, std::vector <std::pair <TH1F*, TH1F*> > Back
 
   //Draw syst errors
   TH1F *background_syst = 0;
+  TH1F *background_sum = 0;
   if (Background_systs.size() > 0){
     background_syst = new TH1F(*Background_systs[0]); 
+    background_syst->Sumw2(); 
     background_syst->SetFillColor(kGray+3); 
     background_syst->SetFillStyle(3003); 
   }
+  if (Backgrounds.size() > 0){
+    background_sum = new TH1F(*Backgrounds[0]); 
+    background_sum->Sumw2(); 
+  }
   for (unsigned int iSyst = 0; iSyst < Background_systs.size(); iSyst++){
     if (iSyst == 0) continue;
-    background_syst->Sumw2(); 
     background_syst->Add(Background_systs[iSyst]); 
+  }
+  for (unsigned int iBack = 0; iBack < Background_systs.size(); iBack++){
+    if (iBack == 0) continue;
+    background_sum->Add(Backgrounds[iBack]); 
+  }
+  //Now add stat error to systs
+  if (systInclStat){
+    for (int i = 1; i <= Backgrounds[0]->GetNbinsX(); i++){
+      float err = background_syst->GetBinError(i); 
+      float stat = background_sum->GetBinError(i); 
+      background_syst->SetBinError(i, sqrt( pow(err, 2) + pow(stat, 2) ) ); 
+    }
   }
   if (background_syst != 0) background_syst->Draw("E2 SAME");
 
   //Legend
   TLegend *leg;
-  if ((Backgrounds.size()+Signals.size() == 1 || Backgrounds.size()+Signals.size() == 2) && (noData || ratioOnly) && !compareMultiple) leg = new TLegend(0.7+legendRight,0.79+legendUp,0.92+legendRight+legendWider_,0.87+legendUp+legendTaller_); 
-  else if ((Backgrounds.size()+Signals.size() == 1 || Backgrounds.size()+Signals.size() == 2) && !noData && !ratioOnly) leg = new TLegend(0.7+legendRight,0.69+legendUp,0.92+legendRight+legendWider_,0.77+legendUp+legendTaller_); 
+  if ((Backgrounds.size()+Signals.size() == 1 || Backgrounds.size()+Signals.size() == 2) && (noData || noRatioPlot || ratioOnly) && !compareMultiple) leg = new TLegend(0.7+legendRight,0.79+legendUp,0.92+legendRight+legendWider_,0.87+legendUp+legendTaller_); 
+  else if ((Backgrounds.size()+Signals.size() == 1 || Backgrounds.size()+Signals.size() == 2) && !noData && !noRatioPlot && !ratioOnly) leg = new TLegend(0.7+legendRight,0.69+legendUp,0.92+legendRight+legendWider_,0.77+legendUp+legendTaller_); 
   else leg = new TLegend(0.7+legendRight,0.59+legendUp,0.92+legendRight+legendWider_,0.87+legendUp+legendTaller_);
   leg->SetTextSize(legendTextSize);
   leg->SetTextFont(42);
@@ -927,14 +951,14 @@ void dataMCplotMaker(TH1F* Data_in, std::vector <std::pair <TH1F*, TH1F*> > Back
   tex->SetNDC();
   tex->SetTextSize(0.035);
   float title_y_coord = 0.88;
-  if (noData) title_y_coord = 0.78; 
+  if (noData || noRatioPlot) title_y_coord = 0.78; 
   if (outOfFrame) title_y_coord += 0.09;
   if (colorTitle) title = Form("#color[4]{%s}",title);
   tex->DrawLatex(0.16,title_y_coord,title);
   tex->DrawLatex(0.16,title_y_coord-0.05,title2);
   float yCounts = (strcmp(title2, "") == 0) ? title_y_coord-0.05 : title_y_coord-0.10; 
-  if (!noData && doCounts) tex->DrawLatex(0.16,yCounts,Form("%i (Data), %0.1f (MC)",nEventsData,nEventsMC)); 
-  if ( noData && doCounts) tex->DrawLatex(0.16,yCounts,Form("%0.1f (MC)",nEventsMC)); 
+  if ( !noData && !noRatioPlot && doCounts) tex->DrawLatex(0.16,yCounts,Form("%i (Data), %0.1f (MC)",nEventsData,nEventsMC)); 
+  if (( noData || noRatioPlot) && doCounts) tex->DrawLatex(0.16,yCounts,Form("%0.1f (MC)",nEventsMC)); 
 
   //Draw vertical lines
   c0.Update();
@@ -952,7 +976,7 @@ void dataMCplotMaker(TH1F* Data_in, std::vector <std::pair <TH1F*, TH1F*> > Back
 
   //Draw header
   float type_y = .95;
-  if (!noData || compareMultiple) type_y = .96;
+  if ((!noData && !noRatioPlot) || compareMultiple) type_y = .96;
   tex->SetTextSize(0.028);
   if (overrideHeader[0] == '\0'){
     tex->SetTextAlign(31);
@@ -962,14 +986,14 @@ void dataMCplotMaker(TH1F* Data_in, std::vector <std::pair <TH1F*, TH1F*> > Back
   }
   tex->SetTextSize(0.035);
   if (!noType) {
-    if (noData && overrideHeader[0] == '\0'){
+    if ((noData || noRatioPlot) && overrideHeader[0] == '\0'){
       float ycoord = outOfFrame ? .00 : .08;
       tex->DrawLatex(0.16,type_y-ycoord, "CMS");              
       ycoord = outOfFrame ? .00 : .11;
       float xcoord = outOfFrame ? .24 : .16;
       tex->DrawLatex(xcoord,type_y-ycoord, "#font[52]{Preliminary}");
     }
-    if (!noData && overrideHeader[0] == '\0'){ 
+    if (!noData && !noRatioPlot && overrideHeader[0] == '\0'){ 
       float ycoord = outOfFrame ? .00 : .08;
       float xcoord = outOfFrame ? .16 : .83;
       tex->DrawLatex(xcoord,type_y-ycoord, "CMS");              
@@ -979,7 +1003,7 @@ void dataMCplotMaker(TH1F* Data_in, std::vector <std::pair <TH1F*, TH1F*> > Back
     }
   }
   if (overrideHeader[0] != '\0') tex->DrawLatex(0.17,type_y,Form("%s", overrideHeader.c_str()));
-  if (!noData && stack->GetMaximum() > 80000 && linear) finPad[0]->SetPad(0.0, 0.0, 1.0, 0.84);
+  if (!noData && !noRatioPlot && stack->GetMaximum() > 80000 && linear) finPad[0]->SetPad(0.0, 0.0, 1.0, 0.84);
 
   //Set number of divisions on x-axis
   if (doHalf){
@@ -994,7 +1018,7 @@ void dataMCplotMaker(TH1F* Data_in, std::vector <std::pair <TH1F*, TH1F*> > Back
   if (nDivisions != -1 && nDivisions < 0) stack->GetXaxis()->SetNdivisions(nDivisions, kFALSE);
 
   //-----------Second pad: data/MC yields---------------
-  if (!noData || compareMultiple){
+  if ((!noData || compareMultiple) && !noRatioPlot){
     if (compareMultiple) Data = (TH1F*)Signals[0]->Clone();
     if (compareMultiple && Signals.size() > 1) for (unsigned int i = 1; i < Signals.size(); i++) Data->Add(Signals[i]); 
     finPad[1]->cd();
@@ -1021,6 +1045,7 @@ void dataMCplotMaker(TH1F* Data_in, std::vector <std::pair <TH1F*, TH1F*> > Back
       float data_value = Data->GetBinContent(ib);
       float value = (MC_value > 0 ? data_value/MC_value : 1000);
       if (data_value != 0 || MC_value != 0) err_hist->SetBinContent(ib, value);
+      if (dontShowZeroRatios && data_value == 0){ err_hist->SetBinContent(ib, -9999);  cout << __LINE__ << endl; } 
       float MC_err = sqrt(MC_error_2);
       float data_err = Data->GetBinError(ib);
       if(!noErrBars) err_hist->SetBinError(ib, (data_value == 0 || MC_value == 0) ? 0.001 : (value * sqrt( pow(MC_err/MC_value, 2) + pow(data_err/data_value, 2)) ) );
