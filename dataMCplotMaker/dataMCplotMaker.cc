@@ -866,13 +866,13 @@ void dataMCplotMaker(TH1F* Data_in, std::vector <std::pair <TH1F*, TH1F*> > Back
   TH1F *background_sum = 0;
   if (Background_systs.size() > 0){
     background_syst = new TH1F(*Background_systs[0]); 
-    background_syst->Sumw2(); 
+    if (!background_syst->GetSumw2N()) background_syst->Sumw2(); 
     background_syst->SetFillColor(kGray+3); 
     background_syst->SetFillStyle(3003); 
   }
   if (Backgrounds.size() > 0){
     background_sum = new TH1F(*Backgrounds[0]); 
-    background_sum->Sumw2(); 
+    if (!background_sum->GetSumw2N()) background_sum->Sumw2(); 
   }
   for (unsigned int iSyst = 0; iSyst < Background_systs.size(); iSyst++){
     if (iSyst == 0) continue;
