@@ -203,14 +203,16 @@ void dataMCplotMaker(TH1F* Data_in, std::vector <std::pair <TH1F*, TH1F*> > Back
   for (unsigned int i = 0; i < Backgrounds_pair_in.size(); i++){
     TH1F* blah  = new TH1F(*Backgrounds_pair_in[i].first); 
     Backgrounds.push_back(blah);  
-    TH1F* blah2 = 0; 
-    TH1F* blah3 = 0; 
-    if (Backgrounds_pair_in[i].second->GetEntries() > 0){
-      blah2 = new TH1F(*Backgrounds_pair_in[i].second); 
-      Background_systs.push_back(blah2); 
-    }
-    else blah3 = new TH1F(*Backgrounds_pair_in[i].second);
-    std::pair<TH1F*, TH1F*> blah4 = std::make_pair(blah, Backgrounds_pair_in[i].second->GetEntries() > 0 ? blah2 : blah3); 
+    TH1F* blah2 = new TH1F(*Backgrounds_pair_in[i].second);  
+    Background_systs.push_back(blah2); 
+    //TH1F* blah3 = 0; 
+    //if (Backgrounds_pair_in[i].second->GetEntries() > 0){
+      
+    //}
+    //else blah3 = new TH1F(*Backgrounds_pair_in[i].second);
+    //std::pair<TH1F*, TH1F*> blah4 = std::make_pair(blah, Backgrounds_pair_in[i].second->GetEntries() > 0 ? blah2 : blah3); 
+    std::pair<TH1F*, TH1F*> blah4 = std::make_pair(blah, blah2); 
+    //Backgrounds_pair.push_back(blah4); 
     Backgrounds_pair.push_back(blah4); 
   }
   for (unsigned int i = 0; i < Signals_in.size(); i++){
@@ -878,12 +880,12 @@ void dataMCplotMaker(TH1F* Data_in, std::vector <std::pair <TH1F*, TH1F*> > Back
     if (iSyst == 0) continue;
     background_syst->Add(Background_systs[iSyst]); 
   }
-  for (unsigned int iBack = 0; iBack < Background_systs.size(); iBack++){
+  for (unsigned int iBack = 0; iBack < Backgrounds.size(); iBack++){
     if (iBack == 0) continue;
     background_sum->Add(Backgrounds[iBack]); 
   }
   //Now add stat error to systs
-  if (systInclStat){
+  if (systInclStat && Backgrounds[0]->GetNbinsX() > 0){
     for (int i = 1; i <= Backgrounds[0]->GetNbinsX(); i++){
       float err = background_syst->GetBinError(i); 
       float stat = background_sum->GetBinError(i); 
