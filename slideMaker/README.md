@@ -68,6 +68,7 @@ Instead of test.py, you could execute slideMaker.py. This makes it simpler to te
   * Common symbols are built in, so you can do "$\\\\met \\\\gt 30$" or "$\\\\pt$" or even "$\\\\ht$". Feel free to add in more useful 
     commands into strings.py.
   * Place the date in the document via "\\\\today"
+  * Supplying the parameter "tex" will let you write your own TeX code for a slide
 
 ## TODO:
   * figure out good algorithm for resizing images so that they don't overlap with text

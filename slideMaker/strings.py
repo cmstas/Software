@@ -1,9 +1,9 @@
 ### Long template strings go here
 
 institute = """
-    N. Amin, C. Campagnari, A. George, F. Golf, J. Gran,\\\\ B. Marsh, I. Suarez, S. Wang\\\\ (UCSB)\\\\ \\vspace{0.3cm} 
-    G. Cerati, M. Derdzinski, D. Klein, D. Olivito, G. Zevi Della Porta, \\\\ C. Welke, J. Wood, F. W\\"urthwein, A. Yagil \\\\ (UCSD)\\\\ \\vspace{0.3cm} 
-        L. Bauerdick, K. Burkett, O. Gutsche, S. Jindariani, \\\\ J. Linacre, M. Liu, R. Lopes de Sa, H. Weber  \\\\ (FNAL) \\\\ 
+    N. Amin, C. Campagnari, A. George, F. Golf, J. Gran,\\\\ B. Marsh, I. Suarez, S. Wang\\\\ (\\textit{UCSB})\\\\ \\vspace{0.3cm} 
+    G. Cerati, M. Derdzinski, D. Klein, D. Olivito, G. Zevi Della Porta, \\\\ C. Welke, J. Wood, F. W\\"urthwein, A. Yagil \\\\ (\\textit{UCSD})\\\\ \\vspace{0.3cm} 
+    L. Bauerdick, K. Burkett, O. Gutsche, S. Jindariani, \\\\ J. Linacre, M. Liu, R. Lopes de Sa, H. Weber  \\\\ (\\textit{FNAL}) \\\\ 
 """
 
 commonHeader = """
@@ -178,7 +178,7 @@ themeAlexMod = """
 \\setbeamercolor{frametitle}{fg=thethemecolor}
 \\setbeamerfont{frametitle}{size=\\LARGE \\bfseries}
 \\setbeamertemplate{footline}{\\raisebox{5pt}{\\makebox[\\paperwidth]{\\hfill\\makebox[10pt]{\\scriptsize\\textcolor{white}{\\insertframenumber\\hspace{2mm}}}}}}\\setbeamersize{text margin left=10pt,text margin right=10pt}
-\\addtobeamertemplate{frametitle}{\\vskip-0.23cm}{}
+\\addtobeamertemplate{frametitle}{\\vskip-0.13cm}{}
 
 
 \\defbeamertemplate*{title page}{customized}[1][]{ 
@@ -205,13 +205,14 @@ themeAlexMod = """
 }
 
 \\usebackgroundtemplate{
+%\\begin{tikzpicture}[line width=2pt, remember picture, overlay]
 \\begin{tikzpicture}
    %\\shade[top color=thethemecolor!15,middle color=thethemecolor!20,bottom color=white!0] (0cm,0cm) rectangle (12.8cm,0.6cm);
    %\\draw[thick, draw=thethemecolor] (0cm,-0.21cm) -- (12.8cm,-0.21cm);
    %\\draw[fill=thethemecolor,thick,draw=thethemecolor](11.8cm,-9cm) -- (12.8cm,-9cm) -- (12.8cm,-8cm) -- (11.8cm,-9cm);
-   \\shade[top color=thethemecolor!15,middle color=thethemecolor!20,bottom color=white!0] (0cm,0cm) rectangle (12.8cm,0.8cm);
-   \\draw[thick, draw=thethemecolor] (0cm,-0.00cm) -- (12.8cm,-0.00cm);
-   \\draw[fill=thethemecolor,thick,draw=thethemecolor](11.8cm,-8.8cm) -- (12.8cm,-8.8cm) -- (12.8cm,-7.8cm) -- (11.8cm,-8.8cm);
+   %
+   \\node [rectangle, top color=thethemecolor!25, middle color=thethemecolor!20, bottom color=white!0, anchor=north, minimum width=\\paperwidth, minimum height=0.8cm] (box) at (current page.north){};
+   \\draw[fill=thethemecolor,thick,draw=thethemecolor](11.65cm,0cm) -- (12.8cm,0cm) -- (12.8cm,1.15cm) -- (11.65cm,0cm);
 \\end{tikzpicture}
 }
 

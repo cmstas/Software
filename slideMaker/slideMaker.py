@@ -33,10 +33,12 @@ def addSlideTitle(title="", opts=""):
     titlePageAlex = """
     \\begin{frame}[plain]
         %% draw over global triangle so that it doesn't show up on the title slide
-        \\begin{tikzpicture}[thick]
-        %% \\draw[fill=white, draw=white](0cm,0.0cm) -- (20.3cm,0.0cm) -- (20.3cm,20.3cm) -- (0.0cm,0.0cm);
-        \\draw[fill=white, draw=white](0cm,0cm) -- (20.3cm,0cm) -- (20.3cm,20.3cm) -- (0cm,20.3cm) -- (0cm,0cm);
-        \\end{tikzpicture}
+        %% http://tex.stackexchange.com/questions/41344/tikz-picture-on-the-entire-frame-in-beamer-without-using-overlays
+        \\makebox[\\textwidth][c]{
+            \\begin{tikzpicture}[thick]
+            \\draw[fill=white, draw=white](0cm,0cm) -- (12.8cm,0cm) -- (12.8cm,9.6cm) -- (0cm,9.6cm) -- (0cm,0cm);
+            \\end{tikzpicture}
+        }
         \\titlepage 
     """
 
@@ -62,6 +64,13 @@ def addSlideTitle(title="", opts=""):
     else:
         source += "\\begin{frame} \\titlepage"
 
+def addSlideTeX(slideTitle, tex,opts=""):
+    opts = utils.parseOptions(opts)
+    code = """
+    \\begin{frame}\\frametitle{%s}
+    """ % slideTitle
+    code += tex
+    return code
 
 def addSlidePlot(slideTitle, plotName,drawType="includegraphics",opts=""):
     opts = utils.parseOptions(opts)
@@ -263,7 +272,7 @@ def addSlideTextPlotPlotPlot(slideTitle,bullets,plotName1,plotName2,plotName3,dr
     code += "\\end{columns}"
     return code
 
-def addSlide(title=None,text=None,text1=None,text2=None,p1=None,p2=None,p3=None,p4=None,opts="",plots=[],textobjects=[],arrowobjects=[],boxobjects=[],objects=[]):
+def addSlide(title=None,text=None,text1=None,text2=None,p1=None,p2=None,p3=None,p4=None,tex=None,opts="",plots=[],objects=[]):
     global source, slideNumber
     slideNumber += 1
 
@@ -283,46 +292,50 @@ def addSlide(title=None,text=None,text1=None,text2=None,p1=None,p2=None,p3=None,
         elif( p1 and p2 ): title = cleanP1 + ", " + cleanP2
         else: title = "\\phantom{}"
 
-    if( p1 and p2 ):
-        if not text: bullets = []
-        if( p3 and not p4 ):
-            print "[SM] Adding TextPlotPlotPlot slide #%s" % slideNumber
-            source += addSlideTextPlotPlotPlot(title,bullets,p1,p2,p3,drawType=drawtype,opts=opts)
-        elif( p3 and p4 ):
-            print "[SM] Adding TextPlotPlotPlotPlot slide #%s" % slideNumber
-            source += addSlideTextPlotPlotPlotPlot(title,bullets,p1,p2,p3,p4,drawType=drawtype,opts=opts)
-        else:
-            if( text ):
-                print "[SM] Adding TextPlotPlot slide #%s" % slideNumber
-                source += addSlideTextPlotPlot(title,bullets,p1,p2,drawType=drawtype,opts=opts)
+    if( not tex ) :
+        if( p1 and p2 ):
+            if not text: bullets = []
+            if( p3 and not p4 ):
+                print "[SM] Adding TextPlotPlotPlot slide #%s" % slideNumber
+                source += addSlideTextPlotPlotPlot(title,bullets,p1,p2,p3,drawType=drawtype,opts=opts)
+            elif( p3 and p4 ):
+                print "[SM] Adding TextPlotPlotPlotPlot slide #%s" % slideNumber
+                source += addSlideTextPlotPlotPlotPlot(title,bullets,p1,p2,p3,p4,drawType=drawtype,opts=opts)
             else:
-                print "[SM] Adding PlotPlot slide #%s" % slideNumber
-                source += addSlidePlotPlot(title,p1,p2,drawType=drawtype,opts=opts)
+                if( text ):
+                    print "[SM] Adding TextPlotPlot slide #%s" % slideNumber
+                    source += addSlideTextPlotPlot(title,bullets,p1,p2,drawType=drawtype,opts=opts)
+                else:
+                    print "[SM] Adding PlotPlot slide #%s" % slideNumber
+                    source += addSlidePlotPlot(title,p1,p2,drawType=drawtype,opts=opts)
 
-    elif( len(plots) > 0):
-        print "[SM] Adding TextPlots slide #%s" % slideNumber
-        source += addSlideTextPlots(title,bullets,plots,drawType=drawtype,opts=opts)
+        elif( len(plots) > 0):
+            print "[SM] Adding TextPlots slide #%s" % slideNumber
+            source += addSlideTextPlots(title,bullets,plots,drawType=drawtype,opts=opts)
 
-    elif( p1 ):
-        if( text ):
-            print "[SM] Adding TextPlot slide #%s" % slideNumber
-            source += addSlideTextPlot(title,bullets,p1,drawType=drawtype,opts=opts)
+        elif( p1 ):
+            if( text ):
+                print "[SM] Adding TextPlot slide #%s" % slideNumber
+                source += addSlideTextPlot(title,bullets,p1,drawType=drawtype,opts=opts)
+            else:
+                print "[SM] Adding Plot slide #%s" % slideNumber
+                source += addSlidePlot(title,p1,drawType=drawtype,opts=opts)
+        elif( text ):
+            if ( text2 ):
+                pass
+                print "[SM] Adding TextText slide #%s" % slideNumber
+                source += addSlideTextText(title,bullets,bullets2,opts=opts)
+            else:
+                print "[SM] Adding Text slide #%s" % slideNumber
+                source += addSlideText(title,bullets,opts=opts)
+        elif( title ):
+            print "[SM] Adding Title slide #%s" % slideNumber
+            addSlideTitle(title,opts)
         else:
-            print "[SM] Adding Plot slide #%s" % slideNumber
-            source += addSlidePlot(title,p1,drawType=drawtype,opts=opts)
-    elif( text ):
-        if ( text2 ):
-            pass
-            print "[SM] Adding TextText slide #%s" % slideNumber
-            source += addSlideTextText(title,bullets,bullets2,opts=opts)
-        else:
-            print "[SM] Adding Text slide #%s" % slideNumber
-            source += addSlideText(title,bullets,opts=opts)
-    elif( title ):
-        print "[SM] Adding Title slide #%s" % slideNumber
-        addSlideTitle(title,opts)
+            print "couldn't figure out what you want"
     else:
-        print "couldn't figure out what you want"
+        print "[SM] Adding custom TeX slide #%s" % slideNumber
+        source += addSlideTeX(title,tex,opts=opts)
 
     drawGrid = False
 
