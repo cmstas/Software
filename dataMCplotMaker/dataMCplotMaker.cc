@@ -992,7 +992,7 @@ void dataMCplotMaker(TH1F* Data_in, std::vector <std::pair <TH1F*, TH1F*> > Back
     tex->SetTextAlign(11);
   }
   tex->SetTextSize(0.040);
-  float xshift = -0.03;
+  float xshift = -0.03;//configurable?
   if (!noType) {
     if ((noData || noRatioPlot) && overrideHeader[0] == '\0'){
       float ycoord = outOfFrame ? .00 : .08;
