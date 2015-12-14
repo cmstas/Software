@@ -152,7 +152,7 @@ void SetTDRStyle(){
   //For the axis titles:
   tdrStyleAG->SetTitleColor(1, "XYZ");
   tdrStyleAG->SetTitleFont(42, "XYZ");
-  tdrStyleAG->SetTitleSize(0.035, "XYZ");
+  tdrStyleAG->SetTitleSize(0.045, "XYZ");
   tdrStyleAG->SetTitleOffset(1.20, "X");
   tdrStyleAG->SetTitleOffset(1.10, "Y"); 
 
@@ -160,7 +160,7 @@ void SetTDRStyle(){
   tdrStyleAG->SetLabelColor(1, "XYZ");
   tdrStyleAG->SetLabelFont(42, "XYZ");
   tdrStyleAG->SetLabelOffset(0.007, "XYZ");
-  tdrStyleAG->SetLabelSize(0.035, "XYZ");
+  tdrStyleAG->SetLabelSize(0.040, "XYZ");
 
   //For the axis:
   tdrStyleAG->SetAxisColor(1, "XYZ");
@@ -664,6 +664,7 @@ void dataMCplotMaker(TH1F* Data_in, std::vector <std::pair <TH1F*, TH1F*> > Back
       Backgrounds[i]->SetLineWidth(Backgrounds[i]->GetLineWidth()/1.5);
       if (nostack && normalize) Backgrounds[i]->Scale(1.0/Backgrounds[i]->Integral());
       stack->Add(Backgrounds[i]);
+      //Backgrounds[i]->SetLineWidth(2);//would be good to have an option for this
     }
   } 
   else if(noFill == 1){
@@ -744,7 +745,7 @@ void dataMCplotMaker(TH1F* Data_in, std::vector <std::pair <TH1F*, TH1F*> > Back
   if (xAxisOverride[0] == '\0' && showXaxisUnit == 0) stack->GetXaxis()->SetTitle(Form("%s", xAxisLabel.c_str()));
   if (xAxisOverride[0] == '\0' && showXaxisUnit == 1) stack->GetXaxis()->SetTitle(Form("%s (%s)", xAxisLabel.c_str(), xAxisUnit.c_str()));
   if (xAxisOverride[0] != '\0' || xAxisOverrideGiven) stack->GetXaxis()->SetTitle(Form("%s", xAxisOverride.c_str()));
-  if (!noData && !noRatioPlot) stack->GetYaxis()->SetTitleOffset(1.5);
+  if (!noData && !noRatioPlot) stack->GetYaxis()->SetTitleOffset(1.5+yTitleOffset_);
   if ((noData || noRatioPlot) && !linear) stack->GetYaxis()->SetTitleOffset(1.4+yTitleOffset_);
   if ((noData || noRatioPlot) &&  linear) stack->GetYaxis()->SetTitleOffset(1.6+yTitleOffset_);
   if (linear && myMax > 1000) stack->GetYaxis()->SetTitleOffset(0.5+stack->GetYaxis()->GetTitleOffset()); 
@@ -869,8 +870,8 @@ void dataMCplotMaker(TH1F* Data_in, std::vector <std::pair <TH1F*, TH1F*> > Back
   if (Background_systs.size() > 0){
     background_syst = new TH1F(*Background_systs[0]); 
     if (!background_syst->GetSumw2N()) background_syst->Sumw2(); 
-    background_syst->SetFillColor(kGray+3); 
-    background_syst->SetFillStyle(3003); 
+    background_syst->SetFillColor(kGray+1); //should have an option for these?
+    background_syst->SetFillStyle(3644); 
   }
   if (Backgrounds.size() > 0){
     background_sum = new TH1F(*Backgrounds[0]); 
@@ -894,6 +895,10 @@ void dataMCplotMaker(TH1F* Data_in, std::vector <std::pair <TH1F*, TH1F*> > Back
   }
   if (background_syst != 0) background_syst->Draw("E2 SAME");
 
+  //Redraw the data on top of the shaded area
+  if(noErrBars) stack2->Draw("PSAME");
+  else stack2->Draw("PSAMEE");
+
   //Legend
   TLegend *leg;
   if ((Backgrounds.size()+Signals.size() == 1 || Backgrounds.size()+Signals.size() == 2) && (noData || noRatioPlot || ratioOnly) && !compareMultiple) leg = new TLegend(0.7+legendRight,0.79+legendUp,0.92+legendRight+legendWider_,0.87+legendUp+legendTaller_); 
@@ -904,7 +909,7 @@ void dataMCplotMaker(TH1F* Data_in, std::vector <std::pair <TH1F*, TH1F*> > Back
   if (!noData && !ratioOnly ) leg->AddEntry(Data, dataName.c_str(), "lep");
   if (showPercentage) for (int i = Titles.size()-1; i > -1; i--) Titles[i] =  Form("%s [%i%%]", Titles[i].c_str(), percent[i]);
   if (!dots && !nostack) for (int i = Titles.size()-1; i > -1; i--) leg->AddEntry(Backgrounds[i], Titles[i].c_str(), "f");
-  if (dots || nostack) for (int i = Titles.size()-1; i > -1; i--) leg->AddEntry(Backgrounds[i], Titles[i].c_str(), "LPE");
+  if (dots || nostack) for (int i = Titles.size()-1; i > -1; i--) leg->AddEntry(Backgrounds[i], Titles[i].c_str(), "L");
   if (use_signals && !compareMultiple) for (int i = SignalTitles.size()-1; i > -1; i--) leg->AddEntry(Signals[i], SignalTitles[i].c_str(), "P");
   leg->SetFillStyle(0);
   if ( legendBox) leg->SetBorderSize(1);
@@ -954,7 +959,7 @@ void dataMCplotMaker(TH1F* Data_in, std::vector <std::pair <TH1F*, TH1F*> > Back
   tex->SetTextSize(0.035);
   float title_y_coord = 0.88;
   if (noData || noRatioPlot) title_y_coord = 0.78; 
-  if (outOfFrame) title_y_coord += 0.09;
+  if (outOfFrame && noRatioPlot) title_y_coord += 0.09;
   if (colorTitle) title = Form("#color[4]{%s}",title);
   tex->DrawLatex(0.16,title_y_coord,title);
   tex->DrawLatex(0.16,title_y_coord-0.05,title2);
@@ -979,28 +984,29 @@ void dataMCplotMaker(TH1F* Data_in, std::vector <std::pair <TH1F*, TH1F*> > Back
   //Draw header
   float type_y = .95;
   if ((!noData && !noRatioPlot) || compareMultiple) type_y = .96;
-  tex->SetTextSize(0.028);
+  tex->SetTextSize(0.035);
   if (overrideHeader[0] == '\0'){
     tex->SetTextAlign(31);
-    if (!noLumi) tex->DrawLatex(0.96,type_y,Form("%.2f %s^{-1} (%s TeV)", stof(lumi), lumiUnit.c_str(), energy.c_str()));
+    if (!noLumi) tex->DrawLatex(0.96,type_y,Form("%.1f %s^{-1} (%s TeV)", stof(lumi), lumiUnit.c_str(), energy.c_str()));
     if ( noLumi) tex->DrawLatex(0.96,type_y,Form("           (%s TeV)", energy.c_str()));
     tex->SetTextAlign(11);
   }
-  tex->SetTextSize(0.035);
+  tex->SetTextSize(0.040);
+  float xshift = -0.03;
   if (!noType) {
     if ((noData || noRatioPlot) && overrideHeader[0] == '\0'){
       float ycoord = outOfFrame ? .00 : .08;
-      tex->DrawLatex(0.16,type_y-ycoord, "CMS");              
+      tex->DrawLatex(0.16+xshift,type_y-ycoord, "CMS");              
       ycoord = outOfFrame ? .00 : .11;
-      float xcoord = outOfFrame ? .24 : .16;
-      tex->DrawLatex(xcoord,type_y-ycoord, "#font[52]{Preliminary}");
+      float xcoord = outOfFrame ? .25+xshift : .16+xshift;
+      tex->DrawLatex(xcoord,type_y-ycoord, "#font[52]{Preliminary}");//Simulation
     }
     if (!noData && !noRatioPlot && overrideHeader[0] == '\0'){ 
       float ycoord = outOfFrame ? .00 : .08;
-      float xcoord = outOfFrame ? .16 : .83;
+      float xcoord = outOfFrame ? .16+xshift : .83+xshift;
       tex->DrawLatex(xcoord,type_y-ycoord, "CMS");              
       ycoord = outOfFrame ? .00 : .13;
-      xcoord = outOfFrame ? .24 : .73;
+      xcoord = outOfFrame ? .25+xshift : .73+xshift;
       tex->DrawLatex(xcoord,type_y-ycoord, "#font[52]{Preliminary}");
     }
   }
@@ -1069,6 +1075,7 @@ void dataMCplotMaker(TH1F* Data_in, std::vector <std::pair <TH1F*, TH1F*> > Back
     line.SetLineWidth(2);
     int maxbin = err_hist->GetXaxis()->GetNbins();
     line.DrawLine(err_hist->GetXaxis()->GetBinLowEdge(1),1,err_hist->GetXaxis()->GetBinUpEdge(maxbin),1);
+    if (Background_systs.size() > 0) background_syst_ratio->Draw("E2 SAME");//draw the shaded area before the dots
     if(noErrBars && ratioLine) err_hist->Draw("HIST SAME");
     else if(noErrBars) err_hist->Draw("pSAME");
     else err_hist->Draw("pESAME"); 
@@ -1076,7 +1083,6 @@ void dataMCplotMaker(TH1F* Data_in, std::vector <std::pair <TH1F*, TH1F*> > Back
     err_hist->GetYaxis()->SetLabelSize(0.2);
     err_hist->GetYaxis()->SetRangeUser(0., 2.);
     err_hist->GetYaxis()->SetNdivisions(505);
-    if (Background_systs.size() > 0) background_syst_ratio->Draw("E2 SAME"); 
   }
   //--------------------------------
 
