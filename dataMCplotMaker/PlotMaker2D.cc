@@ -20,6 +20,10 @@ void PlotMaker2D(TH2F* hist, std::string options_string){
   string sciNot = "";
   bool color = 0;
   bool text = 0; 
+  bool isLogx = 0;
+  bool isLogy = 0;
+  bool isLogz = 0;
+  float zMax = -9999.;
 
   //Loop over options and change default settings to user-defined settings
   for (unsigned int i = 0; i < Options.size(); i++){
@@ -31,6 +35,10 @@ void PlotMaker2D(TH2F* hist, std::string options_string){
     else if (Options[i].find("sciNot") < Options[i].length()){ sciNot = getString(Options[i], "sciNot"); if (sciNot == "") cout << "Warning!  --sciNot requires an argument for the precision.  Ex: .2"; }
     else if (Options[i].find("color") < Options[i].length()) color = 1;
     else if (Options[i].find("text") < Options[i].length()) text = 1;
+    else if (Options[i].find("isLogx") < Options[i].length()) isLogx = 1;
+    else if (Options[i].find("isLogy") < Options[i].length()) isLogy = 1;
+    else if (Options[i].find("isLogz") < Options[i].length()) isLogz = 1;
+    else if (Options[i].find("zMax") < Options[i].length()) zMax = atof( getString(Options[i], "zMax").c_str() );
     else cout << "Warning: Option not recognized!  Option: " << Options[i] << endl;
   }
 
@@ -60,8 +68,12 @@ void PlotMaker2D(TH2F* hist, std::string options_string){
   //Set scientific notation if needed
   if (sciNot != "") gStyle->SetPaintTextFormat(Form("%sE", sciNot.c_str()));
 
-  hist->GetZaxis()->SetRangeUser(0,0.5);
-  
+  if (zMax > -9999.) hist->GetZaxis()->SetRangeUser(0,zMax);
+
+  if (isLogx) canvas->SetLogx();  
+  if (isLogy) canvas->SetLogy();  
+  if (isLogz) canvas->SetLogz();  
+
   //Make it a contour plot
 
   //Draw it
