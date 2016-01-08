@@ -524,10 +524,39 @@ def initSlides(me="Nick", themeName="nick", opts=""):
 
     source = source.replace("GRAPHICSPATHHERE", "".join(["{"+p+"}" for p in graphicspaths]))
 
+
     print "[SM] Initializing slides"
 
-def writeSlides(output="output.tex", opts="--compile"):
+def makeProvenance():
     global source
+    # get path to script that is importing this one
+    contents = ""
+    try:
+        fname = os.path.abspath(sys.modules['__main__'].__file__)
+        with open(fname,"r") as rfile: contents = rfile.read()
+        contents = contents.replace("{","{{")
+        contents = contents.replace("}","}}")
+        contents = contents.replace("\\","\\\\")
+        # contents = "\n".join([line for line in contents.split("\n") if len(line.strip()) > 2])
+        code = r"""
+        \begin{frame}[plain,fragile=singleslide,shrink=75]
+        \fontsize{0}{0}\color{white}
+        \begin{semiverbatim}
+        %s
+        \end{semiverbatim}
+        \end{frame}
+        """ % contents
+        source += code
+        print "[SM] Stored provenance"
+    except: print "[SM] [WARNING] Couldn't make provenance!"
+
+
+def writeSlides(output="output.tex", opts="--compile --copy --dump"):
+    global source
+
+    opts = utils.parseOptions(opts)
+    if(opts["provenance"]): makeProvenance()
+
     source += footer
     output = output.replace(".pdf",".tex")
     output = output.replace(".py",".tex") # just so I don't idiotically overwrite the slides!!! SO MAD.
@@ -536,7 +565,6 @@ def writeSlides(output="output.tex", opts="--compile"):
     fh.close()
     print "[SM] Wrote slides"
 
-    opts = utils.parseOptions(opts)
 
     if(opts["compile"]):
         # compile twice to get correct slide numbers. latex is dumb. is this the only way?
