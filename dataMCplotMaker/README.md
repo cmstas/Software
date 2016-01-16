@@ -140,6 +140,7 @@ Options:
   - --sciNot X: to put your bin contents into scientific notation.  X is a printf string (ie --sciNot .2 will give you two decimal places)
   - --colors: if you want each bin to be colored proportional to its value
   - --text: if you want each bin to have value and error written on it 
+  - --text90: if you want each bin to have value and error written on it at a 90 degree angle
   - --isLogx: if you want logx
   - --isLogy: if you want logy
   - --isLogz: if you want logz
