@@ -1157,8 +1157,8 @@ void makeSrcFile(const string& Classname, const string& nameSpace, const string&
     codef << "  while ( (currentFile = (TFile*)fileIter.Next()) ) {" << endl;
     codef << "" << endl;
     codef << "    // Get File Content" << endl;
-    codef << "    TFile *file = new TFile( currentFile->GetTitle() );" << endl;
-    codef << "    TTree *tree = (TTree*)file->Get(\"" << treeName << "\");" << endl;
+    codef << "    TFile file( currentFile->GetTitle() );" << endl;
+    codef << "    TTree *tree = (TTree*)file.Get(\"" << treeName << "\");" << endl;
     codef << "    if(fast) TTreeCache::SetLearnEntries(10);" << endl;
     codef << "    if(fast) tree->SetCacheSize(128*1024*1024);" << endl;
     codef << "    " << objName << ".Init(tree);" << endl;
@@ -1181,8 +1181,7 @@ void makeSrcFile(const string& Classname, const string& nameSpace, const string&
     codef << "  " << endl;
     codef << "    // Clean Up" << endl;
     codef << "    delete tree;" << endl;
-    codef << "    file->Close();" << endl;
-    codef << "    delete file;" << endl;
+    codef << "    file.Close();" << endl;
     codef << "  }" << endl;
     codef << "  if ( nEventsChain != nEventsTotal ) {" << endl;
     codef << "    cout << Form( \"ERROR: number of events from files (\%d) is not equal to total number of events (\%d)\", nEventsChain, nEventsTotal ) << endl;" << endl;
