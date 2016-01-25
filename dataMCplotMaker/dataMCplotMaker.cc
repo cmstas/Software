@@ -1,5 +1,7 @@
 #include "dataMCplotMaker.h"
 
+bool do_background_syst = true;
+
 //Comparison to put smallest histogram on bottom of stack
 bool Integral(PlotInfo plot1, PlotInfo plot2){
   return plot1.Plot->Integral(0,plot1.Plot->GetNbinsX()) < plot2.Plot->Integral(0,plot2.Plot->GetNbinsX());
@@ -728,6 +730,7 @@ void dataMCplotMaker(TH1F* Data_in, std::vector <std::pair <TH1F*, TH1F*> > Back
   //If linear and large numbers, need extra space
   if (linear && myMax > 1000) finPad[0]->SetLeftMargin(0.15);
   if (linear && myMax > 1000) finPad[1]->SetLeftMargin(0.15);
+  if (!linear) finPad[0]->SetLeftMargin(0.12); 
 
   //Y-axis titles
   float bin_width = Backgrounds[0]->GetXaxis()->GetBinWidth(1);
@@ -893,7 +896,7 @@ void dataMCplotMaker(TH1F* Data_in, std::vector <std::pair <TH1F*, TH1F*> > Back
       background_syst->SetBinError(i, sqrt( pow(err, 2) + pow(stat, 2) ) ); 
     }
   }
-  if (background_syst != 0) background_syst->Draw("E2 SAME");
+  if (background_syst != 0 && do_background_syst == true) background_syst->Draw("E2 SAME");
 
   //Redraw the data on top of the shaded area
   if(noErrBars) stack2->Draw("PSAME");
@@ -959,7 +962,7 @@ void dataMCplotMaker(TH1F* Data_in, std::vector <std::pair <TH1F*, TH1F*> > Back
   tex->SetTextSize(0.035);
   float title_y_coord = 0.88;
   if (noData || noRatioPlot) title_y_coord = 0.78; 
-  if (outOfFrame && noRatioPlot) title_y_coord += 0.09;
+  if (outOfFrame || noRatioPlot) title_y_coord += 0.09;
   if (colorTitle) title = Form("#color[4]{%s}",title);
   tex->DrawLatex(0.16,title_y_coord,title);
   tex->DrawLatex(0.16,title_y_coord-0.05,title2);
@@ -987,7 +990,7 @@ void dataMCplotMaker(TH1F* Data_in, std::vector <std::pair <TH1F*, TH1F*> > Back
   tex->SetTextSize(0.035);
   if (overrideHeader[0] == '\0'){
     tex->SetTextAlign(31);
-    if (!noLumi) tex->DrawLatex(0.96,type_y,Form("%.1f %s^{-1} (%s TeV)", stof(lumi), lumiUnit.c_str(), energy.c_str()));
+    if (!noLumi) tex->DrawLatex(0.96,type_y,Form("%.2f %s^{-1} (%s TeV)", stof(lumi), lumiUnit.c_str(), energy.c_str()));
     if ( noLumi) tex->DrawLatex(0.96,type_y,Form("           (%s TeV)", energy.c_str()));
     tex->SetTextAlign(11);
   }
@@ -1075,7 +1078,7 @@ void dataMCplotMaker(TH1F* Data_in, std::vector <std::pair <TH1F*, TH1F*> > Back
     line.SetLineWidth(2);
     int maxbin = err_hist->GetXaxis()->GetNbins();
     line.DrawLine(err_hist->GetXaxis()->GetBinLowEdge(1),1,err_hist->GetXaxis()->GetBinUpEdge(maxbin),1);
-    if (Background_systs.size() > 0) background_syst_ratio->Draw("E2 SAME");//draw the shaded area before the dots
+    if (do_background_syst && Background_systs.size() > 0) background_syst_ratio->Draw("E2 SAME");//draw the shaded area before the dots
     if(noErrBars && ratioLine) err_hist->Draw("HIST SAME");
     else if(noErrBars) err_hist->Draw("pSAME");
     else err_hist->Draw("pESAME"); 
@@ -1104,6 +1107,8 @@ void dataMCplotMaker(TH1F* Data_in, std::vector <std::pair <TH1F*, TH1F*> > Back
 
 //Overload function for case of no stat errors
 void dataMCplotMaker(TH1F* Data_in, std::vector <TH1F*> Backgrounds_in, std::vector <std::string> Titles, std::string titleIn, std::string title2In, std::string options_string, std::vector <TH1F*> Signals_in, std::vector <std::string> SignalTitles, std::vector <Color_t> color_input){
+
+  do_background_syst = false;
 
   //Make a null pair for each 
   std::vector< std::pair<TH1F*, TH1F*> > Backgrounds_pair_in;
