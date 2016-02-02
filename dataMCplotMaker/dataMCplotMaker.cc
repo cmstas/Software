@@ -797,7 +797,7 @@ void dataMCplotMaker(TH1F* Data_in, std::vector <std::pair <TH1F*, TH1F*> > Back
     }
   }
 
-  //if (Background_systs.size() == 0) gStyle->SetErrorX(0.001); //why the fuck is this even here?
+  if (Background_systs.size() == 0) gStyle->SetErrorX(0.001); //why the fuck is this even here?
 
   //Stupid dots thing
   if (dots && myMin == 0){
@@ -962,7 +962,7 @@ void dataMCplotMaker(TH1F* Data_in, std::vector <std::pair <TH1F*, TH1F*> > Back
   tex->SetTextSize(0.035);
   float title_y_coord = 0.88;
   if (noData || noRatioPlot) title_y_coord = 0.78; 
-  if (outOfFrame || noRatioPlot) title_y_coord += 0.09;
+  if (outOfFrame && (noData || noRatioPlot)) title_y_coord += 0.09;
   if (colorTitle) title = Form("#color[4]{%s}",title);
   tex->DrawLatex(0.16,title_y_coord,title);
   tex->DrawLatex(0.16,title_y_coord-0.05,title2);
