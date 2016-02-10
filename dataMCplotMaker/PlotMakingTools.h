@@ -53,4 +53,18 @@ std::string getString(std::string initial, std::string result){
   return substring;
 }
 
+//Needed for freaking vertical lines
+void DrawVerticalLine(Double_t x){
+  TLine l;
+  l.SetLineStyle(2);
+  l.SetLineWidth(2);
+  l.SetLineColor(kGray+2);
+  Double_t lm = gPad->GetLeftMargin();
+  Double_t rm = 1.-gPad->GetRightMargin();
+  Double_t tm = 1.-gPad->GetTopMargin();
+  Double_t bm = gPad->GetBottomMargin();
+  Double_t xndc = (rm-lm)*((x-gPad->GetUxmin())/(gPad->GetUxmax()-gPad->GetUxmin()))+lm;
+  l.DrawLineNDC(xndc,bm,xndc,tm);
+}
+
 #endif

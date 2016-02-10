@@ -258,8 +258,9 @@ void dataMCplotMaker(TH1F* Data_in, std::vector <std::pair <TH1F*, TH1F*> > Back
   float legendUp = 0;
   float legendRight = 0;
   float legendTextSize = 0.035;
-  std::vector <float> vLines;
-  std::vector <float> hLines;
+  std::vector <std::string> vLines;
+  std::vector <std::string> hLines;
+  std::string boxLines = "";
   bool doHalf = 0;
   Int_t nDivisions = -1;
   bool noLegend = false;
@@ -336,8 +337,9 @@ void dataMCplotMaker(TH1F* Data_in, std::vector <std::pair <TH1F*, TH1F*> > Back
     else if (Options[i].find("topYaxisTitle") < Options[i].length()) topYaxisTitle = getString(Options[i], "topYaxisTitle");
     else if (Options[i].find("type") < Options[i].length()) type = getString(Options[i], "type");
     else if (Options[i].find("overrideHeader") < Options[i].length()) overrideHeader = getString(Options[i], "overrideHeader");
-    else if (Options[i].find("vLine") < Options[i].length()) vLines.push_back(atof( getString(Options[i], "vLine").c_str() ));
-    else if (Options[i].find("hLine") < Options[i].length()) hLines.push_back(atof( getString(Options[i], "hLine").c_str() ));
+    else if (Options[i].find("vLine") < Options[i].length()) vLines.push_back(getString(Options[i], "vLine").c_str());
+    else if (Options[i].find("hLine") < Options[i].length()) hLines.push_back(getString(Options[i], "hLine").c_str());
+    else if (Options[i].find("boxLines") < Options[i].length()) boxLines = getString(Options[i], "boxLines").c_str();
     else if (Options[i].find("setMaximum") < Options[i].length()) setMaximum = atof( getString(Options[i], "setMaximum").c_str() );
     else if (Options[i].find("legendUp") < Options[i].length()) legendUp = atof( getString(Options[i], "legendUp").c_str() );
     else if (Options[i].find("legendRight") < Options[i].length()) legendRight = atof( getString(Options[i], "legendRight").c_str() );
@@ -961,18 +963,77 @@ void dataMCplotMaker(TH1F* Data_in, std::vector <std::pair <TH1F*, TH1F*> > Back
   if ( !noData && !noRatioPlot && doCounts) tex->DrawLatex(0.16,yCounts,Form("%i (Data), %0.1f (MC)",nEventsData,nEventsMC)); 
   if (( noData || noRatioPlot) && doCounts) tex->DrawLatex(0.16,yCounts,Form("%0.1f (MC)",nEventsMC)); 
 
+  //Draw a box (convert a string into coordinates to make 2 hlines and 2 vlines)
+  TString box(boxLines);
+  std::cout << box.CountChar(',') << std::endl;
+  if(box.CountChar(',') == 3) {
+      TObjArray *tokens = box.Tokenize(",");
+      std::string xLeft = ((TObjString *)(tokens->At(0)))->String().Data();
+      std::string yTop = ((TObjString *)(tokens->At(1)))->String().Data();
+      std::string xRight = ((TObjString *)(tokens->At(2)))->String().Data();
+      std::string yBottom = ((TObjString *)(tokens->At(3)))->String().Data();
+      hLines.push_back(yTop + "," + xLeft + "," + xRight);
+      hLines.push_back(yBottom + "," + xLeft + "," + xRight);
+      vLines.push_back(xLeft + "," + yBottom + "," + yTop);
+      vLines.push_back(xRight + "," + yBottom + "," + yTop);
+  }
+
+
   //Draw vertical lines
   c0.Update();
-  for (unsigned int i = 0; i < vLines.size(); i++) DrawVerticalLine(vLines[i]); 
+  for (unsigned int i = 0; i < vLines.size(); i++) {
+    // extract yposition,minx,maxx (last two are optional)
+    float xPos;
+    float yMin = Backgrounds.size() > 0 ? Backgrounds[0]->GetXaxis()->GetXmin() : Signals[0]->GetXaxis()->GetXmin();
+    float yMax = Backgrounds.size() > 0 ? Backgrounds[0]->GetXaxis()->GetXmax() : Signals[0]->GetXaxis()->GetXmax();
+
+    TString s1(vLines[i]);
+    if (s1.CountChar(',') == 0) {
+      xPos = s1.Atof();
+      DrawVerticalLine(xPos); 
+    } else if (s1.CountChar(',') == 2) {
+      TObjArray *tokens = s1.Tokenize(",");
+      xPos = (((TObjString *)(tokens->At(0)))->String()).Atof();
+      yMin = (((TObjString *)(tokens->At(1)))->String()).Atof();
+      yMax = (((TObjString *)(tokens->At(2)))->String()).Atof();
+
+      TLine linecut;
+      c0.Update();
+      linecut.SetLineStyle(2);
+      linecut.SetLineWidth(2);
+      linecut.SetLineColor(kGray+2);
+      linecut.DrawLine(xPos, yMin, xPos, yMax);
+    } else {
+      std::cout << "You goofed with your vLine syntax. Either specify xpos,miny,maxy or just xpos" << std::endl;
+      continue;
+    }
+  }
 
   //Draw Horizontal lines
   for (unsigned int i = 0; i < hLines.size(); i++){
+    // extract yposition,minx,maxx (last two are optional)
+    float yPos;
+    float xMin = Backgrounds.size() > 0 ? Backgrounds[0]->GetXaxis()->GetXmin() : Signals[0]->GetXaxis()->GetXmin();
+    float xMax = Backgrounds.size() > 0 ? Backgrounds[0]->GetXaxis()->GetXmax() : Signals[0]->GetXaxis()->GetXmax();
+
+    TString s1(hLines[i]);
+    if (s1.CountChar(',') == 0) {
+      yPos = s1.Atof();
+    } else if (s1.CountChar(',') == 2) {
+      TObjArray *tokens = s1.Tokenize(",");
+      yPos = (((TObjString *)(tokens->At(0)))->String()).Atof();
+      xMin = (((TObjString *)(tokens->At(1)))->String()).Atof();
+      xMax = (((TObjString *)(tokens->At(2)))->String()).Atof();
+    } else {
+      std::cout << "You goofed with your hLine syntax. Either specify ypos,minx,maxx or just ypos" << std::endl;
+      continue;
+    }
     TLine linecut;
     c0.Update();
     linecut.SetLineStyle(2);
     linecut.SetLineWidth(2);
     linecut.SetLineColor(kGray+2);
-    linecut.DrawLine(Backgrounds.size() > 0 ? Backgrounds[0]->GetXaxis()->GetXmin() : Signals[0]->GetXaxis()->GetXmin(), hLines[i], Backgrounds.size() > 0 ? Backgrounds[0]->GetXaxis()->GetXmax() : Signals[0]->GetXaxis()->GetXmax(), hLines[i]);
+    linecut.DrawLine(xMin, yPos, xMax, yPos);
   }
 
   //Draw header
