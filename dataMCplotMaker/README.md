@@ -79,9 +79,9 @@ Supported flags for "options" string:
   - --preserveBackgroundOrder: to keep the backgrounds in the order you specified, rather than putting the smallest backgrounds on the bottom
   - --noOverflow: do not make the last bin an overflow bin (important if your last bin is already an overflow bin).  Also underflow.
   - --noBlackLines: don't put a black line between the various backgrounds
-  - --vLine X: insert a vertical line where the x-axis = X
-  - --hLine X: insert a horizontal line where the y-axis = X
-  **Max and Min**
+  - --vLine X: insert a vertical line where the x-axis = X; alternatively to only draw a part of the line, you can do --vLine xpos,ymin,ymax
+  - --hLine X: insert a horizontal line where the y-axis = X; alternatively, can do --hLine ypos,xmin,xmax
+  - --box xleft,ytop,xright,ybottom: draws a box between top left and bottom right coordinates
   - --setMaximum X: change the y-axis maximum from its default value (originally chosen such that the top of the top-most error bar appears at 3/4 of the histogram's height)
   - --setMinimum X: change the y-axis minimum from its default value (originally chosen to be 90% of the smallest bin's height on the bottom background)
   - --noLegend: to suppress the legend
