@@ -108,6 +108,7 @@ Supported flags for "options" string:
   - --compareMultiple: useful for when validating new MC.  Put the old plots under backgrounds and the new plots under signals and enable this option.  This will stack the signals and manipulate the colors so you can see the agreement for each background.  Also prints the ratio for the total.
   - --systFillStyle: change the fill style of the systematics, for example to 3005
   - --systBlack: change the color of the syst errors to black
+  - --showZeroRatios: show the ratio plots as zero when the bin is empty.  
 
 Example:
 ````

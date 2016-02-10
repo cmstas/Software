@@ -293,7 +293,7 @@ void dataMCplotMaker(TH1F* Data_in, std::vector <std::pair <TH1F*, TH1F*> > Back
   bool ratioOnly = 0; 
   bool ratioLine = 0; 
   int bkgd_width = 1; 
-  bool dontShowZeroRatios = 0; 
+  bool dontShowZeroRatios = 1; 
   bool systInclStat = 0; 
   bool noRatioPlot = 0; 
   int systFillStyle = 3644; 
@@ -367,7 +367,7 @@ void dataMCplotMaker(TH1F* Data_in, std::vector <std::pair <TH1F*, TH1F*> > Back
     else if (Options[i].find("ratio") < Options[i].length()) ratio = atoi( getString(Options[i], "ratio").c_str() );
     else if (Options[i].find("noLumi") < Options[i].length()) noLumi = true;
     else if (Options[i].find("bkgd_width") < Options[i].length()) bkgd_width = atoi( getString(Options[i], "bkgd_width").c_str() ); 
-    else if (Options[i].find("dontShowZeroRatios") < Options[i].length()) dontShowZeroRatios = true; 
+    else if (Options[i].find("showZeroRatios") < Options[i].length()) dontShowZeroRatios = false; 
     else if (Options[i].find("systInclStat") < Options[i].length()) systInclStat = true; 
     else if (Options[i].find("noRatioPlot") < Options[i].length()) noRatioPlot = true; 
     else if (Options[i].find("systBlack") < Options[i].length()) systBlack = true; 
@@ -740,7 +740,8 @@ void dataMCplotMaker(TH1F* Data_in, std::vector <std::pair <TH1F*, TH1F*> > Back
   if (xAxisOverride[0] == '\0' && showXaxisUnit == 0) stack->GetXaxis()->SetTitle(Form("%s", xAxisLabel.c_str()));
   if (xAxisOverride[0] == '\0' && showXaxisUnit == 1) stack->GetXaxis()->SetTitle(Form("%s (%s)", xAxisLabel.c_str(), xAxisUnit.c_str()));
   if (xAxisOverride[0] != '\0' || xAxisOverrideGiven) stack->GetXaxis()->SetTitle(Form("%s", xAxisOverride.c_str()));
-  if (!noData && !noRatioPlot) stack->GetYaxis()->SetTitleOffset(1.5+yTitleOffset_);
+  if (!noData && !noRatioPlot &&  linear) stack->GetYaxis()->SetTitleOffset(1.5+yTitleOffset_);
+  if (!noData && !noRatioPlot && !linear) stack->GetYaxis()->SetTitleOffset(1.2+yTitleOffset_);
   if ((noData || noRatioPlot) && !linear) stack->GetYaxis()->SetTitleOffset(1.4+yTitleOffset_);
   if ((noData || noRatioPlot) &&  linear && myMax > 1000) stack->GetYaxis()->SetTitleOffset(2.1+yTitleOffset_);
   if ((noData || noRatioPlot) &&  linear && myMax < 1000) stack->GetYaxis()->SetTitleOffset(1.1+yTitleOffset_);
