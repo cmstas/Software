@@ -46,6 +46,7 @@ Supported flags for "options" string:
   - --outputName X: change the name of the output file produced from its default of "data_MC_plot" in pdf (you may also specify other file type like xxx.ps)
   - --png: to make output as png rather than pdf (must specify output name)
   - --noOutput: if by any chance you don't want an output to file
+  - --noRatioPlot: for when you have data and MC but don't want the ratio pad
   - --xAxisLabel X: change the x-axis label from its default of "M_T"
   - --noDivisionLabel: to remove the divisions label on the y-axis (ex: "Entries/30 GeV" becomes "Entries")
   - --yAxisLabel X: change the y-axis label from its default of "Entries"
@@ -105,6 +106,8 @@ Supported flags for "options" string:
   - --ratio N: show the ratio plot with the denominator = the Nth background rather than the sum of backgrounds
   - --noErrBars: if by any chance you don't want the data points to have error bars (it may be annoying when error bars are too big) (effective at both main hist and err hist)
   - --compareMultiple: useful for when validating new MC.  Put the old plots under backgrounds and the new plots under signals and enable this option.  This will stack the signals and manipulate the colors so you can see the agreement for each background.  Also prints the ratio for the total.
+  - --systFillStyle: change the fill style of the systematics, for example to 3005
+  - --systBlack: change the color of the syst errors to black
 
 Example:
 ````

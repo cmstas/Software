@@ -12,20 +12,6 @@ bool pairCompare(const std::pair<float, int> & a, const std::pair<float, int> & 
   return a.first > b.first;
 }
 
-//Needed for freaking vertical lines
-void DrawVerticalLine(Double_t x){
-  TLine l;
-  l.SetLineStyle(2);
-  l.SetLineWidth(2);
-  l.SetLineColor(kGray+2);
-  Double_t lm = gPad->GetLeftMargin();
-  Double_t rm = 1.-gPad->GetRightMargin();
-  Double_t tm = 1.-gPad->GetTopMargin();
-  Double_t bm = gPad->GetBottomMargin();
-  Double_t xndc = (rm-lm)*((x-gPad->GetUxmin())/(gPad->GetUxmax()-gPad->GetUxmin()))+lm;
-  l.DrawLineNDC(xndc,bm,xndc,tm);
-}
-
 //Function to determine maximum of each histogram, including error bars.  Side = 1 left, 2 right, 3 both, 4 = overflow
 TH1F *null = new TH1F("", "", 1,0,1);
 float AdjustedMaximum(int side, std::vector <std::pair<TH1F*, TH1F*> > Plots_in, TH1F* data = null, std::vector <TH1F*> Signals = std::vector<TH1F*>()){
@@ -309,11 +295,14 @@ void dataMCplotMaker(TH1F* Data_in, std::vector <std::pair <TH1F*, TH1F*> > Back
   bool dontShowZeroRatios = 0; 
   bool systInclStat = 0; 
   bool noRatioPlot = 0; 
+  int systFillStyle = 3644; 
+  bool systBlack = 0; 
 
   //Loop over options and change default settings to user-defined settings
   for (unsigned int i = 0; i < Options.size(); i++){
     if (Options[i].find("isLinear") < Options[i].length()) linear = 1; 
     else if (Options[i].find("preserveBackgroundOrder") < Options[i].length()) preserveBackgroundOrder = 1; 
+    else if (Options[i].find("systFillStyle") < Options[i].length()) systFillStyle = atoi( getString(Options[i], "systFillStyle").c_str() );
     else if (Options[i].find("noBlackLines") < Options[i].length()) noBlackLines = 1; 
     else if (Options[i].find("noStack") < Options[i].length()) nostack = 1; 
     else if (Options[i].find("lumiUnit") < Options[i].length()) lumiUnit = getString(Options[i], "lumiUnit"); 
@@ -379,6 +368,7 @@ void dataMCplotMaker(TH1F* Data_in, std::vector <std::pair <TH1F*, TH1F*> > Back
     else if (Options[i].find("dontShowZeroRatios") < Options[i].length()) dontShowZeroRatios = true; 
     else if (Options[i].find("systInclStat") < Options[i].length()) systInclStat = true; 
     else if (Options[i].find("noRatioPlot") < Options[i].length()) noRatioPlot = true; 
+    else if (Options[i].find("systBlack") < Options[i].length()) systBlack = true; 
     else std::cout << "Warning: Option not recognized!  Option: " << Options[i] << std::endl;
   }
 
@@ -750,8 +740,8 @@ void dataMCplotMaker(TH1F* Data_in, std::vector <std::pair <TH1F*, TH1F*> > Back
   if (xAxisOverride[0] != '\0' || xAxisOverrideGiven) stack->GetXaxis()->SetTitle(Form("%s", xAxisOverride.c_str()));
   if (!noData && !noRatioPlot) stack->GetYaxis()->SetTitleOffset(1.5+yTitleOffset_);
   if ((noData || noRatioPlot) && !linear) stack->GetYaxis()->SetTitleOffset(1.4+yTitleOffset_);
-  if ((noData || noRatioPlot) &&  linear) stack->GetYaxis()->SetTitleOffset(1.6+yTitleOffset_);
-  if (linear && myMax > 1000) stack->GetYaxis()->SetTitleOffset(0.5+stack->GetYaxis()->GetTitleOffset()); 
+  if ((noData || noRatioPlot) &&  linear && myMax > 1000) stack->GetYaxis()->SetTitleOffset(2.1+yTitleOffset_);
+  if ((noData || noRatioPlot) &&  linear && myMax < 1000) stack->GetYaxis()->SetTitleOffset(1.1+yTitleOffset_);
 
   //Title size
   if (largeLabels){
@@ -873,8 +863,9 @@ void dataMCplotMaker(TH1F* Data_in, std::vector <std::pair <TH1F*, TH1F*> > Back
   if (Background_systs.size() > 0){
     background_syst = new TH1F(*Background_systs[0]); 
     if (!background_syst->GetSumw2N()) background_syst->Sumw2(); 
-    background_syst->SetFillColor(kGray+1); //should have an option for these?
-    background_syst->SetFillStyle(3644); 
+    background_syst->SetFillColor(kGray+1); 
+    background_syst->SetFillStyle(systFillStyle); 
+    background_syst->SetFillColor(kBlack); //should have a better option for these?
   }
   if (Backgrounds.size() > 0){
     background_sum = new TH1F(*Backgrounds[0]); 
