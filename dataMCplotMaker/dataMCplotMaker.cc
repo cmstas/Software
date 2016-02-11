@@ -247,7 +247,7 @@ void dataMCplotMaker(TH1F* Data_in, std::vector <std::pair <TH1F*, TH1F*> > Back
   std::string dataName = "data";
   std::string topYaxisTitle = "data/MC";
   std::string overrideHeader = "";
-  std::string type = "CMS Preliminary "; // unused?
+  std::string type = "Preliminary "; // unused?
   std::string outputName = "data_MC_plot";
   bool preserveBackgroundOrder = 0;
   bool preserveSignalOrder = 0;
@@ -298,6 +298,7 @@ void dataMCplotMaker(TH1F* Data_in, std::vector <std::pair <TH1F*, TH1F*> > Back
   bool noRatioPlot = 0; 
   int systFillStyle = 3644; 
   bool systBlack = 0; 
+  int lumiPrec = 2; 
 
   //Loop over options and change default settings to user-defined settings
   for (unsigned int i = 0; i < Options.size(); i++){
@@ -307,6 +308,7 @@ void dataMCplotMaker(TH1F* Data_in, std::vector <std::pair <TH1F*, TH1F*> > Back
     else if (Options[i].find("noBlackLines") < Options[i].length()) noBlackLines = 1; 
     else if (Options[i].find("noStack") < Options[i].length()) nostack = 1; 
     else if (Options[i].find("lumiUnit") < Options[i].length()) lumiUnit = getString(Options[i], "lumiUnit"); 
+    else if (Options[i].find("lumiPrec") < Options[i].length()) lumiPrec = atoi( getString(Options[i], "lumiPrec").c_str() );
     else if (Options[i].find("noFill") < Options[i].length()) noFill = 1;
     else if (Options[i].find("normalize") < Options[i].length()) normalize = 1; 
     else if (Options[i].find("preserveSignalOrder") < Options[i].length()) preserveSignalOrder = 1; 
@@ -966,7 +968,6 @@ void dataMCplotMaker(TH1F* Data_in, std::vector <std::pair <TH1F*, TH1F*> > Back
 
   //Draw a box (convert a string into coordinates to make 2 hlines and 2 vlines)
   TString box(boxLines);
-  std::cout << box.CountChar(',') << std::endl;
   if(box.CountChar(',') == 3) {
       TObjArray *tokens = box.Tokenize(",");
       std::string xLeft = ((TObjString *)(tokens->At(0)))->String().Data();
@@ -1043,7 +1044,9 @@ void dataMCplotMaker(TH1F* Data_in, std::vector <std::pair <TH1F*, TH1F*> > Back
   tex->SetTextSize(0.035);
   if (overrideHeader[0] == '\0'){
     tex->SetTextAlign(31);
-    if (!noLumi) tex->DrawLatex(0.96,type_y,Form("%.2f %s^{-1} (%s TeV)", stof(lumi), lumiUnit.c_str(), energy.c_str()));
+    if (!noLumi && lumiPrec == 2) tex->DrawLatex(0.96,type_y,Form("%.2f %s^{-1} (%s TeV)", stof(lumi), lumiUnit.c_str(), energy.c_str()));
+    if (!noLumi && lumiPrec == 1) tex->DrawLatex(0.96,type_y,Form("%.1f %s^{-1} (%s TeV)", stof(lumi), lumiUnit.c_str(), energy.c_str()));
+    if (!noLumi && lumiPrec == 0) tex->DrawLatex(0.96,type_y,Form("%.0f %s^{-1} (%s TeV)", stof(lumi), lumiUnit.c_str(), energy.c_str()));
     if ( noLumi) tex->DrawLatex(0.96,type_y,Form("           (%s TeV)", energy.c_str()));
     tex->SetTextAlign(11);
   }
@@ -1055,7 +1058,7 @@ void dataMCplotMaker(TH1F* Data_in, std::vector <std::pair <TH1F*, TH1F*> > Back
       tex->DrawLatex(0.16+xshift,type_y-ycoord, "CMS");              
       ycoord = outOfFrame ? .00 : .11;
       float xcoord = outOfFrame ? .25+xshift : .16+xshift;
-      tex->DrawLatex(xcoord,type_y-ycoord, "#font[52]{Preliminary}");//Simulation
+      tex->DrawLatex(xcoord,type_y-ycoord, Form("#font[52]{%s}", type.c_str()));//Simulation
     }
     if (!noData && !noRatioPlot && overrideHeader[0] == '\0'){ 
       float ycoord = outOfFrame ? .00 : .08;
@@ -1063,7 +1066,7 @@ void dataMCplotMaker(TH1F* Data_in, std::vector <std::pair <TH1F*, TH1F*> > Back
       tex->DrawLatex(xcoord,type_y-ycoord, "CMS");              
       ycoord = outOfFrame ? .00 : .13;
       xcoord = outOfFrame ? .25+xshift : .73+xshift;
-      tex->DrawLatex(xcoord,type_y-ycoord, "#font[52]{Preliminary}");
+      tex->DrawLatex(xcoord,type_y-ycoord, Form("#font[52]{%s}", type.c_str()));
     }
   }
   if (overrideHeader[0] != '\0') tex->DrawLatex(0.17,type_y,Form("%s", overrideHeader.c_str()));
