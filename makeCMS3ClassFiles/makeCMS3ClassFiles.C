@@ -114,7 +114,7 @@ void makeHeaderFile(TFile *f, const string& treeName, bool paranoid, const strin
   
     headerf << "// -*- C++ -*-" << endl;
     headerf << "// This is a header file generated with the command:" << endl;
-    headerf << "// makeCMS3ClassFiles(\"" << f->GetPath() << "\b\b\", \"" << treeName << "\", \"" << Classname << "\", \"" << nameSpace << "\", \"" << objName << "\")" << endl << endl;
+    headerf << "// makeCMS3ClassFiles(\"" << f->GetName() << "\", \"" << treeName << "\", \"" << Classname << "\", \"" << nameSpace << "\", \"" << objName << "\")" << endl << endl;
     headerf << "#ifndef " << Classname << "_H" << endl;
     headerf << "#define " << Classname << "_H" << endl << endl;
     headerf << "#include \"Math/LorentzVector.h\"" << endl;
