@@ -259,7 +259,7 @@ void makeHeaderFile(TFile *f, const string& treeName, bool paranoid, const strin
                 if(classname.Contains("edm::Wrapper<") ) {
                     classname = classname(0,classname.Length()-1);
                     classname.ReplaceAll("edm::Wrapper<","");
-                    headerf << "\t" << classname << " " << aliasname << "_;" << endl;
+                    headerf << "\t" << setw(8) << left << classname << " " << aliasname << "_;" << endl;
                 }
                 //else if (classname.Contains("TString")) {
                 //    headerf << "\t" << classname << " " << aliasname << "_;" << endl;
