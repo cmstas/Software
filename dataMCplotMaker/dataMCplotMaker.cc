@@ -491,39 +491,39 @@ void dataMCplotMaker(TH1F* Data_in, std::vector <std::pair <TH1F*, TH1F*> > Back
   }
   //(b) If compareMultiple, then need to light + dark colors
   if (compareMultiple){
-    Colors.push_back(kGray);     Colors2.push_back(kBlack); 
-    Colors.push_back(kCyan);     Colors2.push_back(kBlue); 
-    Colors.push_back(kGreen);    Colors2.push_back(kGreen+3); 
-    Colors.push_back(kRed-7);    Colors2.push_back(kRed); 
-    Colors.push_back(kMagenta);  Colors2.push_back(kViolet+3); 
-    Colors.push_back(kOrange+1); Colors2.push_back(kOrange+3); 
+    Colors.push_back(kGray);     Colors2.push_back(kGray+3);
+    Colors.push_back(kAzure+8);  Colors2.push_back(kAzure-2);
+    Colors.push_back(kSpring-5); Colors2.push_back(kSpring-6);
+    Colors.push_back(kRed-7);    Colors2.push_back(kRed);
+    Colors.push_back(kMagenta);  Colors2.push_back(kViolet+3);
+    Colors.push_back(kOrange-3); Colors2.push_back(kOrange+7);
   }
   //(c) If only 2 backgrounds, use this green + "Azure"
   if (color_input.size() == 0 && Backgrounds.size() == 2){
     if(Colors.size() > 0) Colors[0] = kAzure+7; else Colors.push_back(kAzure+7);
-    if(Colors.size() > 1) Colors[1] = kGreen+3; else Colors.push_back(kGreen+3);
+    if(Colors.size() > 1) Colors[1] = kSpring-5; else Colors.push_back(kSpring-5);
   }
   //(d) Otherwise, default scheme for no signals
-  if (color_input.size() == 0 && use_signals == 0){ 
-    Colors.push_back(kGreen+3);   
-    if (!nostack) Colors.push_back(kBlue-10);   
-    Colors.push_back(kOrange+10);
-    if (!nostack) Colors.push_back(kYellow-4); 
-    if (!nostack) Colors.push_back(kCyan-4);
-    Colors.push_back(kViolet+4);
-    Colors.push_back(kRed);
-    Colors.push_back(kBlack);
+  if (color_input.size() == 0 && use_signals == 0){
+    Colors.push_back(kSpring-5);
+    Colors.push_back(kAzure+7);
+    if (!nostack) Colors.push_back(kRed-7);
+    Colors.push_back(kOrange-2);
+    if (!nostack) Colors.push_back(kCyan-7);
+    Colors.push_back(kMagenta-7);
+    if (!nostack) Colors.push_back(kTeal+6);
+    Colors.push_back(kGray+2);
   }
   //(e) Otherwise, default scheme for signals
-  if (color_input.size() == 0 && use_signals == 1){ 
-    Colors.push_back(kGreen-3);
-    Colors.push_back(kBlue-2);
-    Colors.push_back(kCyan);
+  if (color_input.size() == 0 && use_signals == 1){
+    Colors.push_back(kSpring-5);
+    Colors.push_back(kAzure+7);
+    Colors.push_back(kCyan-7);
+    Colors.push_back(kRed-7);
     Colors.push_back(kOrange-4);
-    Colors.push_back(kMagenta-8);
-    Colors.push_back(kRed);
-    Colors.push_back(kGreen+3);
-    Colors.push_back(kYellow-7);
+    Colors.push_back(kMagenta-7);
+    Colors.push_back(kTeal-5);
+    Colors.push_back(kOrange+6);
   }
 
   //Black Signals
@@ -680,10 +680,10 @@ void dataMCplotMaker(TH1F* Data_in, std::vector <std::pair <TH1F*, TH1F*> > Back
   }
 
   //Try this
-  if (!dots && !nostack) Backgrounds[0]->SetMarkerColor(0); 
-  if (dots){ Backgrounds[0]->SetMarkerColor(kBlue); Backgrounds[0]->SetLineColor(kBlue); }
-  if (dots && Backgrounds.size() > 1){ Backgrounds[1]->SetMarkerColor(kRed); Backgrounds[1]->SetLineColor(kRed); }
-  if (dots && Backgrounds.size() > 2){ Backgrounds[2]->SetMarkerColor(kGreen+3); Backgrounds[2]->SetLineColor(kGreen+3); }
+  if (!dots && !nostack) Backgrounds[0]->SetMarkerColor(0);
+  if (dots){ Backgrounds[0]->SetMarkerColor(kAzure-3); Backgrounds[0]->SetLineColor(kAzure-3); }
+  if (dots && Backgrounds.size() > 1){ Backgrounds[1]->SetMarkerColor(kRed-7); Backgrounds[1]->SetLineColor(kRed-7); }
+  if (dots && Backgrounds.size() > 2){ Backgrounds[2]->SetMarkerColor(kTeal+4); Backgrounds[2]->SetLineColor(kTeal+4); }
   if (dots && Backgrounds.size() > 3){ Backgrounds[3]->SetMarkerColor(kOrange+7); Backgrounds[3]->SetLineColor(kOrange+7); }
 
   //Minimum and maximum
@@ -807,13 +807,13 @@ void dataMCplotMaker(TH1F* Data_in, std::vector <std::pair <TH1F*, TH1F*> > Back
   }
 
   //Try this
-  if (!dots && !nostack) Backgrounds[0]->SetMarkerColor(0); 
-  if (dots){ Backgrounds[0]->SetMarkerColor(kBlue); Backgrounds[0]->SetLineColor(kBlue); }
-  if (dots && Backgrounds.size() > 1){ Backgrounds[1]->SetMarkerColor(kRed); Backgrounds[1]->SetLineColor(kRed); }
-  if (dots && Backgrounds.size() > 2){ Backgrounds[2]->SetMarkerColor(kGreen+3); Backgrounds[2]->SetLineColor(kGreen+3); }
+  if (!dots && !nostack) Backgrounds[0]->SetMarkerColor(0);
+  if (dots){ Backgrounds[0]->SetMarkerColor(kAzure+7); Backgrounds[0]->SetLineColor(kAzure+7); }
+  if (dots && Backgrounds.size() > 1){ Backgrounds[1]->SetMarkerColor(kRed-7); Backgrounds[1]->SetLineColor(kRed-7); }
+  if (dots && Backgrounds.size() > 2){ Backgrounds[2]->SetMarkerColor(kGreen-3); Backgrounds[2]->SetLineColor(kGreen-3); }
   if (dots && Backgrounds.size() > 3){ Backgrounds[3]->SetMarkerColor(kOrange+7); Backgrounds[3]->SetLineColor(kOrange+7); }
-  if (dots && Backgrounds.size() > 4){ Backgrounds[4]->SetMarkerColor(kMagenta+2); Backgrounds[4]->SetLineColor(kMagenta+2); }
-  if (dots && Backgrounds.size() > 5){ Backgrounds[5]->SetMarkerColor(kYellow-4); Backgrounds[5]->SetLineColor(kYellow-4); }
+  if (dots && Backgrounds.size() > 4){ Backgrounds[4]->SetMarkerColor(kMagenta-7); Backgrounds[4]->SetLineColor(kMagenta-7); }
+  if (dots && Backgrounds.size() > 5){ Backgrounds[5]->SetMarkerColor(kOrange-4); Backgrounds[5]->SetLineColor(kOrange-4); }
 
   if (bkgd_width > 1){
     for (unsigned int i = 0; i < Backgrounds.size(); i++){
