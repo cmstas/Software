@@ -633,7 +633,7 @@ void dataMCplotMaker(TH1F* Data_in, std::vector <std::pair <TH1F*, TH1F*> > Back
   THStack *stack = new THStack("stack", ""); 
   Data->SetMarkerStyle(20);
   Data->UseCurrentStyle();
-  if (Data->GetNbinsX() > 150) Data->SetMarkerSize(0.4);
+  if (Data->GetNbinsX() > 150) Data->SetMarkerSize(0.5);
   else if (Data->GetNbinsX() > 100) Data->SetMarkerSize(0.6);
   else if (Data->GetNbinsX() > 60) Data->SetMarkerSize(0.8);
 
@@ -1126,7 +1126,7 @@ void dataMCplotMaker(TH1F* Data_in, std::vector <std::pair <TH1F*, TH1F*> > Back
     }
     if (!ratioLine) {
       err_hist->SetMarkerStyle(20);
-      if (err_hist->GetNbinsX() > 150) err_hist->SetMarkerSize(0.4);
+      if (err_hist->GetNbinsX() > 150) err_hist->SetMarkerSize(0.5);
       else if (err_hist->GetNbinsX() > 100) err_hist->SetMarkerSize(0.6);
       else if (err_hist->GetNbinsX() > 60) err_hist->SetMarkerSize(0.8);
     }
