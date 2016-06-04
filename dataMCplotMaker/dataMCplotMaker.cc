@@ -633,6 +633,10 @@ void dataMCplotMaker(TH1F* Data_in, std::vector <std::pair <TH1F*, TH1F*> > Back
   THStack *stack = new THStack("stack", ""); 
   Data->SetMarkerStyle(20);
   Data->UseCurrentStyle();
+  if (Data->GetNbinsX() > 150) Data->SetMarkerSize(0.4);
+  else if (Data->GetNbinsX() > 100) Data->SetMarkerSize(0.6);
+  else if (Data->GetNbinsX() > 60) Data->SetMarkerSize(0.8);
+
   if(!compareMultiple && noFill == 0 && Signals.size() >= 5 && !nostack){
     std::vector <int> Style;
     Style.push_back(3003);
@@ -1120,7 +1124,12 @@ void dataMCplotMaker(TH1F* Data_in, std::vector <std::pair <TH1F*, TH1F*> > Back
       else if (Background_systs.size() > 0) background_syst_ratio->SetBinError(ib, 0); 
       if (Background_systs.size() > 0) background_syst_ratio->SetBinContent(ib, 1); 
     }
-    if (!ratioLine) err_hist->SetMarkerStyle(20);
+    if (!ratioLine) {
+      err_hist->SetMarkerStyle(20);
+      if (err_hist->GetNbinsX() > 150) err_hist->SetMarkerSize(0.4);
+      else if (err_hist->GetNbinsX() > 100) err_hist->SetMarkerSize(0.6);
+      else if (err_hist->GetNbinsX() > 60) err_hist->SetMarkerSize(0.8);
+    }
     if(noErrBars && ratioLine) err_hist->Draw("HIST");
     else if(noErrBars) err_hist->Draw("P");
     else err_hist->Draw("PE");
