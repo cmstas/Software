@@ -272,6 +272,13 @@ def addSlideTextPlotPlotPlot(slideTitle,bullets,plotName1,plotName2,plotName3,dr
     code += "\\end{columns}"
     return code
 
+def replaceFixme(p):
+    if type(p) == type([]):
+        return ["fixme.jpg" if "fixme" in path.lower() else path for path in p]
+    else:
+        if not p: return p
+        return "fixme.jpg" if "fixme" in p.lower() else p
+
 def addSlide(title=None,text=None,text1=None,text2=None,p1=None,p2=None,p3=None,p4=None,tex=None,opts="",plots=[],objects=[]):
     global source, slideNumber
     slideNumber += 1
@@ -291,6 +298,12 @@ def addSlide(title=None,text=None,text1=None,text2=None,p1=None,p2=None,p3=None,
         elif( p2 and not p1 ): title = cleanP2
         elif( p1 and p2 ): title = cleanP1 + ", " + cleanP2
         else: title = "\\phantom{}"
+
+    p1 = replaceFixme(p1)
+    p2 = replaceFixme(p2)
+    p3 = replaceFixme(p3)
+    p4 = replaceFixme(p4)
+    plots = replaceFixme(plots)
 
     if( not tex ) :
         if( p1 and p2 ):
@@ -511,10 +524,39 @@ def initSlides(me="Nick", themeName="nick", opts=""):
 
     source = source.replace("GRAPHICSPATHHERE", "".join(["{"+p+"}" for p in graphicspaths]))
 
+
     print "[SM] Initializing slides"
 
-def writeSlides(output="output.tex", opts="--compile"):
+def makeProvenance():
     global source
+    # get path to script that is importing this one
+    contents = ""
+    try:
+        fname = os.path.abspath(sys.modules['__main__'].__file__)
+        with open(fname,"r") as rfile: contents = rfile.read()
+        contents = contents.replace("{","{{")
+        contents = contents.replace("}","}}")
+        contents = contents.replace("\\","\\\\")
+        # contents = "\n".join([line for line in contents.split("\n") if len(line.strip()) > 2])
+        code = r"""
+        \begin{frame}[plain,fragile=singleslide,shrink=75]
+        \fontsize{0}{0}\color{white}
+        \begin{semiverbatim}
+        %s
+        \end{semiverbatim}
+        \end{frame}
+        """ % contents
+        source += code
+        print "[SM] Stored provenance"
+    except: print "[SM] [WARNING] Couldn't make provenance!"
+
+
+def writeSlides(output="output.tex", opts="--compile --copy --dump"):
+    global source
+
+    opts = utils.parseOptions(opts)
+    if(opts["provenance"]): makeProvenance()
+
     source += footer
     output = output.replace(".pdf",".tex")
     output = output.replace(".py",".tex") # just so I don't idiotically overwrite the slides!!! SO MAD.
@@ -523,7 +565,6 @@ def writeSlides(output="output.tex", opts="--compile"):
     fh.close()
     print "[SM] Wrote slides"
 
-    opts = utils.parseOptions(opts)
 
     if(opts["compile"]):
         # compile twice to get correct slide numbers. latex is dumb. is this the only way?

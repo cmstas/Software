@@ -20,6 +20,7 @@ void PlotMaker2D(TH2F* hist, std::string options_string){
   string sciNot = "";
   bool color = 0;
   bool text = 0; 
+  bool text90 = 0; 
   bool isLogx = 0;
   bool isLogy = 0;
   bool isLogz = 0;
@@ -34,6 +35,7 @@ void PlotMaker2D(TH2F* hist, std::string options_string){
     else if (Options[i].find("Yaxis") < Options[i].length()) Yaxis = getString(Options[i], "Yaxis"); 
     else if (Options[i].find("sciNot") < Options[i].length()){ sciNot = getString(Options[i], "sciNot"); if (sciNot == "") cout << "Warning!  --sciNot requires an argument for the precision.  Ex: .2"; }
     else if (Options[i].find("color") < Options[i].length()) color = 1;
+    else if (Options[i].find("text90") < Options[i].length()) text90 = 1;
     else if (Options[i].find("text") < Options[i].length()) text = 1;
     else if (Options[i].find("isLogx") < Options[i].length()) isLogx = 1;
     else if (Options[i].find("isLogy") < Options[i].length()) isLogy = 1;
@@ -79,6 +81,7 @@ void PlotMaker2D(TH2F* hist, std::string options_string){
   //Draw it
   string opt = ""; 
   if (text) opt += "TEXTE";
+  if (text90) opt += "TEXT90E";
   if (color) opt += "COLZ";
   hist->Draw(opt.c_str()); 
 

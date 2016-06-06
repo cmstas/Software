@@ -113,8 +113,10 @@ void makeHeaderFile(TFile *f, const string& treeName, bool paranoid, const strin
   
   
     headerf << "// -*- C++ -*-" << endl;
+    headerf << "// This is a header file generated with the command:" << endl;
+    headerf << "// makeCMS3ClassFiles(\"" << f->GetName() << "\", \"" << treeName << "\", \"" << Classname << "\", \"" << nameSpace << "\", \"" << objName << "\")" << endl << endl;
     headerf << "#ifndef " << Classname << "_H" << endl;
-    headerf << "#define " << Classname << "_H" << endl;
+    headerf << "#define " << Classname << "_H" << endl << endl;
     headerf << "#include \"Math/LorentzVector.h\"" << endl;
     headerf << "#include \"Math/Point3D.h\"" << endl;
     headerf << "#include \"TMath.h\"" << endl;
@@ -126,8 +128,6 @@ void makeHeaderFile(TFile *f, const string& treeName, bool paranoid, const strin
     headerf << "#include <vector> " << endl;
     headerf << "#include <unistd.h> " << endl;
     headerf << "typedef ROOT::Math::LorentzVector<ROOT::Math::PxPyPzE4D<float> > LorentzVector;" << endl << endl;
-    headerf << "// Generated with the command" << endl;
-    headerf << "// makeCMS3ClassFiles(\"" << f->GetTitle() << "\", \"" << treeName << "\", \"" << Classname << "\", \"" << nameSpace << "\", \"" << objName << "\")" << endl << endl;
     if (paranoid)
         headerf << "#define PARANOIA" << endl << endl;
     headerf << "using namespace std; " << endl;
@@ -259,7 +259,7 @@ void makeHeaderFile(TFile *f, const string& treeName, bool paranoid, const strin
                 if(classname.Contains("edm::Wrapper<") ) {
                     classname = classname(0,classname.Length()-1);
                     classname.ReplaceAll("edm::Wrapper<","");
-                    headerf << "\t" << classname << " " << aliasname << "_;" << endl;
+                    headerf << "\t" << setw(8) << left << classname << " " << aliasname << "_;" << endl;
                 }
                 //else if (classname.Contains("TString")) {
                 //    headerf << "\t" << classname << " " << aliasname << "_;" << endl;
@@ -269,21 +269,21 @@ void makeHeaderFile(TFile *f, const string& treeName, bool paranoid, const strin
                 }
             } else {
                 if(title.EndsWith("/i"))
-                    headerf << "\tunsigned int" << "\t" << aliasname << "_;" << endl;
+                    headerf << "\tunsigned int" << aliasname << "_;" << endl;
                 if(title.EndsWith("/l"))
-                    headerf << "\tunsigned long long" << "\t" << aliasname << "_;" << endl;
+                    headerf << "\tunsigned long long" << aliasname << "_;" << endl;
                 if(title.EndsWith("/F"))
-                    headerf << "\tfloat" << "\t" << aliasname << "_;" << endl;
+                    headerf << "\tfloat    " << aliasname << "_;" << endl;
                 if(title.EndsWith("/I"))
-                    headerf << "\tint" << "\t" << aliasname << "_;" << endl;
+                    headerf << "\tint      " << aliasname << "_;" << endl;
                 if(title.EndsWith("/O"))
-                    headerf << "\tbool" << "\t" << aliasname << "_;" << endl;
+                    headerf << "\tbool     " << aliasname << "_;" << endl;
                 if(title.EndsWith("/D"))
-                    headerf << "\tdouble" << "\t" << aliasname << "_;" << endl;
+                    headerf << "\tdouble   " << aliasname << "_;" << endl;
             }
         }
         headerf << "\tTBranch *" << Form("%s_branch",aliasname.Data()) << ";" << endl;
-        headerf << "\tbool " << Form("%s_isLoaded",aliasname.Data()) << ";" << endl;
+        headerf << "\tbool     " << Form("%s_isLoaded",aliasname.Data()) << ";" << endl;
     }
     headerf << "public: " << endl;
     headerf << "void Init(TTree *tree);" << endl;
@@ -333,9 +333,9 @@ void makeHeaderFile(TFile *f, const string& treeName, bool paranoid, const strin
                 if(title.EndsWith("/I"))
                     headerf << "\tconst int &" << aliasname << "();" << endl;
                 if(title.EndsWith("/O"))
-                    headerf << "\tconst bool &" << "\t" << aliasname << "();" << endl;
+                    headerf << "\tconst bool &" << aliasname << "();" << endl;
                 if(title.EndsWith("/D"))
-                    headerf << "\tconst double &" << "\t" << aliasname << "();" << endl;
+                    headerf << "\tconst double &" << aliasname << "();" << endl;
             }
         }
     } // end of accessor header
@@ -693,9 +693,9 @@ void makeCCFile(TFile *f, const string& Classname, const string& nameSpace, cons
                 if(title.EndsWith("/I"))
                     implf << "\tconst int &" << funcname << "()" << endl;
                 if(title.EndsWith("/O"))
-                    implf << "\tconst bool &" << "\t" << funcname << "()" << endl;
+                    implf << "\tconst bool &" << funcname << "()" << endl;
                 if(title.EndsWith("/D"))
-                    implf << "\tconst double &" << "\t" << funcname << "()" << endl;
+                    implf << "\tconst double &" << funcname << "()" << endl;
             }
         }
         aliasname = aliasarray->At(i)->GetName();
@@ -1120,8 +1120,8 @@ void makeSrcFile(const string& Classname, const string& nameSpace, const string&
     codef << "  while ( (currentFile = (TFile*)fileIter.Next()) ) {" << endl;
     codef << "" << endl;
     codef << "    // Get File Content" << endl;
-    codef << "    TFile *file = new TFile( currentFile->GetTitle() );" << endl;
-    codef << "    TTree *tree = (TTree*)file->Get(\"" << treeName << "\");" << endl;
+    codef << "    TFile file( currentFile->GetTitle() );" << endl;
+    codef << "    TTree *tree = (TTree*)file.Get(\"" << treeName << "\");" << endl;
     codef << "    if(fast) TTreeCache::SetLearnEntries(10);" << endl;
     codef << "    if(fast) tree->SetCacheSize(128*1024*1024);" << endl;
     codef << "    " << objName << ".Init(tree);" << endl;
@@ -1144,8 +1144,7 @@ void makeSrcFile(const string& Classname, const string& nameSpace, const string&
     codef << "  " << endl;
     codef << "    // Clean Up" << endl;
     codef << "    delete tree;" << endl;
-    codef << "    file->Close();" << endl;
-    codef << "    delete file;" << endl;
+    codef << "    file.Close();" << endl;
     codef << "  }" << endl;
     codef << "  if ( nEventsChain != nEventsTotal ) {" << endl;
     codef << "    cout << Form( \"ERROR: number of events from files (\%d) is not equal to total number of events (\%d)\", nEventsChain, nEventsTotal ) << endl;" << endl;

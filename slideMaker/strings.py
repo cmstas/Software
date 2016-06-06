@@ -30,6 +30,7 @@ commonHeader = """
 \\definecolor{orange}{RGB}{230,97,1}
 \\definecolor{babyblue}{RGB}{56,147,214}
 \\definecolor{coolblue}{RGB}{51,51,179}
+\\definecolor{darkyellow}{RGB}{204,204,0}
 \\definecolor{thethemecolor}{RGB}{0,0,255}
 \\setbeamercolor{alerted text}{fg=thethemecolor}
 

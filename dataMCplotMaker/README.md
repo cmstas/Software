@@ -46,6 +46,7 @@ Supported flags for "options" string:
   - --outputName X: change the name of the output file produced from its default of "data_MC_plot" in pdf (you may also specify other file type like xxx.ps)
   - --png: to make output as png rather than pdf (must specify output name)
   - --noOutput: if by any chance you don't want an output to file
+  - --noRatioPlot: for when you have data and MC but don't want the ratio pad
   - --xAxisLabel X: change the x-axis label from its default of "M_T"
   - --noDivisionLabel: to remove the divisions label on the y-axis (ex: "Entries/30 GeV" becomes "Entries")
   - --yAxisLabel X: change the y-axis label from its default of "Entries"
@@ -78,9 +79,9 @@ Supported flags for "options" string:
   - --preserveBackgroundOrder: to keep the backgrounds in the order you specified, rather than putting the smallest backgrounds on the bottom
   - --noOverflow: do not make the last bin an overflow bin (important if your last bin is already an overflow bin).  Also underflow.
   - --noBlackLines: don't put a black line between the various backgrounds
-  - --vLine X: insert a vertical line where the x-axis = X
-  - --hLine X: insert a horizontal line where the y-axis = X
-  **Max and Min**
+  - --vLine X: insert a vertical line where the x-axis = X; alternatively to only draw a part of the line, you can do --vLine xpos,ymin,ymax
+  - --hLine X: insert a horizontal line where the y-axis = X; alternatively, can do --hLine ypos,xmin,xmax
+  - --box xleft,ytop,xright,ybottom: draws a box between top left and bottom right coordinates
   - --setMaximum X: change the y-axis maximum from its default value (originally chosen such that the top of the top-most error bar appears at 3/4 of the histogram's height)
   - --setMinimum X: change the y-axis minimum from its default value (originally chosen to be 90% of the smallest bin's height on the bottom background)
   - --noLegend: to suppress the legend
@@ -105,6 +106,9 @@ Supported flags for "options" string:
   - --ratio N: show the ratio plot with the denominator = the Nth background rather than the sum of backgrounds
   - --noErrBars: if by any chance you don't want the data points to have error bars (it may be annoying when error bars are too big) (effective at both main hist and err hist)
   - --compareMultiple: useful for when validating new MC.  Put the old plots under backgrounds and the new plots under signals and enable this option.  This will stack the signals and manipulate the colors so you can see the agreement for each background.  Also prints the ratio for the total.
+  - --systFillStyle: change the fill style of the systematics, for example to 3005
+  - --systBlack: change the color of the syst errors to black
+  - --showZeroRatios: show the ratio plots as zero when the bin is empty.  
   - --noTextBetweenPads: bring ratio pad closer to main pad, no text in between them. All thex inside main pad. Used for SUS-15-008
   - --poissonErrorsNoZeros: avoid showing poissonian error bars for data entries with zero yield (used for SUS-15-008)
 
@@ -142,6 +146,7 @@ Options:
   - --sciNot X: to put your bin contents into scientific notation.  X is a printf string (ie --sciNot .2 will give you two decimal places)
   - --colors: if you want each bin to be colored proportional to its value
   - --text: if you want each bin to have value and error written on it 
+  - --text90: if you want each bin to have value and error written on it at a 90 degree angle
   - --isLogx: if you want logx
   - --isLogy: if you want logy
   - --isLogz: if you want logz

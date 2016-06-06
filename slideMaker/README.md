@@ -59,6 +59,7 @@ Instead of test.py, you could execute slideMaker.py. This makes it simpler to te
   * --compile: compile slides (twice, for slide numbers) after writing .tex source (enabled by default)
   * --copy: copy output .pdf file to web directory (default: public_html)
   * --dump: copy to "dump" directory within web directory
+  * --provenance: append a slide with the python source in small white font. using "pdftotext" on pdf you can recover the source
 
 ## Misc tips
   * Writing the text "ENDL" without quotes in the title of the title slide or when specifying --casual X will force
@@ -69,6 +70,7 @@ Instead of test.py, you could execute slideMaker.py. This makes it simpler to te
     commands into strings.py.
   * Place the date in the document via "\\\\today"
   * Supplying the parameter "tex" will let you write your own TeX code for a slide
+  * If you put the word "fixme" in the path for any plot, slideMaker puts a FIXME placeholder for you
 
 ## TODO:
   * figure out good algorithm for resizing images so that they don't overlap with text

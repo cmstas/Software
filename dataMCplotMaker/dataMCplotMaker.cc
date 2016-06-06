@@ -3,6 +3,8 @@
 #include "Math/QuantFuncMathCore.h"
 #include "TMath.h"
 
+bool do_background_syst = true;
+
 //Comparison to put smallest histogram on bottom of stack
 bool Integral(PlotInfo plot1, PlotInfo plot2){
   return plot1.Plot->Integral(0,plot1.Plot->GetNbinsX()) < plot2.Plot->Integral(0,plot2.Plot->GetNbinsX());
@@ -11,20 +13,6 @@ bool Integral(PlotInfo plot1, PlotInfo plot2){
 //Comparison between pair in order to make sort on index 
 bool pairCompare(const std::pair<float, int> & a, const std::pair<float, int> & b) {
   return a.first > b.first;
-}
-
-//Needed for freaking vertical lines
-void DrawVerticalLine(Double_t x){
-  TLine l;
-  l.SetLineStyle(2);
-  l.SetLineWidth(2);
-  l.SetLineColor(kGray+2);
-  Double_t lm = gPad->GetLeftMargin();
-  Double_t rm = 1.-gPad->GetRightMargin();
-  Double_t tm = 1.-gPad->GetTopMargin();
-  Double_t bm = gPad->GetBottomMargin();
-  Double_t xndc = (rm-lm)*((x-gPad->GetUxmin())/(gPad->GetUxmax()-gPad->GetUxmin()))+lm;
-  l.DrawLineNDC(xndc,bm,xndc,tm);
 }
 
 //Function to determine maximum of each histogram, including error bars.  Side = 1 left, 2 right, 3 both, 4 = overflow
@@ -157,7 +145,7 @@ void SetTDRStyle(){
   tdrStyleAG->SetTitleFont(42, "XYZ");
   tdrStyleAG->SetTitleSize(0.045, "XYZ");
   tdrStyleAG->SetTitleOffset(1.17, "X");
-  tdrStyleAG->SetTitleOffset(1.10, "Y"); 
+  tdrStyleAG->SetTitleOffset(1.15, "Y"); 
 
   //For the axis labels:
   tdrStyleAG->SetLabelColor(1, "XYZ");
@@ -274,8 +262,9 @@ void dataMCplotMaker(TH1F* Data_in, std::vector <std::pair <TH1F*, TH1F*> > Back
   float legendUp = 0;
   float legendRight = 0;
   float legendTextSize = 0.035;
-  std::vector <float> vLines;
-  std::vector <float> hLines;
+  std::vector <std::string> vLines;
+  std::vector <std::string> hLines;
+  std::string boxLines = "";
   bool doHalf = 0;
   Int_t nDivisions = -1;
   bool noLegend = false;
@@ -308,9 +297,12 @@ void dataMCplotMaker(TH1F* Data_in, std::vector <std::pair <TH1F*, TH1F*> > Back
   bool ratioOnly = 0; 
   bool ratioLine = 0; 
   int bkgd_width = 1; 
-  bool dontShowZeroRatios = 0; 
+  bool dontShowZeroRatios = 1; 
   bool systInclStat = 0; 
   bool noRatioPlot = 0; 
+  int systFillStyle = 3644; 
+  bool systBlack = 0; 
+  int lumiPrec = 2; 
   bool noTextBetweenPads = 0;
   bool poissonErrorsNoZeros = 0;
 
@@ -318,9 +310,11 @@ void dataMCplotMaker(TH1F* Data_in, std::vector <std::pair <TH1F*, TH1F*> > Back
   for (unsigned int i = 0; i < Options.size(); i++){
     if (Options[i].find("isLinear") < Options[i].length()) linear = 1; 
     else if (Options[i].find("preserveBackgroundOrder") < Options[i].length()) preserveBackgroundOrder = 1; 
+    else if (Options[i].find("systFillStyle") < Options[i].length()) systFillStyle = atoi( getString(Options[i], "systFillStyle").c_str() );
     else if (Options[i].find("noBlackLines") < Options[i].length()) noBlackLines = 1; 
     else if (Options[i].find("noStack") < Options[i].length()) nostack = 1; 
     else if (Options[i].find("lumiUnit") < Options[i].length()) lumiUnit = getString(Options[i], "lumiUnit"); 
+    else if (Options[i].find("lumiPrec") < Options[i].length()) lumiPrec = atoi( getString(Options[i], "lumiPrec").c_str() );
     else if (Options[i].find("noFill") < Options[i].length()) noFill = 1;
     else if (Options[i].find("normalize") < Options[i].length()) normalize = 1; 
     else if (Options[i].find("preserveSignalOrder") < Options[i].length()) preserveSignalOrder = 1; 
@@ -351,8 +345,9 @@ void dataMCplotMaker(TH1F* Data_in, std::vector <std::pair <TH1F*, TH1F*> > Back
     else if (Options[i].find("topYaxisTitle") < Options[i].length()) topYaxisTitle = getString(Options[i], "topYaxisTitle");
     else if (Options[i].find("type") < Options[i].length()) type = getString(Options[i], "type");
     else if (Options[i].find("overrideHeader") < Options[i].length()) overrideHeader = getString(Options[i], "overrideHeader");
-    else if (Options[i].find("vLine") < Options[i].length()) vLines.push_back(atof( getString(Options[i], "vLine").c_str() ));
-    else if (Options[i].find("hLine") < Options[i].length()) hLines.push_back(atof( getString(Options[i], "hLine").c_str() ));
+    else if (Options[i].find("vLine") < Options[i].length()) vLines.push_back(getString(Options[i], "vLine").c_str());
+    else if (Options[i].find("hLine") < Options[i].length()) hLines.push_back(getString(Options[i], "hLine").c_str());
+    else if (Options[i].find("boxLines") < Options[i].length()) boxLines = getString(Options[i], "boxLines").c_str();
     else if (Options[i].find("setMaximum") < Options[i].length()) setMaximum = atof( getString(Options[i], "setMaximum").c_str() );
     else if (Options[i].find("legendUp") < Options[i].length()) legendUp = atof( getString(Options[i], "legendUp").c_str() );
     else if (Options[i].find("legendRight") < Options[i].length()) legendRight = atof( getString(Options[i], "legendRight").c_str() );
@@ -380,9 +375,10 @@ void dataMCplotMaker(TH1F* Data_in, std::vector <std::pair <TH1F*, TH1F*> > Back
     else if (Options[i].find("ratio") < Options[i].length()) ratio = atoi( getString(Options[i], "ratio").c_str() );
     else if (Options[i].find("noLumi") < Options[i].length()) noLumi = true;
     else if (Options[i].find("bkgd_width") < Options[i].length()) bkgd_width = atoi( getString(Options[i], "bkgd_width").c_str() ); 
-    else if (Options[i].find("dontShowZeroRatios") < Options[i].length()) dontShowZeroRatios = true; 
+    else if (Options[i].find("showZeroRatios") < Options[i].length()) dontShowZeroRatios = false; 
     else if (Options[i].find("systInclStat") < Options[i].length()) systInclStat = true; 
     else if (Options[i].find("noRatioPlot") < Options[i].length()) noRatioPlot = true; 
+    else if (Options[i].find("systBlack") < Options[i].length()) systBlack = true; 
     else if (Options[i].find("noTextBetweenPads") < Options[i].length()) noTextBetweenPads = true;
     else if (Options[i].find("poissonErrorsNoZeros") < Options[i].length()) poissonErrorsNoZeros = true;
     else std::cout << "Warning: Option not recognized!  Option: " << Options[i] << std::endl;
@@ -503,39 +499,39 @@ void dataMCplotMaker(TH1F* Data_in, std::vector <std::pair <TH1F*, TH1F*> > Back
   }
   //(b) If compareMultiple, then need to light + dark colors
   if (compareMultiple){
-    Colors.push_back(kGray);     Colors2.push_back(kBlack); 
-    Colors.push_back(kCyan);     Colors2.push_back(kBlue); 
-    Colors.push_back(kGreen);    Colors2.push_back(kGreen+3); 
-    Colors.push_back(kRed-7);    Colors2.push_back(kRed); 
-    Colors.push_back(kMagenta);  Colors2.push_back(kViolet+3); 
-    Colors.push_back(kOrange+1); Colors2.push_back(kOrange+3); 
+    Colors.push_back(kGray);     Colors2.push_back(kGray+3);
+    Colors.push_back(kAzure+8);  Colors2.push_back(kAzure-2);
+    Colors.push_back(kSpring-5); Colors2.push_back(kSpring-6);
+    Colors.push_back(kRed-7);    Colors2.push_back(kRed);
+    Colors.push_back(kMagenta);  Colors2.push_back(kViolet+3);
+    Colors.push_back(kOrange-3); Colors2.push_back(kOrange+7);
   }
   //(c) If only 2 backgrounds, use this green + "Azure"
   if (color_input.size() == 0 && Backgrounds.size() == 2){
     if(Colors.size() > 0) Colors[0] = kAzure+7; else Colors.push_back(kAzure+7);
-    if(Colors.size() > 1) Colors[1] = kGreen+3; else Colors.push_back(kGreen+3);
+    if(Colors.size() > 1) Colors[1] = kSpring-5; else Colors.push_back(kSpring-5);
   }
   //(d) Otherwise, default scheme for no signals
-  if (color_input.size() == 0 && use_signals == 0){ 
-    Colors.push_back(kGreen+3);   
-    if (!nostack) Colors.push_back(kBlue-10);   
-    Colors.push_back(kOrange+10);
-    if (!nostack) Colors.push_back(kYellow-4); 
-    if (!nostack) Colors.push_back(kCyan-4);
-    Colors.push_back(kViolet+4);
-    Colors.push_back(kRed);
-    Colors.push_back(kBlack);
+  if (color_input.size() == 0 && use_signals == 0){
+    Colors.push_back(kSpring-5);
+    Colors.push_back(kAzure+7);
+    if (!nostack) Colors.push_back(kRed-7);
+    Colors.push_back(kOrange-2);
+    if (!nostack) Colors.push_back(kCyan-7);
+    Colors.push_back(kMagenta-7);
+    if (!nostack) Colors.push_back(kTeal+6);
+    Colors.push_back(kGray+2);
   }
   //(e) Otherwise, default scheme for signals
-  if (color_input.size() == 0 && use_signals == 1){ 
-    Colors.push_back(kGreen-3);
-    Colors.push_back(kBlue-2);
-    Colors.push_back(kCyan);
+  if (color_input.size() == 0 && use_signals == 1){
+    Colors.push_back(kSpring-5);
+    Colors.push_back(kAzure+7);
+    Colors.push_back(kCyan-7);
+    Colors.push_back(kRed-7);
     Colors.push_back(kOrange-4);
-    Colors.push_back(kMagenta-8);
-    Colors.push_back(kRed);
-    Colors.push_back(kGreen+3);
-    Colors.push_back(kYellow-7);
+    Colors.push_back(kMagenta-7);
+    Colors.push_back(kTeal-5);
+    Colors.push_back(kOrange+6);
   }
 
   //Black Signals
@@ -646,6 +642,10 @@ void dataMCplotMaker(TH1F* Data_in, std::vector <std::pair <TH1F*, TH1F*> > Back
   THStack *stack = new THStack("stack", ""); 
   Data->SetMarkerStyle(20);
   Data->UseCurrentStyle();
+  if (Data->GetNbinsX() > 150) Data->SetMarkerSize(0.5);
+  else if (Data->GetNbinsX() > 100) Data->SetMarkerSize(0.6);
+  else if (Data->GetNbinsX() > 60) Data->SetMarkerSize(0.8);
+
   if(!compareMultiple && noFill == 0 && Signals.size() >= 5 && !nostack){
     std::vector <int> Style;
     Style.push_back(3003);
@@ -693,10 +693,10 @@ void dataMCplotMaker(TH1F* Data_in, std::vector <std::pair <TH1F*, TH1F*> > Back
   }
 
   //Try this
-  if (!dots && !nostack) Backgrounds[0]->SetMarkerColor(0); 
-  if (dots){ Backgrounds[0]->SetMarkerColor(kBlue); Backgrounds[0]->SetLineColor(kBlue); }
-  if (dots && Backgrounds.size() > 1){ Backgrounds[1]->SetMarkerColor(kRed); Backgrounds[1]->SetLineColor(kRed); }
-  if (dots && Backgrounds.size() > 2){ Backgrounds[2]->SetMarkerColor(kGreen+3); Backgrounds[2]->SetLineColor(kGreen+3); }
+  if (!dots && !nostack) Backgrounds[0]->SetMarkerColor(0);
+  if (dots){ Backgrounds[0]->SetMarkerColor(kAzure-3); Backgrounds[0]->SetLineColor(kAzure-3); }
+  if (dots && Backgrounds.size() > 1){ Backgrounds[1]->SetMarkerColor(kRed-7); Backgrounds[1]->SetLineColor(kRed-7); }
+  if (dots && Backgrounds.size() > 2){ Backgrounds[2]->SetMarkerColor(kTeal+4); Backgrounds[2]->SetLineColor(kTeal+4); }
   if (dots && Backgrounds.size() > 3){ Backgrounds[3]->SetMarkerColor(kOrange+7); Backgrounds[3]->SetLineColor(kOrange+7); }
 
   //Minimum and maximum
@@ -737,6 +737,7 @@ void dataMCplotMaker(TH1F* Data_in, std::vector <std::pair <TH1F*, TH1F*> > Back
   //If linear and large numbers, need extra space
   if (linear && myMax > 1000) finPad[0]->SetLeftMargin(0.15);
   if (linear && myMax > 1000) finPad[1]->SetLeftMargin(0.15);
+  if (!linear) finPad[0]->SetLeftMargin(0.12); 
 
   //Y-axis titles
   float bin_width = Backgrounds[0]->GetXaxis()->GetBinWidth(1);
@@ -754,10 +755,11 @@ void dataMCplotMaker(TH1F* Data_in, std::vector <std::pair <TH1F*, TH1F*> > Back
   if (xAxisOverride[0] == '\0' && showXaxisUnit == 0) stack->GetXaxis()->SetTitle(Form("%s", xAxisLabel.c_str()));
   if (xAxisOverride[0] == '\0' && showXaxisUnit == 1) stack->GetXaxis()->SetTitle(Form("%s (%s)", xAxisLabel.c_str(), xAxisUnit.c_str()));
   if (xAxisOverride[0] != '\0' || xAxisOverrideGiven) stack->GetXaxis()->SetTitle(Form("%s", xAxisOverride.c_str()));
-  if (!noData && !noRatioPlot) stack->GetYaxis()->SetTitleOffset(1.5+yTitleOffset_);
+  if (!noData && !noRatioPlot &&  linear) stack->GetYaxis()->SetTitleOffset(1.5+yTitleOffset_);
+  if (!noData && !noRatioPlot && !linear) stack->GetYaxis()->SetTitleOffset(1.2+yTitleOffset_);
   if ((noData || noRatioPlot) && !linear) stack->GetYaxis()->SetTitleOffset(1.4+yTitleOffset_);
-  if ((noData || noRatioPlot) &&  linear) stack->GetYaxis()->SetTitleOffset(1.6+yTitleOffset_);
-  if (linear && myMax > 1000) stack->GetYaxis()->SetTitleOffset(0.5+stack->GetYaxis()->GetTitleOffset()); 
+  if ((noData || noRatioPlot) &&  linear && myMax > 1000) stack->GetYaxis()->SetTitleOffset(2.1+yTitleOffset_);
+  if ((noData || noRatioPlot) &&  linear && myMax < 1000) stack->GetYaxis()->SetTitleOffset(1.5+yTitleOffset_);
 
   //Title size
   if (largeLabels){
@@ -803,7 +805,7 @@ void dataMCplotMaker(TH1F* Data_in, std::vector <std::pair <TH1F*, TH1F*> > Back
     }
   }
 
-  //if (Background_systs.size() == 0) gStyle->SetErrorX(0.001); //why the fuck is this even here?
+  if (Background_systs.size() == 0) gStyle->SetErrorX(0.001); //why the fuck is this even here?
 
   //Stupid dots thing
   if (dots && myMin == 0){
@@ -818,13 +820,13 @@ void dataMCplotMaker(TH1F* Data_in, std::vector <std::pair <TH1F*, TH1F*> > Back
   }
 
   //Try this
-  if (!dots && !nostack) Backgrounds[0]->SetMarkerColor(0); 
-  if (dots){ Backgrounds[0]->SetMarkerColor(kBlue); Backgrounds[0]->SetLineColor(kBlue); }
-  if (dots && Backgrounds.size() > 1){ Backgrounds[1]->SetMarkerColor(kRed); Backgrounds[1]->SetLineColor(kRed); }
-  if (dots && Backgrounds.size() > 2){ Backgrounds[2]->SetMarkerColor(kGreen+3); Backgrounds[2]->SetLineColor(kGreen+3); }
+  if (!dots && !nostack) Backgrounds[0]->SetMarkerColor(0);
+  if (dots){ Backgrounds[0]->SetMarkerColor(kAzure+7); Backgrounds[0]->SetLineColor(kAzure+7); }
+  if (dots && Backgrounds.size() > 1){ Backgrounds[1]->SetMarkerColor(kRed-7); Backgrounds[1]->SetLineColor(kRed-7); }
+  if (dots && Backgrounds.size() > 2){ Backgrounds[2]->SetMarkerColor(kGreen-3); Backgrounds[2]->SetLineColor(kGreen-3); }
   if (dots && Backgrounds.size() > 3){ Backgrounds[3]->SetMarkerColor(kOrange+7); Backgrounds[3]->SetLineColor(kOrange+7); }
-  if (dots && Backgrounds.size() > 4){ Backgrounds[4]->SetMarkerColor(kMagenta+2); Backgrounds[4]->SetLineColor(kMagenta+2); }
-  if (dots && Backgrounds.size() > 5){ Backgrounds[5]->SetMarkerColor(kYellow-4); Backgrounds[5]->SetLineColor(kYellow-4); }
+  if (dots && Backgrounds.size() > 4){ Backgrounds[4]->SetMarkerColor(kMagenta-7); Backgrounds[4]->SetLineColor(kMagenta-7); }
+  if (dots && Backgrounds.size() > 5){ Backgrounds[5]->SetMarkerColor(kOrange-4); Backgrounds[5]->SetLineColor(kOrange-4); }
 
   if (bkgd_width > 1){
     for (unsigned int i = 0; i < Backgrounds.size(); i++){
@@ -879,8 +881,9 @@ void dataMCplotMaker(TH1F* Data_in, std::vector <std::pair <TH1F*, TH1F*> > Back
   if (Background_systs.size() > 0){
     background_syst = new TH1F(*Background_systs[0]); 
     if (!background_syst->GetSumw2N()) background_syst->Sumw2(); 
-    background_syst->SetFillColor(kGray+1); //should have an option for these?
-    background_syst->SetFillStyle(3644); 
+    background_syst->SetFillColor(kGray+1); 
+    background_syst->SetFillStyle(systFillStyle); 
+    if (systBlack) background_syst->SetFillColor(kBlack); //should have a better option for these?
   }
   if (Backgrounds.size() > 0){
     background_sum = new TH1F(*Backgrounds[0]); 
@@ -902,7 +905,7 @@ void dataMCplotMaker(TH1F* Data_in, std::vector <std::pair <TH1F*, TH1F*> > Back
       background_syst->SetBinError(i, sqrt( pow(err, 2) + pow(stat, 2) ) ); 
     }
   }
-  if (background_syst != 0) background_syst->Draw("E2 SAME");
+  if (background_syst != 0 && do_background_syst == true) background_syst->Draw("E2 SAME");
 
   //Redraw the data on top of the shaded area
   if(noErrBars) Data->Draw("PSAME");
@@ -986,7 +989,7 @@ void dataMCplotMaker(TH1F* Data_in, std::vector <std::pair <TH1F*, TH1F*> > Back
   tex->SetTextSize(0.035);
   float title_y_coord = 0.88;
   if (noData || noRatioPlot) title_y_coord = 0.78; 
-  if (outOfFrame && noRatioPlot) title_y_coord += 0.09;
+  if (outOfFrame && (noData || noRatioPlot)) title_y_coord += 0.09;
   if (colorTitle) title = Form("#color[4]{%s}",title);
   if (noTextBetweenPads) title_y_coord-=0.02;
   tex->DrawLatex(0.16,title_y_coord,title);
@@ -995,18 +998,76 @@ void dataMCplotMaker(TH1F* Data_in, std::vector <std::pair <TH1F*, TH1F*> > Back
   if ( !noData && !noRatioPlot && doCounts) tex->DrawLatex(0.16,yCounts,Form("%i (Data), %0.1f (MC)",nEventsData,nEventsMC)); 
   if (( noData || noRatioPlot) && doCounts) tex->DrawLatex(0.16,yCounts,Form("%0.1f (MC)",nEventsMC)); 
 
+  //Draw a box (convert a string into coordinates to make 2 hlines and 2 vlines)
+  TString box(boxLines);
+  if(box.CountChar(',') == 3) {
+      TObjArray *tokens = box.Tokenize(",");
+      std::string xLeft = ((TObjString *)(tokens->At(0)))->String().Data();
+      std::string yTop = ((TObjString *)(tokens->At(1)))->String().Data();
+      std::string xRight = ((TObjString *)(tokens->At(2)))->String().Data();
+      std::string yBottom = ((TObjString *)(tokens->At(3)))->String().Data();
+      hLines.push_back(yTop + "," + xLeft + "," + xRight);
+      hLines.push_back(yBottom + "," + xLeft + "," + xRight);
+      vLines.push_back(xLeft + "," + yBottom + "," + yTop);
+      vLines.push_back(xRight + "," + yBottom + "," + yTop);
+  }
+
+
   //Draw vertical lines
   c0.Update();
-  for (unsigned int i = 0; i < vLines.size(); i++) DrawVerticalLine(vLines[i]); 
+  for (unsigned int i = 0; i < vLines.size(); i++) {
+    // extract yposition,minx,maxx (last two are optional)
+    float xPos;
+    float yMin = Backgrounds.size() > 0 ? Backgrounds[0]->GetXaxis()->GetXmin() : Signals[0]->GetXaxis()->GetXmin();
+    float yMax = Backgrounds.size() > 0 ? Backgrounds[0]->GetXaxis()->GetXmax() : Signals[0]->GetXaxis()->GetXmax();
+
+    TString s1(vLines[i]);
+    if (s1.CountChar(',') == 0) {
+      xPos = s1.Atof();
+      DrawVerticalLine(xPos); 
+    } else if (s1.CountChar(',') == 2) {
+      TObjArray *tokens = s1.Tokenize(",");
+      xPos = (((TObjString *)(tokens->At(0)))->String()).Atof();
+      yMin = (((TObjString *)(tokens->At(1)))->String()).Atof();
+      yMax = (((TObjString *)(tokens->At(2)))->String()).Atof();
+
+      TLine linecut;
+      c0.Update();
+      linecut.SetLineStyle(2);
+      linecut.SetLineWidth(2);
+      linecut.SetLineColor(kGray+2);
+      linecut.DrawLine(xPos, yMin, xPos, yMax);
+    } else {
+      std::cout << "You goofed with your vLine syntax. Either specify xpos,miny,maxy or just xpos" << std::endl;
+      continue;
+    }
+  }
 
   //Draw Horizontal lines
   for (unsigned int i = 0; i < hLines.size(); i++){
+    // extract yposition,minx,maxx (last two are optional)
+    float yPos;
+    float xMin = Backgrounds.size() > 0 ? Backgrounds[0]->GetXaxis()->GetXmin() : Signals[0]->GetXaxis()->GetXmin();
+    float xMax = Backgrounds.size() > 0 ? Backgrounds[0]->GetXaxis()->GetXmax() : Signals[0]->GetXaxis()->GetXmax();
+
+    TString s1(hLines[i]);
+    if (s1.CountChar(',') == 0) {
+      yPos = s1.Atof();
+    } else if (s1.CountChar(',') == 2) {
+      TObjArray *tokens = s1.Tokenize(",");
+      yPos = (((TObjString *)(tokens->At(0)))->String()).Atof();
+      xMin = (((TObjString *)(tokens->At(1)))->String()).Atof();
+      xMax = (((TObjString *)(tokens->At(2)))->String()).Atof();
+    } else {
+      std::cout << "You goofed with your hLine syntax. Either specify ypos,minx,maxx or just ypos" << std::endl;
+      continue;
+    }
     TLine linecut;
     c0.Update();
     linecut.SetLineStyle(2);
     linecut.SetLineWidth(2);
     linecut.SetLineColor(kGray+2);
-    linecut.DrawLine(Backgrounds.size() > 0 ? Backgrounds[0]->GetXaxis()->GetXmin() : Signals[0]->GetXaxis()->GetXmin(), hLines[i], Backgrounds.size() > 0 ? Backgrounds[0]->GetXaxis()->GetXmax() : Signals[0]->GetXaxis()->GetXmax(), hLines[i]);
+    linecut.DrawLine(xMin, yPos, xMax, yPos);
   }
 
   //Draw header
@@ -1021,7 +1082,9 @@ void dataMCplotMaker(TH1F* Data_in, std::vector <std::pair <TH1F*, TH1F*> > Back
       xpos = 0.92;
       type_y = 0.91;
     }
-    if (!noLumi) tex->DrawLatex(xpos,type_y,Form("%.1f %s^{-1} (%s TeV)", stof(lumi), lumiUnit.c_str(), energy.c_str()));
+    if (!noLumi && lumiPrec == 2) tex->DrawLatex(xpos,type_y,Form("%.2f %s^{-1} (%s TeV)", stof(lumi), lumiUnit.c_str(), energy.c_str()));
+    if (!noLumi && lumiPrec == 1) tex->DrawLatex(xpos,type_y,Form("%.1f %s^{-1} (%s TeV)", stof(lumi), lumiUnit.c_str(), energy.c_str()));
+    if (!noLumi && lumiPrec == 0) tex->DrawLatex(xpos,type_y,Form("%.0f %s^{-1} (%s TeV)", stof(lumi), lumiUnit.c_str(), energy.c_str()));
     if ( noLumi) tex->DrawLatex(xpos,type_y,Form("           (%s TeV)", energy.c_str()));
     tex->SetTextAlign(11);
   }
@@ -1041,7 +1104,7 @@ void dataMCplotMaker(TH1F* Data_in, std::vector <std::pair <TH1F*, TH1F*> > Back
 	xcoord = 0.16;
       }
       tex->DrawLatex(xcoord,type_y-ycoord, "#font[61]{#scale[1.25]{CMS}}");
-      xcoord = .27+xshift;
+      xcoord = outOfFrame ? .27+xshift : .73+xshift;
       if (type!="") tex->DrawLatex(xcoord,type_y-ycoord, Form("#font[52]{%s}",type.c_str()));
     }
   }
@@ -1096,7 +1159,12 @@ void dataMCplotMaker(TH1F* Data_in, std::vector <std::pair <TH1F*, TH1F*> > Back
       else if (Background_systs.size() > 0) background_syst_ratio->SetBinError(ib, 0); 
       if (Background_systs.size() > 0) background_syst_ratio->SetBinContent(ib, 1); 
     }
-    if (!ratioLine) err_hist->SetMarkerStyle(20);
+    if (!ratioLine) {
+      err_hist->SetMarkerStyle(20);
+      if (err_hist->GetNbinsX() > 150) err_hist->SetMarkerSize(0.5);
+      else if (err_hist->GetNbinsX() > 100) err_hist->SetMarkerSize(0.6);
+      else if (err_hist->GetNbinsX() > 60) err_hist->SetMarkerSize(0.8);
+    }
     if(noErrBars && ratioLine) err_hist->Draw("HIST");
     else if(noErrBars) err_hist->Draw("P");
     else err_hist->Draw("PE");
@@ -1110,7 +1178,7 @@ void dataMCplotMaker(TH1F* Data_in, std::vector <std::pair <TH1F*, TH1F*> > Back
     line.SetLineWidth(2);
     int maxbin = err_hist->GetXaxis()->GetNbins();
     line.DrawLine(err_hist->GetXaxis()->GetBinLowEdge(1),1,err_hist->GetXaxis()->GetBinUpEdge(maxbin),1);
-    if (Background_systs.size() > 0) background_syst_ratio->Draw("E2 SAME");//draw the shaded area before the dots
+    if (do_background_syst && Background_systs.size() > 0) background_syst_ratio->Draw("E2 SAME");//draw the shaded area before the dots
     if(noErrBars && ratioLine) err_hist->Draw("HIST SAME");
     else if(noErrBars) err_hist->Draw("pSAME");
     else err_hist->Draw("pESAME"); 
@@ -1142,6 +1210,8 @@ void dataMCplotMaker(TH1F* Data_in, std::vector <std::pair <TH1F*, TH1F*> > Back
 //Overload function for case of no stat errors
 void dataMCplotMaker(TH1F* Data_in, std::vector <TH1F*> Backgrounds_in, std::vector <std::string> Titles, std::string titleIn, std::string title2In, std::string options_string, std::vector <TH1F*> Signals_in, std::vector <std::string> SignalTitles, std::vector <Color_t> color_input){
 
+  do_background_syst = false;
+
   //Make a null pair for each 
   std::vector< std::pair<TH1F*, TH1F*> > Backgrounds_pair_in;
   for (unsigned int i = 0; i < Backgrounds_in.size(); i++){
@@ -1159,6 +1229,8 @@ void dataMCplotMaker(TH1F* Data_in, std::vector <TH1F*> Backgrounds_in, std::vec
 }
 
 void dataMCplotMaker(TH1F* Data_in, std::vector <std::pair <TH1F*, float> > Backgrounds_in, std::vector <std::string> Titles, std::string titleIn, std::string title2In, std::string options_string, std::vector <TH1F*> Signals_in, std::vector <std::string> SignalTitles, std::vector <Color_t> color_input){
+
+  do_background_syst = true;
 
   std::vector< std::pair<TH1F*, TH1F*> > Backgrounds_pair_in;
   for (unsigned int i = 0; i < Backgrounds_in.size(); i++){
