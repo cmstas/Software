@@ -58,7 +58,7 @@ Supported flags for "options" string:
   - --xAxisVerticalBinLabels: if using xAxisBinLabels, specify vertical orientation (default is diagonal)
   - --dataName X: replace the name for "data" in the legend with the user-defined value
   - --topYaxisTitle X: change the y-axis label in the top histogram from its default of "data/MC"
-  - --type X: change the top-left label from its default of "CMS Preliminary"
+  - --type X: additional label to "CMS" on the top-left (i.e. Preliminary, Summplementary, Simulation, etc.)
   - --overrideHeader X: override the entire top line to the user-defined value
   - --energy X: change the energy from its default of 13 TeV
   - --lumi X: change the lumi from its default of 10.0 fb-1.
@@ -105,6 +105,8 @@ Supported flags for "options" string:
   - --ratio N: show the ratio plot with the denominator = the Nth background rather than the sum of backgrounds
   - --noErrBars: if by any chance you don't want the data points to have error bars (it may be annoying when error bars are too big) (effective at both main hist and err hist)
   - --compareMultiple: useful for when validating new MC.  Put the old plots under backgrounds and the new plots under signals and enable this option.  This will stack the signals and manipulate the colors so you can see the agreement for each background.  Also prints the ratio for the total.
+  - --noTextBetweenPads: bring ratio pad closer to main pad, no text in between them. All thex inside main pad. Used for SUS-15-008
+  - --poissonErrorsNoZeros: avoid showing poissonian error bars for data entries with zero yield (used for SUS-15-008)
 
 Example:
 ````
