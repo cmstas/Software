@@ -130,10 +130,14 @@ def plotRatio(h1, h2, canvas=None, ratioHist=None, xRangeUser=None, ratioTitle =
 
 
 ## plot data and stacked background hist. Arguments should be self-explanatory
-def plotDataMC(h_bkg_vec, bkg_names, h_data, title=None, subtitles=None, doRatio=True, scaleMCtoData=False, saveAs=None, 
+def plotDataMC(h_bkg_vec_, bkg_names, h_data_, title=None, subtitles=None, doRatio=True, scaleMCtoData=False, saveAs=None, 
                isLog=True, dataTitle="Data", xRangeUser=None, doPause=False, lumi=1.0, lumiUnit="fb",
                energy=13, xAxisTitle="H_{T}", xAxisUnit="GeV", userMax=None, userMin=None, doSort=False,
                doMT2Colors=False, markerSize=0.9, doOverflow=True, titleSize=0.04, subtitleSize=0.03, subLegText=None):
+
+    # make shallow copies of hists so we don't overwrite the originals
+    h_bkg_vec = [ROOT.TH1D(h) for h in h_bkg_vec_]
+    h_data = ROOT.TH1D(h_data_)
 
     ROOT.gStyle.SetOptStat(0)
      
@@ -257,6 +261,7 @@ def plotDataMC(h_bkg_vec, bkg_names, h_data, title=None, subtitles=None, doRatio
         subLegText = [subLegText]
     for s in subLegText:
         vals = (scaleFactor,int(h_data.GetEntries()))
+        print vals[0]
         s = s.replace("{datamcsf}","{0:.2f}")
         s = s.replace("{ndata}","{1:d}")
         text.SetTextFont(62)
