@@ -224,6 +224,7 @@ def plotDataMC(h_bkg_vec_, bkg_names, h_data=None, title=None, subtitles=None, d
         h_data.SetLineColor(ROOT.kBlack)
         if xRangeUser!=None:
             h_data.GetXaxis().SetRangeUser(*xRangeUser)
+        N_DATA_EVENTS = int(h_data.GetEntries()) #overflow bin breaks this for some reason, so compute before
         if doOverflow:
             utils.PutOverflowInLastBin(h_data, None if xRangeUser==None else xRangeUser[1])
 
@@ -280,7 +281,7 @@ def plotDataMC(h_bkg_vec_, bkg_names, h_data=None, title=None, subtitles=None, d
     if type(subLegText)==type(""):
         subLegText = [subLegText]
     for s in subLegText:
-        vals = (scaleFactor,int(h_data.GetEntries()))
+        vals = (scaleFactor,N_DATA_EVENTS)
         s = s.replace("{datamcsf}","{0:.2f}")
         s = s.replace("{ndata}","{1:d}")
         text.SetTextFont(62)
