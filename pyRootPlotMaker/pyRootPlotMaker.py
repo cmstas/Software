@@ -1,9 +1,7 @@
 import ROOT
 import ppmUtils as utils
 
-## plot a stacked histogram of backgrounds
-## if calling this from another function, must give it a THStack defined in the other
-## function's scope so it doesn't disappear
+## do not use this manually! call plotDataMC with no h_data argument
 def plotBackgrounds(h_bkg_vec_, bkg_names, canvas=None, stack=None, saveAs=None, xRangeUser=None, doPause=False, 
                     isLog=True, xAxisTitle="H_{T}", xAxisUnit="GeV", dataMax=0, userMax=None, userMin=None,
                     doLegend=False, doMT2Colors=False, doOverflow=True, shallowCopy=True):
@@ -138,18 +136,23 @@ def plotRatio(h1, h2, canvas=None, ratioHist=None, xRangeUser=None, ratioTitle =
 
 
 ## plot data and stacked background hist. Arguments should be self-explanatory
-def plotDataMC(h_bkg_vec_, bkg_names, h_data_, title=None, subtitles=None, doRatio=True, scaleMCtoData=False, saveAs=None, 
+def plotDataMC(h_bkg_vec_, bkg_names, h_data=None, title=None, subtitles=None, doRatio=True, scaleMCtoData=False, saveAs=None, 
                isLog=True, dataTitle="Data", xRangeUser=None, doPause=False, lumi=1.0, lumiUnit="fb", noLumi=False,
                energy=13, xAxisTitle="H_{T}", xAxisUnit="GeV", userMax=None, userMin=None, doSort=False,
                doMT2Colors=False, markerSize=0.9, doOverflow=True, titleSize=0.04, subtitleSize=0.03, subLegText=None,
                cmsText="CMS Preliminary"):
+    
+    if h_data == None:
+        doRatio = False
 
     # make shallow copies of hists so we don't overwrite the originals
     h_bkg_vec = [ROOT.TH1D() for h in h_bkg_vec_]
-    h_data = ROOT.TH1D()
     for i in range(len(h_bkg_vec_)):
         h_bkg_vec_[i].Copy(h_bkg_vec[i])
-    h_data_.Copy(h_data)
+    if h_data != None:
+        h_data_ = ROOT.TH1D()
+        h_data.Copy(h_data_)
+        h_data = h_data_  #so the arg name doesn't have underscore
 
     ROOT.gStyle.SetOptStat(0)
      
@@ -194,7 +197,7 @@ def plotDataMC(h_bkg_vec_, bkg_names, h_data_, title=None, subtitles=None, doRat
         bkg_names = bkg_names[::-1]
 
     scaleFactor = 1.0
-    if(scaleMCtoData):
+    if(h_data!=None and scaleMCtoData):
         tot_MC_integral = sum(integrals)
         data_integral = h_data.Integral(0,-1)
         scaleFactor = data_integral/tot_MC_integral
@@ -202,10 +205,11 @@ def plotDataMC(h_bkg_vec_, bkg_names, h_data_, title=None, subtitles=None, doRat
         h_bkg_vec[i].Scale(scaleFactor)
 
     dataMax = 0
-    for i in range(1,h_data.GetNbinsX()+1):
-        y = h_data.GetBinContent(i)+h_data.GetBinError(i)
-        if y>dataMax:
-            dataMax = y
+    if h_data!=None:
+        for i in range(1,h_data.GetNbinsX()+1):
+            y = h_data.GetBinContent(i)+h_data.GetBinError(i)
+            if y>dataMax:
+                dataMax = y
 
     stack = ROOT.THStack("hs","")
     plotBackgrounds(h_bkg_vec, bkg_names, canvas=pads[0], stack=stack, xRangeUser=xRangeUser, isLog=isLog, 
@@ -213,25 +217,27 @@ def plotDataMC(h_bkg_vec_, bkg_names, h_data_, title=None, subtitles=None, doRat
                     userMax=userMax, userMin=userMin, doMT2Colors=doMT2Colors, doOverflow=doOverflow)
 
     ## data
-    h_data.SetMarkerStyle(20)
-    h_data.SetMarkerSize(markerSize)
-    h_data.SetMarkerColor(ROOT.kBlack)
-    h_data.SetLineColor(ROOT.kBlack)
-    if xRangeUser!=None:
-        h_data.GetXaxis().SetRangeUser(*xRangeUser)
-    if doOverflow:
-        utils.PutOverflowInLastBin(h_data, None if xRangeUser==None else xRangeUser[1])
+    if h_data != None:
+        h_data.SetMarkerStyle(20)
+        h_data.SetMarkerSize(markerSize)
+        h_data.SetMarkerColor(ROOT.kBlack)
+        h_data.SetLineColor(ROOT.kBlack)
+        if xRangeUser!=None:
+            h_data.GetXaxis().SetRangeUser(*xRangeUser)
+        if doOverflow:
+            utils.PutOverflowInLastBin(h_data, None if xRangeUser==None else xRangeUser[1])
 
-    h_data.Draw("SAME")
+        h_data.Draw("SAME")
 
     ## legend
     leg = ROOT.TLegend(0.65,0.72,0.88,0.89)
     for i in range(len(h_bkg_vec)):
         leg.AddEntry(h_bkg_vec[-i-1],bkg_names[-i-1],"f")
-    leg.AddEntry(h_data,dataTitle)
+    if h_data != None:
+        leg.AddEntry(h_data,dataTitle)
     leg.Draw()
     
-    # handloe all of the text
+    # handle all of the text
     text = ROOT.TLatex()
     text.SetNDC(1)
     cursorX = 0.23
