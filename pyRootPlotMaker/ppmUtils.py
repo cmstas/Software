@@ -37,6 +37,9 @@ def PutOverflowInLastBin(h, xmax=None):
     h.SetBinContent(lastbin,bc1+bc2)
     h.SetBinError(lastbin,ROOT.TMath.Sqrt(be1**2+be2**2))
 
+    for i in range(lastbin+1,nb+2):
+        h.SetBinContent(i,0)
+        h.SetBinError(i,0)
 
 def SetYBounds(stack, isLog, h_bkg_vec, data_max, xRangeUser):
     xmax = None if xRangeUser==None else xRangeUser[1]

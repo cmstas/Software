@@ -4,9 +4,17 @@ import ppmUtils as utils
 ## plot a stacked histogram of backgrounds
 ## if calling this from another function, must give it a THStack defined in the other
 ## function's scope so it doesn't disappear
-def plotBackgrounds(h_bkg_vec, bkg_names, canvas=None, stack=None, saveAs=None, xRangeUser=None, doPause=False, 
+def plotBackgrounds(h_bkg_vec_, bkg_names, canvas=None, stack=None, saveAs=None, xRangeUser=None, doPause=False, 
                     isLog=True, xAxisTitle="H_{T}", xAxisUnit="GeV", dataMax=0, userMax=None, userMin=None,
-                    doLegend=False, doMT2Colors=False, doOverflow=True):
+                    doLegend=False, doMT2Colors=False, doOverflow=True, shallowCopy=True):
+
+    # make shallow copies of hists so we don't overwrite the originals
+    if shallowCopy:
+        h_bkg_vec = [ROOT.TH1D() for h in h_bkg_vec_]
+        for i in range(len(h_bkg_vec_)):
+            h_bkg_vec_[i].Copy(h_bkg_vec[i])
+    else:
+        h_bkg_vec = h_bkg_vec_
 
     if canvas==None:
         canvas = ROOT.TCanvas()
@@ -131,13 +139,17 @@ def plotRatio(h1, h2, canvas=None, ratioHist=None, xRangeUser=None, ratioTitle =
 
 ## plot data and stacked background hist. Arguments should be self-explanatory
 def plotDataMC(h_bkg_vec_, bkg_names, h_data_, title=None, subtitles=None, doRatio=True, scaleMCtoData=False, saveAs=None, 
-               isLog=True, dataTitle="Data", xRangeUser=None, doPause=False, lumi=1.0, lumiUnit="fb",
+               isLog=True, dataTitle="Data", xRangeUser=None, doPause=False, lumi=1.0, lumiUnit="fb", noLumi=False,
                energy=13, xAxisTitle="H_{T}", xAxisUnit="GeV", userMax=None, userMin=None, doSort=False,
-               doMT2Colors=False, markerSize=0.9, doOverflow=True, titleSize=0.04, subtitleSize=0.03, subLegText=None):
+               doMT2Colors=False, markerSize=0.9, doOverflow=True, titleSize=0.04, subtitleSize=0.03, subLegText=None,
+               cmsText="CMS Preliminary"):
 
     # make shallow copies of hists so we don't overwrite the originals
-    h_bkg_vec = [ROOT.TH1D(h) for h in h_bkg_vec_]
-    h_data = ROOT.TH1D(h_data_)
+    h_bkg_vec = [ROOT.TH1D() for h in h_bkg_vec_]
+    h_data = ROOT.TH1D()
+    for i in range(len(h_bkg_vec_)):
+        h_bkg_vec_[i].Copy(h_bkg_vec[i])
+    h_data_.Copy(h_data)
 
     ROOT.gStyle.SetOptStat(0)
      
@@ -197,7 +209,7 @@ def plotDataMC(h_bkg_vec_, bkg_names, h_data_, title=None, subtitles=None, doRat
 
     stack = ROOT.THStack("hs","")
     plotBackgrounds(h_bkg_vec, bkg_names, canvas=pads[0], stack=stack, xRangeUser=xRangeUser, isLog=isLog, 
-                    xAxisTitle=xAxisTitle, xAxisUnit=xAxisUnit, dataMax=dataMax, 
+                    xAxisTitle=xAxisTitle, xAxisUnit=xAxisUnit, dataMax=dataMax, shallowCopy=False,
                     userMax=userMax, userMin=userMin, doMT2Colors=doMT2Colors, doOverflow=doOverflow)
 
     ## data
@@ -244,14 +256,16 @@ def plotDataMC(h_bkg_vec_, bkg_names, h_data_, title=None, subtitles=None, doRat
         text.DrawLatex(cursorX,cursorY,s)
         cursorY -= subtitleSize + 0.01
     # lumi
-    text.SetTextAlign(31)
-    text.SetTextSize(0.035)
-    text.SetTextFont(42)
-    text.DrawLatex(0.89,0.93,"{0} {1}^{{-1}} ({2} TeV)".format(lumi, lumiUnit, energy))
+    if not noLumi:
+        text.SetTextAlign(31)
+        text.SetTextSize(0.035)
+        text.SetTextFont(42)
+        text.DrawLatex(0.89,0.93,"{0} {1}^{{-1}} ({2} TeV)".format(lumi, lumiUnit, energy))
     # CMS text
+    text.SetTextSize(0.035)
     text.SetTextAlign(11)
     text.SetTextFont(62)
-    text.DrawLatex(0.12,0.93,"CMS Preliminary")
+    text.DrawLatex(0.12,0.93,cmsText)
     #Data/MC integral ratio
     cursorX = 0.65
     cursorY = 0.71
@@ -261,7 +275,6 @@ def plotDataMC(h_bkg_vec_, bkg_names, h_data_, title=None, subtitles=None, doRat
         subLegText = [subLegText]
     for s in subLegText:
         vals = (scaleFactor,int(h_data.GetEntries()))
-        print vals[0]
         s = s.replace("{datamcsf}","{0:.2f}")
         s = s.replace("{ndata}","{1:d}")
         text.SetTextFont(62)
