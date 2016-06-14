@@ -140,7 +140,7 @@ def plotDataMC(h_bkg_vec_, bkg_names, h_data=None, title=None, subtitles=None, d
                isLog=True, dataTitle="Data", xRangeUser=None, doPause=False, lumi=1.0, lumiUnit="fb", noLumi=False,
                energy=13, xAxisTitle="H_{T}", xAxisUnit="GeV", userMax=None, userMin=None, doSort=False,
                doMT2Colors=False, markerSize=0.9, doOverflow=True, titleSize=0.04, subtitleSize=0.03, subLegText=None,
-               cmsText="CMS Preliminary"):
+               cmsText="CMS Preliminary", doBkgError=False):
     
     if h_data == None:
         doRatio = False
@@ -215,6 +215,16 @@ def plotDataMC(h_bkg_vec_, bkg_names, h_data=None, title=None, subtitles=None, d
     plotBackgrounds(h_bkg_vec, bkg_names, canvas=pads[0], stack=stack, xRangeUser=xRangeUser, isLog=isLog, 
                     xAxisTitle=xAxisTitle, xAxisUnit=xAxisUnit, dataMax=dataMax, shallowCopy=False,
                     userMax=userMax, userMin=userMin, doMT2Colors=doMT2Colors, doOverflow=doOverflow)
+
+    if doBkgError:
+        h_err = ROOT.TH1D()
+        h_bkg_vec[0].Copy(h_err)
+        for i in range(1,len(h_bkg_vec)):
+            h_err.Add(h_bkg_vec[i])
+        h_err.SetFillStyle(3001)
+        h_err.SetFillColor(ROOT.kBlack)
+        h_err.Draw("E2SAME")
+
 
     ## data
     if h_data != None:
