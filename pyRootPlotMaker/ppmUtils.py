@@ -4,10 +4,10 @@ def GetMT2Color(sample):
     
     if 'Top' in sample: return 855
     if 'W+Jets' in sample: return 417
-    if 'zinv' in sample: return 418
     if 'QCD' in sample: return 401
     if 'Prompt' in sample: return 18
-    if 'Z(#font[12]{ll})+Jets' in sample: return 430
+    if 'Z(#font[12]{ll})' in sample: return 430
+    if 'Z(#nu#nu)' in sample: return 418
     if 'Frag' in sample: return 38
     if 'Fake' in sample: return 46
 

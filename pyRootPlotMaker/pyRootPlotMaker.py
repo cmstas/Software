@@ -52,6 +52,7 @@ def plotBackgrounds(h_bkg_vec_, bkg_names, canvas=None, stack=None, saveAs=None,
         stack.GetXaxis().SetTitle(xAxisTitle + " [{0}]".format(xAxisUnit))
         stack.GetYaxis().SetTitle("Events / {0} GeV".format(h_bkg_vec[0].GetXaxis().GetBinWidth(1)))
     stack.GetYaxis().SetTitleOffset(1.2)
+    stack.GetXaxis().SetTitleOffset(1.1)
 
     #utils.SetYBounds(stack, isLog, stack.GetMaximum(), stack.GetMinimum(), dataMax)
     utils.SetYBounds(stack, isLog, h_bkg_vec, dataMax, xRangeUser)
@@ -221,8 +222,8 @@ def plotDataMC(h_bkg_vec_, bkg_names, h_data=None, title=None, subtitles=None, d
         h_bkg_vec[0].Copy(h_err)
         for i in range(1,len(h_bkg_vec)):
             h_err.Add(h_bkg_vec[i])
-        h_err.SetFillStyle(3001)
-        h_err.SetFillColor(ROOT.kBlack)
+        h_err.SetFillStyle(3144)
+        h_err.SetFillColor(ROOT.kGray+2)
         h_err.Draw("E2SAME")
 
 
@@ -265,13 +266,12 @@ def plotDataMC(h_bkg_vec_, bkg_names, h_data=None, title=None, subtitles=None, d
         subtitles=[]
     if type(subtitles)==type(""):
         subtitles = [subtitles]
-    # subtitle
     for s in subtitles:
         text.SetTextAlign(13)
         text.SetTextFont(42)
         text.SetTextSize(0.03)
         text.DrawLatex(cursorX,cursorY,s)
-        cursorY -= subtitleSize + 0.01
+        cursorY -= subtitleSize + 0.015
     # lumi
     if not noLumi:
         text.SetTextAlign(31)
