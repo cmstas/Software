@@ -24,6 +24,18 @@ def GetLastBin(h, xmax=None):
         lastbin = nb
     return lastbin
 
+def GetFirstBin(h, xmin=None):
+    nb = h.GetNbinsX()
+    if xmin!=None:
+        firstbin=1
+        while h.GetXaxis().GetBinUpEdge(firstbin) <= xmin and firstbin<nb+1:
+            firstbin += 1
+        if firstbin == nb+1:
+            raise Exception("ERROR [pyRootPlotMaker]: xmin is out of histogram range!")
+    else:
+        firstbin=1
+    return firstbin
+
 def PutOverflowInLastBin(h, xmax=None):
 
     nb = h.GetNbinsX()
@@ -42,11 +54,13 @@ def PutOverflowInLastBin(h, xmax=None):
         h.SetBinError(i,0)
 
 def SetYBounds(stack, isLog, h_bkg_vec, data_max, xRangeUser):
+    xmin = None if xRangeUser==None else xRangeUser[0]
     xmax = None if xRangeUser==None else xRangeUser[1]
+    firstbin = GetFirstBin(h_bkg_vec[0], xmin)
     lastbin = GetLastBin(h_bkg_vec[0], xmax)
     tmax = 0
     tmin = float("inf")
-    for i in range(1,lastbin+1):
+    for i in range(firstbin,lastbin+1):
         c = sum([h.GetBinContent(i) for h in h_bkg_vec])
         e = ROOT.TMath.Sqrt(sum([h.GetBinError(i)**2 for h in h_bkg_vec]))
         if c+e > tmax:

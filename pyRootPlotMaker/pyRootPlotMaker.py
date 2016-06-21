@@ -54,7 +54,6 @@ def plotBackgrounds(h_bkg_vec_, bkg_names, canvas=None, stack=None, saveAs=None,
     stack.GetYaxis().SetTitleOffset(1.2)
     stack.GetXaxis().SetTitleOffset(1.1)
 
-    #utils.SetYBounds(stack, isLog, stack.GetMaximum(), stack.GetMinimum(), dataMax)
     utils.SetYBounds(stack, isLog, h_bkg_vec, dataMax, xRangeUser)
     if userMax!=None:
         stack.SetMaximum(userMax)
@@ -222,8 +221,8 @@ def plotDataMC(h_bkg_vec_, bkg_names, h_data=None, title=None, subtitles=None, d
         h_bkg_vec[0].Copy(h_err)
         for i in range(1,len(h_bkg_vec)):
             h_err.Add(h_bkg_vec[i])
-        h_err.SetFillStyle(3144)
-        h_err.SetFillColor(ROOT.kGray+2)
+        h_err.SetFillStyle(3244)
+        h_err.SetFillColor(ROOT.kGray+3)
         h_err.Draw("E2SAME")
 
 
