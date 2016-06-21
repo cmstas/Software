@@ -43,14 +43,18 @@ def plotBackgrounds(h_bkg_vec_, bkg_names, canvas=None, stack=None, saveAs=None,
 
     stack.Draw("HIST")
 
+    binWidth = utils.GetBinWidth(h_bkg_vec[0])
+    if binWidth == None:  ## uneven binning
+        binWidth = 'bin'
     if xRangeUser!=None:
         stack.GetXaxis().SetRangeUser(*xRangeUser)
     if xAxisUnit==None:
         stack.GetXaxis().SetTitle(xAxisTitle)
-        stack.GetYaxis().SetTitle("Events")
     else:
         stack.GetXaxis().SetTitle(xAxisTitle + " [{0}]".format(xAxisUnit))
-        stack.GetYaxis().SetTitle("Events / {0} GeV".format(h_bkg_vec[0].GetXaxis().GetBinWidth(1)))
+        if binWidth != 'bin':
+            binWidth = str(binWidth)+ " " + xAxisUnit
+    stack.GetYaxis().SetTitle("Events / {0}".format(binWidth))
     stack.GetYaxis().SetTitleOffset(1.2)
     stack.GetXaxis().SetTitleOffset(1.1)
 

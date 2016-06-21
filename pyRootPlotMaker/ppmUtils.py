@@ -36,6 +36,13 @@ def GetFirstBin(h, xmin=None):
         firstbin=1
     return firstbin
 
+def GetBinWidth(h):
+    width = h.GetBinWidth(1)
+    for i in range(2,h.GetNbinsX()+1):
+        if h.GetBinWidth(i) != width:
+            return None
+    return width
+
 def PutOverflowInLastBin(h, xmax=None):
 
     nb = h.GetNbinsX()
