@@ -292,6 +292,7 @@ void dataMCplotMaker(TH1F* Data_in, std::vector <std::pair <TH1F*, TH1F*> > Back
   bool noOutput = false;
   bool noErrBars = false;
   bool noBlackLines = false;
+  bool darkColorLines = false;
   bool histoErrors = false;
   bool legendBox = false;
   bool xAxisOverrideGiven = false;  
@@ -325,6 +326,7 @@ void dataMCplotMaker(TH1F* Data_in, std::vector <std::pair <TH1F*, TH1F*> > Back
     else if (Options[i].find("preserveBackgroundOrder") < Options[i].length()) preserveBackgroundOrder = 1; 
     else if (Options[i].find("systFillStyle") < Options[i].length()) systFillStyle = atoi( getString(Options[i], "systFillStyle").c_str() );
     else if (Options[i].find("noBlackLines") < Options[i].length()) noBlackLines = 1; 
+    else if (Options[i].find("darkColorLines") < Options[i].length()) darkColorLines = 1; 
     else if (Options[i].find("noStack") < Options[i].length()) nostack = 1; 
     else if (Options[i].find("lumiUnit") < Options[i].length()) lumiUnit = getString(Options[i], "lumiUnit"); 
     else if (Options[i].find("lumiPrec") < Options[i].length()) lumiPrec = atoi( getString(Options[i], "lumiPrec").c_str() );
@@ -527,7 +529,7 @@ void dataMCplotMaker(TH1F* Data_in, std::vector <std::pair <TH1F*, TH1F*> > Back
   }
   //(d) Otherwise, default scheme for no signals
   if (color_input.size() == 0 && use_signals == 0){
-    Colors.push_back(kSpring-6);
+    Colors.push_back(kSpring-5);
     Colors.push_back(kAzure+7);
     if (!nostack) Colors.push_back(kRed-7);
     Colors.push_back(kOrange-2);
@@ -683,6 +685,7 @@ void dataMCplotMaker(TH1F* Data_in, std::vector <std::pair <TH1F*, TH1F*> > Back
       if (!nostack) Backgrounds[i]->SetFillColor(Colors[i]);
       Backgrounds[i]->SetMarkerColor(Colors[i]);
       if (noBlackLines || nostack) Backgrounds[i]->SetLineColor(Colors[i]);
+      if (darkColorLines) Backgrounds[i]->SetLineColor(TColor::GetColorDark(Colors[i]));
       else Backgrounds[i]->SetLineColor(kBlack);
       Backgrounds[i]->SetLineWidth(Backgrounds[i]->GetLineWidth()/1.5);
       if (nostack && normalize) Backgrounds[i]->Scale(1.0/Backgrounds[i]->Integral());
