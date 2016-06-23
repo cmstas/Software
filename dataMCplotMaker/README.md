@@ -79,6 +79,7 @@ Supported flags for "options" string:
   - --preserveBackgroundOrder: to keep the backgrounds in the order you specified, rather than putting the smallest backgrounds on the bottom
   - --noOverflow: do not make the last bin an overflow bin (important if your last bin is already an overflow bin).  Also underflow.
   - --noBlackLines: don't put a black line between the various backgrounds
+  - --noColorLines: make the black line a darker variant of the fill color
   - --vLine X: insert a vertical line where the x-axis = X; alternatively to only draw a part of the line, you can do --vLine xpos,ymin,ymax
   - --hLine X: insert a horizontal line where the y-axis = X; alternatively, can do --hLine ypos,xmin,xmax
   - --box xleft,ytop,xright,ybottom: draws a box between top left and bottom right coordinates
@@ -90,6 +91,7 @@ Supported flags for "options" string:
   - --legendRight X: move the legend to the right by X (number from 0 to 1; you probably want around 0.05), negative numbers to move it to the left
   - --legendTextSize X: change the legend text size from its default value of 0.035
   - --legendBox: put stupid box around legend
+  - --legendCounts: show counts in brackets next to entries in the legend
   - --largeLabel: use larger legend and axis label size
   -- --legendTaller X: increase legend size by X (only when using legendBox)
   -- --legendWider X: increase legend size by X (only when using legendBox)
