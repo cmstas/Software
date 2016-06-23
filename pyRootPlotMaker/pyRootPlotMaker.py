@@ -133,7 +133,7 @@ def plotRatio(h1, h2, canvas=None, ratioHist=None, xRangeUser=None, ratioTitle =
 def plotDataMC(h_bkg_vec, bkg_names, h_data, title=None, subtitles=None, doRatio=True, scaleMCtoData=False, saveAs=None, 
                isLog=True, dataTitle="Data", xRangeUser=None, doPause=False, lumi=1.0, lumiUnit="fb",
                energy=13, xAxisTitle="H_{T}", xAxisUnit="GeV", userMax=None, userMin=None, doSort=False,
-               doMT2Colors=False, markerSize=0.9, doOverflow=True, titleSize=0.04, subtitleSize=0.03, subLegText=None):
+               doMT2Colors=False, markerSize=0.9, doOverflow=True, titleSize=0.04, subtitleSize=0.03, subLegText=None, functions=[]):
 
     ROOT.gStyle.SetOptStat(0)
      
@@ -207,6 +207,11 @@ def plotDataMC(h_bkg_vec, bkg_names, h_data, title=None, subtitles=None, doRatio
         utils.PutOverflowInLastBin(h_data, None if xRangeUser==None else xRangeUser[1])
 
     h_data.Draw("SAME")
+
+    ## functions
+    for function in functions:
+        function.Draw("SAME")
+
 
     ## legend
     leg = ROOT.TLegend(0.65,0.72,0.88,0.89)

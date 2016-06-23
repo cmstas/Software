@@ -180,6 +180,17 @@ void singlePlotMaker(TH1F* h1, std::string title, std::string options_string) {
     dataMCplotMaker(null, Backgrounds, Titles, title, "", options_string);
 }
 
+void singleComparisonMaker(TH1F* h1, TH1F* h2, std::string title, std::string options_string) {
+    if(h1->GetEntries() < 1) {
+        std::cout << "Plot with title " << title << " is empty. Not drawing." << std::endl; return;
+    }
+    std::vector <TH1F*> Backgrounds;
+    std::vector <std::string> Titles;
+    Backgrounds.push_back(h2);
+    Titles.push_back(title);
+    dataMCplotMaker(h1, Backgrounds, Titles, title, "", options_string);
+}
+
 void dataMCplotMaker(TH1F* Data_in, std::vector <std::pair <TH1F*, TH1F*> > Backgrounds_pair_in, std::vector <std::string> Titles, std::string titleIn, std::string title2In, std::string options_string, std::vector <TH1F*> Signals_in, std::vector <std::string> SignalTitles, std::vector <Color_t> color_input){
 
   //Copy inputs
@@ -232,6 +243,7 @@ void dataMCplotMaker(TH1F* Data_in, std::vector <std::pair <TH1F*, TH1F*> > Back
   bool normalize = 0;
   bool doOverflow = 1;
   bool doCounts = 0;
+  bool legendCounts = 0;
   bool showXaxisUnit = 1;
   bool noType = false;
   bool colorTitle = false;
@@ -270,6 +282,7 @@ void dataMCplotMaker(TH1F* Data_in, std::vector <std::pair <TH1F*, TH1F*> > Back
   bool percentageInBox = false;
   bool errHistAtBottom = false;
   std::vector<int> percent;
+  std::vector<int> counts;
   std::string datacolor = "";
   std::string ratiocolor = "";
   bool noOutput = false;
@@ -319,6 +332,7 @@ void dataMCplotMaker(TH1F* Data_in, std::vector <std::pair <TH1F*, TH1F*> > Back
     else if (Options[i].find("noLegend") < Options[i].length()) noLegend = 1; 
     else if (Options[i].find("noOverflow") < Options[i].length()) doOverflow = 0; 
     else if (Options[i].find("doCounts") < Options[i].length()) doCounts = 1; 
+    else if (Options[i].find("legendCounts") < Options[i].length()) legendCounts = 1; 
     else if (Options[i].find("noType") < Options[i].length()) noType = 1; 
     else if (Options[i].find("colorTitle") < Options[i].length()) colorTitle = 1; 
     else if (Options[i].find("noXaxisUnit") < Options[i].length()) showXaxisUnit = 0; 
@@ -505,7 +519,7 @@ void dataMCplotMaker(TH1F* Data_in, std::vector <std::pair <TH1F*, TH1F*> > Back
   }
   //(d) Otherwise, default scheme for no signals
   if (color_input.size() == 0 && use_signals == 0){
-    Colors.push_back(kSpring-5);
+    Colors.push_back(kSpring-6);
     Colors.push_back(kAzure+7);
     if (!nostack) Colors.push_back(kRed-7);
     Colors.push_back(kOrange-2);
@@ -796,6 +810,13 @@ void dataMCplotMaker(TH1F* Data_in, std::vector <std::pair <TH1F*, TH1F*> > Back
     }
   }
 
+  //Show counts
+  if(legendCounts) {
+    for(unsigned int i=0; i<Backgrounds.size(); i++){
+      counts.push_back(Backgrounds[i]->Integral());
+    }
+  }
+
   if (Background_systs.size() == 0) gStyle->SetErrorX(0.001); //why the fuck is this even here?
 
   //Stupid dots thing
@@ -909,8 +930,10 @@ void dataMCplotMaker(TH1F* Data_in, std::vector <std::pair <TH1F*, TH1F*> > Back
   else leg = new TLegend(0.7+legendRight,0.59+legendUp,0.92+legendRight+legendWider_,0.87+legendUp+legendTaller_);
   leg->SetTextSize(legendTextSize);
   leg->SetTextFont(42);
-  if (!noData && !ratioOnly ) leg->AddEntry(Data, dataName.c_str(), "lep");
+  if (!noData && !ratioOnly && !legendCounts) leg->AddEntry(Data, dataName.c_str(), "lep");
+  if (!noData && !ratioOnly && legendCounts) leg->AddEntry(Data, Form("%s [%i]",dataName.c_str(),(int)(Data->GetEntries())), "lep");
   if (showPercentage) for (int i = Titles.size()-1; i > -1; i--) Titles[i] =  Form("%s [%i%%]", Titles[i].c_str(), percent[i]);
+  if (legendCounts) for (int i = Titles.size()-1; i > -1; i--) Titles[i] =  Form("%s [%i]", Titles[i].c_str(), counts[i]);
   if (!dots && !nostack) for (int i = Titles.size()-1; i > -1; i--) leg->AddEntry(Backgrounds[i], Titles[i].c_str(), "f");
   if (dots || nostack) for (int i = Titles.size()-1; i > -1; i--) leg->AddEntry(Backgrounds[i], Titles[i].c_str(), "L");
   if (use_signals && !compareMultiple) for (int i = SignalTitles.size()-1; i > -1; i--) leg->AddEntry(Signals[i], SignalTitles[i].c_str(), "P");

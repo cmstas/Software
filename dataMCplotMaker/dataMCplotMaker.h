@@ -27,5 +27,7 @@ void dataMCplotMaker(TH1F* Data_in, std::vector <std::pair <TH1F*, float> > Back
 //Quick wrapper
 void singlePlotMaker(TH1F* h1, std::string title="", std::string options_string="");
 
+//Quick wrapper
+void singleComparisonMaker(TH1F* h1, TH1F* h2, std::string title="", std::string options_string="");
 
 #endif
