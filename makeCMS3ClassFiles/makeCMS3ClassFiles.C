@@ -269,9 +269,9 @@ void makeHeaderFile(TFile *f, const string& treeName, bool paranoid, const strin
                 }
             } else {
                 if(title.EndsWith("/i"))
-                    headerf << "\tunsigned int" << aliasname << "_;" << endl;
+                    headerf << "\tunsigned int " << aliasname << "_;" << endl;
                 if(title.EndsWith("/l"))
-                    headerf << "\tunsigned long long" << aliasname << "_;" << endl;
+                    headerf << "\tunsigned long long " << aliasname << "_;" << endl;
                 if(title.EndsWith("/F"))
                     headerf << "\tfloat    " << aliasname << "_;" << endl;
                 if(title.EndsWith("/I"))

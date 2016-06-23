@@ -59,7 +59,7 @@ Supported flags for "options" string:
   - --xAxisVerticalBinLabels: if using xAxisBinLabels, specify vertical orientation (default is diagonal)
   - --dataName X: replace the name for "data" in the legend with the user-defined value
   - --topYaxisTitle X: change the y-axis label in the top histogram from its default of "data/MC"
-  - --type X: change the top-left label from its default of "CMS Preliminary"
+  - --type X: additional label to "CMS" on the top-left (i.e. Preliminary, Summplementary, Simulation, etc.)
   - --overrideHeader X: override the entire top line to the user-defined value
   - --energy X: change the energy from its default of 13 TeV
   - --lumi X: change the lumi from its default of 10.0 fb-1.
@@ -109,6 +109,8 @@ Supported flags for "options" string:
   - --systFillStyle: change the fill style of the systematics, for example to 3005
   - --systBlack: change the color of the syst errors to black
   - --showZeroRatios: show the ratio plots as zero when the bin is empty.  
+  - --noTextBetweenPads: bring ratio pad closer to main pad, no text in between them. All thex inside main pad. Used for SUS-15-008
+  - --poissonErrorsNoZeros: avoid showing poissonian error bars for data entries with zero yield (used for SUS-15-008)
 
 Example:
 ````
