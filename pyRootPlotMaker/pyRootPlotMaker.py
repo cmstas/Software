@@ -43,20 +43,22 @@ def plotBackgrounds(h_bkg_vec_, bkg_names, canvas=None, stack=None, saveAs=None,
 
     stack.Draw("HIST")
 
-    binWidth = utils.GetBinWidth(h_bkg_vec[0])
-    if binWidth == None:  ## uneven binning
-        binWidth = 'bin'
     if xRangeUser!=None:
         stack.GetXaxis().SetRangeUser(*xRangeUser)
+
+    binWidth = utils.GetBinWidth(h_bkg_vec[0])
+    if binWidth == None:  ## uneven binning
+        binWidth = 'Bin'
+
     if xAxisUnit==None:
         stack.GetXaxis().SetTitle(xAxisTitle)
     else:
         stack.GetXaxis().SetTitle(xAxisTitle + " [{0}]".format(xAxisUnit))
-        if binWidth != 'bin':
-            binWidth = str(binWidth)+ " " + xAxisUnit
+    if binWidth != 'Bin':
+        binWidth = str(round(binWidth,5)) + " " + (xAxisUnit if xAxisUnit!=None else "")
     stack.GetYaxis().SetTitle("Events / {0}".format(binWidth))
-    stack.GetYaxis().SetTitleOffset(1.2)
-    stack.GetXaxis().SetTitleOffset(1.1)
+    stack.GetYaxis().SetTitleOffset(1.4)
+    stack.GetXaxis().SetTitleOffset(1.2)
 
     utils.SetYBounds(stack, isLog, h_bkg_vec, dataMax, xRangeUser)
     if userMax!=None:
@@ -277,7 +279,7 @@ def plotDataMC(h_bkg_vec_, bkg_names, h_data=None, title=None, subtitles=None, d
     for s in subtitles:
         text.SetTextAlign(13)
         text.SetTextFont(42)
-        text.SetTextSize(0.03)
+        text.SetTextSize(subtitleSize)
         text.DrawLatex(cursorX,cursorY,s)
         cursorY -= subtitleSize + 0.015
     # lumi
