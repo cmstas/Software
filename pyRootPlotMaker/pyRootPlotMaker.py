@@ -192,7 +192,8 @@ def plotDataMC(h_bkg_vec_, bkg_names, h_data=None, title=None, subtitles=None, d
     pads[0].cd()
 
     ## MC
-    integrals = [h.Integral(0,-1) for h in h_bkg_vec]
+    int_errors = [ROOT.Double(0) for i in range(len(h_bkg_vec))]
+    integrals = [h_bkg_vec[i].IntegralAndError(0,-1,int_errors[i]) for i in range(len(h_bkg_vec))]
     if doSort:
         zipped = zip(h_bkg_vec,bkg_names)
         sorted_bkg = [x for (y,x) in sorted(zip(integrals,zipped))]
@@ -203,10 +204,14 @@ def plotDataMC(h_bkg_vec_, bkg_names, h_data=None, title=None, subtitles=None, d
         bkg_names = bkg_names[::-1]
 
     scaleFactor = 1.0
+    scaleFactorError = 0.0
     if(h_data!=None and scaleMCtoData):
+        tot_MC_error = ROOT.TMath.Sqrt(sum([x**2 for x in int_errors]))
         tot_MC_integral = sum(integrals)
-        data_integral = h_data.Integral(0,-1)
+        data_error = ROOT.Double(0)
+        data_integral = h_data.IntegralAndError(0,-1,data_error)
         scaleFactor = data_integral/tot_MC_integral
+        scaleFactorError = scaleFactor * (data_error/data_integral + tot_MC_error/tot_MC_integral)
     for i in range(len(h_bkg_vec)):
         h_bkg_vec[i].Scale(scaleFactor)
 
@@ -301,9 +306,10 @@ def plotDataMC(h_bkg_vec_, bkg_names, h_data=None, title=None, subtitles=None, d
     if type(subLegText)==type(""):
         subLegText = [subLegText]
     for s in subLegText:
-        vals = (scaleFactor,N_DATA_EVENTS)
-        s = s.replace("{datamcsf}","{0:.2f}")
-        s = s.replace("{ndata}","{1:d}")
+        vals = (N_DATA_EVENTS,scaleFactor,scaleFactorError)
+        s = s.replace("{ndata}","{0:d}")
+        s = s.replace("{datamcsf}","{1:.2f}")
+        s = s.replace("{datamcsferr}","{2:.2f}")
         text.SetTextFont(62)
         text.SetTextAlign(13)
         text.SetTextSize(0.03)

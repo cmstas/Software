@@ -2,6 +2,7 @@ import ROOT
 
 def GetMT2Color(sample):
     
+    ## if we are using nice titles
     if 'Top' in sample: return 855
     if 'W+Jets' in sample: return 417
     if 'QCD' in sample: return 401
@@ -11,6 +12,14 @@ def GetMT2Color(sample):
     if 'Frag' in sample: return 38
     if 'Fake' in sample: return 46
     if 'Lost Lepton' in sample: return 430
+
+    ## sample names
+    if 'top' in sample: return 855
+    if 'wjets' in sample: return 417
+    if 'qcd' in sample: return 401
+    if 'zinv' in sample: return 418
+    if 'dyjetsll' in sample: return 430
+    if 'gjets' in sample: return 18
 
     return ROOT.kBlack
 
