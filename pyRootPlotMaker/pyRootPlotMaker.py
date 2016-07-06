@@ -146,7 +146,7 @@ def plotDataMC(h_bkg_vec_, bkg_names, h_data=None, title=None, subtitles=None, d
                isLog=True, dataTitle="Data", xRangeUser=None, doPause=False, lumi=1.0, lumiUnit="fb", noLumi=False,
                energy=13, xAxisTitle="H_{T}", xAxisUnit="GeV", userMax=None, userMin=None, doSort=False,
                doMT2Colors=False, markerSize=0.9, doOverflow=True, titleSize=0.04, subtitleSize=0.03, subLegText=None,
-               cmsText="CMS Preliminary", doBkgError=False, functions=[]):
+               cmsText="CMS Preliminary", cmsTextSize=0.035, doBkgError=False, functions=[], legCoords=None):
     
     if h_data == None:
         doRatio = False
@@ -257,7 +257,9 @@ def plotDataMC(h_bkg_vec_, bkg_names, h_data=None, title=None, subtitles=None, d
 
 
     ## legend
-    leg = ROOT.TLegend(0.65,0.72,0.88,0.89)
+    if legCoords == None:
+        legCoords = (0.65,0.72,0.88,0.89)
+    leg = ROOT.TLegend(*legCoords)
     for i in range(len(h_bkg_vec)):
         leg.AddEntry(h_bkg_vec[-i-1],bkg_names[-i-1],"f")
     if h_data != None:
@@ -290,11 +292,11 @@ def plotDataMC(h_bkg_vec_, bkg_names, h_data=None, title=None, subtitles=None, d
     # lumi
     if not noLumi:
         text.SetTextAlign(31)
-        text.SetTextSize(0.035)
+        text.SetTextSize(cmsTextSize)
         text.SetTextFont(42)
         text.DrawLatex(0.89,0.93,"{0} {1}^{{-1}} ({2} TeV)".format(lumi, lumiUnit, energy))
     # CMS text
-    text.SetTextSize(0.035)
+    text.SetTextSize(cmsTextSize)
     text.SetTextAlign(11)
     text.SetTextFont(62)
     text.DrawLatex(0.12,0.93,cmsText)
