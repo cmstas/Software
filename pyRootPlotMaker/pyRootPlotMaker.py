@@ -80,26 +80,47 @@ def plotBackgrounds(h_bkg_vec_, bkg_names, canvas=None, stack=None, saveAs=None,
         raw_input()
 
 ## make a ratio plot. For use within the plotDataMC and plotComparison functions
-def plotRatio(h1, h2, canvas=None, ratioHist=None, xRangeUser=None, ratioTitle = "Data/MC", markerSize=0.7):
+def plotRatio(h1, h2, canvas=None, ratioHist=None, xRangeUser=None, ratioTitle = None, markerSize=0.7, 
+              doPull=False):
 
     if canvas==None:
         canvas = ROOT.TCanvas()
     if ratioHist==None:
-        ratioHist = ROOT.TH1F()
+        ratioHist = ROOT.TH1D()
+
+    if ratioTitle==None:
+        if not doPull:
+            ratioTitle = "Data/MC"
+        else:
+            ratioTitle = "Pull"
 
     canvas.cd()
 
-    h2.Copy(ratioHist)
-    ratioHist.Divide(h1)
+    if not doPull:
+        h2.Copy(ratioHist)
+        ratioHist.Divide(h1)
+    else:
+        nbins = h1.GetNbinsX()
+        h2.Copy(ratioHist)
+        for i in range(1,nbins+1):
+            diff = h2.GetBinContent(i)-h1.GetBinContent(i)
+            err = ROOT.TMath.Sqrt(h2.GetBinError(i)**2 + h1.GetBinError(i)**2)
+            ratioHist.SetBinContent(i,diff/err)
+            ratioHist.SetBinError(i,1.0)
+
     ratioHist.SetTitle("")
     #yaxis
-    ratioHist.GetYaxis().SetRangeUser(0,2)
-    ratioHist.GetYaxis().SetTitle(ratioTitle)
+    if not doPull:
+        ratioHist.GetYaxis().SetRangeUser(0,2)
+        ratioHist.GetYaxis().SetNdivisions(505)
+    else:
+        ratioHist.GetYaxis().SetRangeUser(-4,4)
+        ratioHist.GetYaxis().SetNdivisions(204,False)
+    ratioHist.GetYaxis().SetTitle(ratioTitle)        
     ratioHist.GetYaxis().SetTitleSize(0.18)
     ratioHist.GetYaxis().SetTitleOffset(0.17)
     ratioHist.GetYaxis().SetLabelSize(0.13)
     ratioHist.GetYaxis().CenterTitle()
-    ratioHist.GetYaxis().SetNdivisions(505)
     #xaxis
     ratioHist.GetXaxis().SetLabelSize(0.0)
     ratioHist.GetXaxis().SetTitle("")
@@ -109,22 +130,6 @@ def plotRatio(h1, h2, canvas=None, ratioHist=None, xRangeUser=None, ratioTitle =
     ratioHist.SetMarkerSize(markerSize)
     
     ratioHist.Draw()
-
-    # # boxes = []
-    # # colors = []
-    # # for i in range(1,ratioHist.GetNbinsX()+1):
-    # #     boxes.append(ROOT.TBox())
-    # #     try:
-    # #         sigma = (ratioHist.GetBinContent(i)-1)/ratioHist.GetBinError(i)
-    # #     except:
-    # #         sigma = 0
-    # #     s = min(abs(sigma)**2 * 0.03, 0.4)
-    # #     if sigma>0:
-    # #         colors.append(ROOT.TColor(12345+i, 1.0-s, 1.0-s, 1.0))
-    # #     else:
-    # #         colors.append(ROOT.TColor(12345+i, 1.0, 1.0-s, 1.0-s))
-    # #     boxes[-1].SetFillColor(12345+i)
-    # #     boxes[-1].DrawBox(ratioHist.GetXaxis().GetBinLowEdge(i),0.0,ratioHist.GetXaxis().GetBinUpEdge(i),1.98)
 
     #line
     line = ROOT.TLine()
@@ -136,17 +141,29 @@ def plotRatio(h1, h2, canvas=None, ratioHist=None, xRangeUser=None, ratioTitle =
     if xRangeUser!=None:
         xmin = xRangeUser[0]
         xmax = xRangeUser[1]
-    line.DrawLine(xmin,1,xmax,1)
+    if not doPull:
+        line.DrawLine(xmin,1,xmax,1)
+    else:
+        line.DrawLine(xmin,0,xmax,0)
+        line.SetLineColor(ROOT.kGray)
+        line.SetLineWidth(1)
+        line.SetLineStyle(1)
+        line.DrawLine(xmin,1,xmax,1)
+        line.DrawLine(xmin,2,xmax,2)
+        line.DrawLine(xmin,3,xmax,3)
+        line.DrawLine(xmin,-1,xmax,-1)
+        line.DrawLine(xmin,-2,xmax,-2)
+        line.DrawLine(xmin,-3,xmax,-3)
     ratioHist.Draw("SAME")
     ratioHist.Draw("SAMEAXIS")
 
 
-## plot data and stacked background hist. Arguments should be self-explanatory
+## plot data and stacked background hist. See README for argument explanations
 def plotDataMC(h_bkg_vec_, bkg_names, h_data=None, title=None, subtitles=None, doRatio=True, scaleMCtoData=False, saveAs=None, 
                isLog=True, dataTitle="Data", xRangeUser=None, doPause=False, lumi=1.0, lumiUnit="fb", noLumi=False,
                energy=13, xAxisTitle="H_{T}", xAxisUnit="GeV", userMax=None, userMin=None, doSort=False,
                doMT2Colors=False, markerSize=0.9, doOverflow=True, titleSize=0.04, subtitleSize=0.03, subLegText=None,
-               cmsText="CMS Preliminary", cmsTextSize=0.035, doBkgError=False, functions=[], legCoords=None):
+               cmsText="CMS Preliminary", cmsTextSize=0.035, doBkgError=False, functions=[], legCoords=None, doPull=False):
     
     if h_data == None:
         doRatio = False
@@ -324,13 +341,14 @@ def plotDataMC(h_bkg_vec_, bkg_names, h_data=None, title=None, subtitles=None, d
     if doRatio:
         pads[1].cd()
     
-        h1 = ROOT.TH1F()
+        h1 = ROOT.TH1D()
         h_bkg_vec[0].Copy(h1)
         for i in range(len(h_bkg_vec)-1):
             h1.Add(h_bkg_vec[i+1])
-        ratio = ROOT.TH1F()
+        ratio = ROOT.TH1D()
 
-        plotRatio(h1, h_data, canvas=pads[1], ratioHist=ratio, xRangeUser=xRangeUser, markerSize=markerSize)
+        plotRatio(h1, h_data, canvas=pads[1], ratioHist=ratio, xRangeUser=xRangeUser, markerSize=markerSize,
+                  doPull=doPull)
     
     c.Update()
     c.SetWindowSize(c.GetWw()+4, c.GetWh()+50)
