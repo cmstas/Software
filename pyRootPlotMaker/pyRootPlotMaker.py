@@ -95,6 +95,7 @@ def plotRatio(h1, h2, canvas=None, ratioHist=None, xRangeUser=None, ratioTitle =
             ratioTitle = "Pull"
 
     canvas.cd()
+    canvas.SetTicky(1)
 
     if not doPull:
         h2.Copy(ratioHist)
@@ -361,7 +362,7 @@ def plotDataMC(h_bkg_vec_, bkg_names, h_data=None, title=None, subtitles=None, d
 
 ## make a comparison plot between two histograms. Plots both histos on one axis, as well as a ratio plot
 def plotComparison(h1, h2, title="", ratioTitle="Data/MC", h1Title="MC", h2Title="Data", saveAs=None,
-                   size=(700,600), xRangeUser=None, markerSize=0.65, doPause=False):
+                   size=(700,600), xRangeUser=None, markerSize=0.65, doPause=False, isLog=True):
 
 
     ROOT.gStyle.SetOptStat(0)
@@ -373,7 +374,7 @@ def plotComparison(h1, h2, title="", ratioTitle="Data/MC", h1Title="MC", h2Title
     pads.append(ROOT.TPad("1","1",0.0,0.16,1.0,1.0))
     pads.append(ROOT.TPad("2","2",0.0,0.0,1.0,0.17))
 
-    pads[0].SetLogy()
+    pads[0].SetLogy(isLog)
     pads[0].SetTopMargin(0.07)
     pads[0].SetLeftMargin(0.12)
     pads[0].SetBottomMargin(0.10)
@@ -382,18 +383,19 @@ def plotComparison(h1, h2, title="", ratioTitle="Data/MC", h1Title="MC", h2Title
     pads[0].Draw()
     pads[1].Draw()
     pads[0].cd()
-    
+        
     h1.SetTitle(title)
     h1.SetLineColor(ROOT.kRed)
     h1.GetXaxis().SetTitleOffset(1.15)
     if xRangeUser!=None:
-        h1.GetXaxis().SetRangeUser(xRangeUser)
+        h1.GetXaxis().SetRangeUser(*xRangeUser)
+        h2.GetXaxis().SetRangeUser(*xRangeUser)
     h1.GetYaxis().SetTitle("Entries / {0} GeV".format(h1.GetXaxis().GetBinWidth(1)))
     h1.Draw()
     h2.SetLineColor(ROOT.kBlack)
     h2.Draw("SAME")
     
-    leg = ROOT.TLegend(0.75,0.75,0.85,0.85)
+    leg = ROOT.TLegend(0.70,0.75,0.89,0.89)
     leg.AddEntry(h1, h1Title)
     leg.AddEntry(h2, h2Title)
     leg.Draw()
@@ -404,6 +406,9 @@ def plotComparison(h1, h2, title="", ratioTitle="Data/MC", h1Title="MC", h2Title
     ratio = ROOT.TH1D()
     plotRatio(h1,h2,canvas=pads[1], ratioHist=ratio, ratioTitle=ratioTitle, xRangeUser=xRangeUser, 
               markerSize=markerSize)
+
+    c.Update()
+    c.SetWindowSize(c.GetWw()+4, c.GetWh()+50)
 
     if saveAs!=None:
         c.SaveAs(saveAs)
