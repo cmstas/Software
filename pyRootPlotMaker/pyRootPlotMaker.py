@@ -81,12 +81,18 @@ def plotBackgrounds(h_bkg_vec_, bkg_names, canvas=None, stack=None, saveAs=None,
 
 ## make a ratio plot. For use within the plotDataMC and plotComparison functions
 def plotRatio(h1, h2, canvas=None, ratioHist=None, xRangeUser=None, ratioTitle = None, markerSize=0.7, 
-              doPull=False):
+              doPull=False, convertToPoisson=False, ratioGraph=None, drawZeros=True):
+
+    if doPull:
+        convertToPoisson = False
 
     if canvas==None:
         canvas = ROOT.TCanvas()
     if ratioHist==None:
         ratioHist = ROOT.TH1D()
+
+    if convertToPoisson and type(ratioGraph)!=type(ROOT.TGraphAsymmErrors()):
+        raise RuntimeError("must pass a TGraphAsymmErrors as ratioGraph for convertToPoisson option!")
 
     if ratioTitle==None:
         if not doPull:
@@ -100,6 +106,8 @@ def plotRatio(h1, h2, canvas=None, ratioHist=None, xRangeUser=None, ratioTitle =
     if not doPull:
         h2.Copy(ratioHist)
         ratioHist.Divide(h1)
+        if convertToPoisson:
+            utils.GetPoissonRatioGraph(h1,h2,ratioGraph,drawZeros=drawZeros)
     else:
         nbins = h1.GetNbinsX()
         h2.Copy(ratioHist)
@@ -128,9 +136,15 @@ def plotRatio(h1, h2, canvas=None, ratioHist=None, xRangeUser=None, ratioTitle =
     ratioHist.GetXaxis().SetTickSize(0.06)
     #markers
     ratioHist.SetMarkerStyle(20)
-    ratioHist.SetMarkerSize(markerSize)
-    
-    ratioHist.Draw()
+    ratioHist.SetMarkerSize(markerSize)    
+    if convertToPoisson:
+        ratioGraph.SetMarkerStyle(20)
+        ratioGraph.SetMarkerSize(markerSize)
+        ratioHist.Reset()
+        ratioHist.Draw()
+        ratioGraph.Draw("PZ")
+    else:
+        ratioHist.Draw("PE")
 
     #line
     line = ROOT.TLine()
@@ -138,7 +152,7 @@ def plotRatio(h1, h2, canvas=None, ratioHist=None, xRangeUser=None, ratioTitle =
     line.SetLineWidth(2)
     line.SetLineStyle(7)
     xmin = ratioHist.GetXaxis().GetBinLowEdge(1)
-    xmax = ratioHist.GetXaxis().GetBinUpEdge(ratioHist.GetNbinsX())
+    xmax = ratioHist.GetXaxis().GetBinUpEdge(h1.GetNbinsX())
     if xRangeUser!=None:
         xmin = xRangeUser[0]
         xmax = xRangeUser[1]
@@ -155,7 +169,10 @@ def plotRatio(h1, h2, canvas=None, ratioHist=None, xRangeUser=None, ratioTitle =
         line.DrawLine(xmin,-1,xmax,-1)
         line.DrawLine(xmin,-2,xmax,-2)
         line.DrawLine(xmin,-3,xmax,-3)
-    ratioHist.Draw("SAME")
+    if convertToPoisson:
+        ratioGraph.Draw("SAME PZ")
+    else:
+        ratioHist.Draw("SAME PE")
     ratioHist.Draw("SAMEAXIS")
 
 
@@ -164,7 +181,8 @@ def plotDataMC(h_bkg_vec_, bkg_names, h_data=None, title=None, subtitles=None, d
                isLog=True, dataTitle="Data", xRangeUser=None, doPause=False, lumi=1.0, lumiUnit="fb", noLumi=False,
                energy=13, xAxisTitle="H_{T}", xAxisUnit="GeV", userMax=None, userMin=None, doSort=False,
                doMT2Colors=False, markerSize=0.9, doOverflow=True, titleSize=0.04, subtitleSize=0.03, subLegText=None,
-               cmsText="CMS Preliminary", cmsTextSize=0.035, doBkgError=False, functions=[], legCoords=None, doPull=False):
+               cmsText="CMS Preliminary", cmsTextSize=0.035, doBkgError=False, functions=[], legCoords=None, doPull=False,
+               convertToPoisson=False, drawZeros=True):
     
     if h_data == None:
         doRatio = False
@@ -267,7 +285,16 @@ def plotDataMC(h_bkg_vec_, bkg_names, h_data=None, title=None, subtitles=None, d
         if doOverflow:
             utils.PutOverflowInLastBin(h_data, None if xRangeUser==None else xRangeUser[1])
 
-        h_data.Draw("SAME")
+        if convertToPoisson:
+            h_data_poisson = ROOT.TGraphAsymmErrors()
+            utils.ConvertToPoissonGraph(h_data, h_data_poisson, drawZeros=drawZeros)
+            h_data_poisson.SetMarkerStyle(20)
+            h_data_poisson.SetMarkerSize(markerSize)
+            h_data_poisson.SetMarkerColor(ROOT.kBlack)
+            h_data_poisson.SetLineColor(ROOT.kBlack)
+            h_data_poisson.Draw("SAME PZ")
+        else:
+            h_data.Draw("SAME E0")
 
     ## functions
     for function in functions:
@@ -346,10 +373,11 @@ def plotDataMC(h_bkg_vec_, bkg_names, h_data=None, title=None, subtitles=None, d
         h_bkg_vec[0].Copy(h1)
         for i in range(len(h_bkg_vec)-1):
             h1.Add(h_bkg_vec[i+1])
-        ratio = ROOT.TH1D()
+        ratioHist = ROOT.TH1D()
+        ratioGraph = ROOT.TGraphAsymmErrors()
 
-        plotRatio(h1, h_data, canvas=pads[1], ratioHist=ratio, xRangeUser=xRangeUser, markerSize=markerSize,
-                  doPull=doPull)
+        plotRatio(h1, h_data, canvas=pads[1], ratioHist=ratioHist, xRangeUser=xRangeUser, markerSize=markerSize,
+                  doPull=doPull, convertToPoisson=convertToPoisson, ratioGraph=ratioGraph, drawZeros=drawZeros)
     
     c.Update()
     c.SetWindowSize(c.GetWw()+4, c.GetWh()+50)

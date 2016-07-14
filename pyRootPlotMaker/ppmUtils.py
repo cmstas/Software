@@ -96,5 +96,52 @@ def SetYBounds(stack, isLog, h_bkg_vec, data_max, xRangeUser):
     else:
         stack.SetMaximum(tmax*1.33)
 
+def ConvertToPoissonGraph(h_data, graph, drawZeros=True):
+
+    alpha = 1-0.6827
+
+    for i in range(1,h_data.GetNbinsX()+1):
+        x = h_data.GetBinCenter(i)
+        xerr = h_data.GetBinWidth(i)/2
+        y = h_data.GetBinContent(i)
+        
+        if y==0 and not drawZeros:
+            continue
+
+        ym = 0 if y==0 else ROOT.Math.gamma_quantile(alpha/2, y, 1)
+        yp = ROOT.Math.gamma_quantile_c(alpha/2, y+1, 1)
+        
+        yerrplus = yp-y
+        yerrminus = y-ym
+
+        thisPoint = graph.GetN()
+        graph.SetPoint(thisPoint, x, y)
+        graph.SetPointError(thisPoint, xerr, xerr, yerrminus, yerrplus)
+
+def GetPoissonRatioGraph(h_mc, h_data, g_ratio, drawZeros=True):
+
+    alpha = 1-0.6827
+
+    for i in range(1,h_mc.GetNbinsX()+1):
+        x = h_mc.GetBinCenter(i)
+        mcy = h_mc.GetBinContent(i)
+        datay = h_data.GetBinContent(i)
+
+        if mcy==0 or (datay==0 and not drawZeros):
+            continue
+
+        mcerr = h_mc.GetBinError(i)
+        dataerrup = ROOT.Math.gamma_quantile_c(alpha/2, datay+1, 1) - datay
+        dataerrdown = 0 if datay==0 else (datay-ROOT.Math.gamma_quantile(alpha/2, datay, 1))
+
+        r = datay/mcy
+        rerrup = ROOT.TMath.Sqrt((dataerrup/mcy)**2 + (mcerr*datay/mcy**2)**2)
+        rerrdown = ROOT.TMath.Sqrt((dataerrdown/mcy)**2 + (mcerr*datay/mcy**2)**2)
+
+        xerr = h_mc.GetBinWidth(i)/2
+
+        thisPoint = g_ratio.GetN()
+        g_ratio.SetPoint(thisPoint, x, r)
+        g_ratio.SetPointError(thisPoint, xerr, xerr, rerrdown, rerrup)
 
 
