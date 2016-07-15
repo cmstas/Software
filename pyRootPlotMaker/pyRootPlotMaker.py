@@ -81,7 +81,8 @@ def plotBackgrounds(h_bkg_vec_, bkg_names, canvas=None, stack=None, saveAs=None,
 
 ## make a ratio plot. For use within the plotDataMC and plotComparison functions
 def plotRatio(h1, h2, canvas=None, ratioHist=None, xRangeUser=None, ratioTitle = None, markerSize=0.7, 
-              doPull=False, convertToPoisson=False, ratioGraph=None, drawZeros=True):
+              doPull=False, convertToPoisson=False, ratioGraph=None, drawZeros=True, drawSystematicBand=False,
+              systematics=None, h_syst=None):
 
     if doPull:
         convertToPoisson = False
@@ -146,6 +147,16 @@ def plotRatio(h1, h2, canvas=None, ratioHist=None, xRangeUser=None, ratioTitle =
     else:
         ratioHist.Draw("PE")
 
+    # systematics
+    if drawSystematicBand:
+        h1.Copy(h_syst)
+        for i in range(1,h_syst.GetNbinsX()+1):
+            h_syst.SetBinContent(i,1)
+            h_syst.SetBinError(i, systematics[i-1])
+        h_syst.SetFillStyle(1001)
+        h_syst.SetFillColor(ROOT.kGray+0)
+        h_syst.Draw("SAME E2")
+
     #line
     line = ROOT.TLine()
     line.SetLineColor(ROOT.kGray+2)
@@ -182,11 +193,17 @@ def plotDataMC(h_bkg_vec_, bkg_names, h_data=None, title=None, subtitles=None, d
                energy=13, xAxisTitle="H_{T}", xAxisUnit="GeV", userMax=None, userMin=None, doSort=False,
                doMT2Colors=False, markerSize=0.9, doOverflow=True, titleSize=0.04, subtitleSize=0.03, subLegText=None,
                subLegTextSize=0.03, cmsText="CMS Preliminary", cmsTextSize=0.035, doBkgError=False, functions=[], 
-               legCoords=None, doPull=False, convertToPoisson=False, drawZeros=True):
+               legCoords=None, doPull=False, convertToPoisson=False, drawZeros=True, drawSystematicBand=False, systematics=None):
     
     if h_data == None:
         doRatio = False
+        
+    if drawSystematicBand and systematics==None:
+        raise RuntimeError("Must supply a list of systematics to draw uncertainty band!")
 
+    if len(systematics) != h_bkg_vec_[0].GetNbinsX():
+        raise RuntimeError("length of systematics list does not equal the number of bins!")
+        
     # make shallow copies of hists so we don't overwrite the originals
     h_bkg_vec = [ROOT.TH1D() for h in h_bkg_vec_]
     for i in range(len(h_bkg_vec_)):
@@ -306,10 +323,10 @@ def plotDataMC(h_bkg_vec_, bkg_names, h_data=None, title=None, subtitles=None, d
     if legCoords == None:
         legCoords = (0.65,0.72,0.87,0.89)
     leg = ROOT.TLegend(*legCoords)
-    for i in range(len(h_bkg_vec)):
-        leg.AddEntry(h_bkg_vec[-i-1],bkg_names[-i-1],"f")
     if h_data != None:
         leg.AddEntry(h_data,dataTitle)
+    for i in range(len(h_bkg_vec)):
+        leg.AddEntry(h_bkg_vec[-i-1],bkg_names[-i-1],"f")
     leg.Draw()
     
     # handle all of the text
@@ -376,9 +393,11 @@ def plotDataMC(h_bkg_vec_, bkg_names, h_data=None, title=None, subtitles=None, d
             h1.Add(h_bkg_vec[i+1])
         ratioHist = ROOT.TH1D()
         ratioGraph = ROOT.TGraphAsymmErrors()
+        h_syst = ROOT.TH1D()
 
         plotRatio(h1, h_data, canvas=pads[1], ratioHist=ratioHist, xRangeUser=xRangeUser, markerSize=markerSize,
-                  doPull=doPull, convertToPoisson=convertToPoisson, ratioGraph=ratioGraph, drawZeros=drawZeros)
+                  doPull=doPull, convertToPoisson=convertToPoisson, ratioGraph=ratioGraph, drawZeros=drawZeros,
+                  drawSystematicBand=drawSystematicBand, systematics=systematics, h_syst=h_syst)
     
     c.Update()
     c.SetWindowSize(c.GetWw()+4, c.GetWh()+50)
