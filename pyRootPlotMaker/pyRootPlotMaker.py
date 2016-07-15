@@ -181,8 +181,8 @@ def plotDataMC(h_bkg_vec_, bkg_names, h_data=None, title=None, subtitles=None, d
                isLog=True, dataTitle="Data", xRangeUser=None, doPause=False, lumi=1.0, lumiUnit="fb", noLumi=False,
                energy=13, xAxisTitle="H_{T}", xAxisUnit="GeV", userMax=None, userMin=None, doSort=False,
                doMT2Colors=False, markerSize=0.9, doOverflow=True, titleSize=0.04, subtitleSize=0.03, subLegText=None,
-               cmsText="CMS Preliminary", cmsTextSize=0.035, doBkgError=False, functions=[], legCoords=None, doPull=False,
-               convertToPoisson=False, drawZeros=True):
+               subLegTextSize=0.03, cmsText="CMS Preliminary", cmsTextSize=0.035, doBkgError=False, functions=[], 
+               legCoords=None, doPull=False, convertToPoisson=False, drawZeros=True):
     
     if h_data == None:
         doRatio = False
@@ -224,6 +224,7 @@ def plotDataMC(h_bkg_vec_, bkg_names, h_data=None, title=None, subtitles=None, d
 
     if isLog:
         pads[0].SetLogy()
+    pads[0].SetTicky(1)
 
     pads[0].cd()
 
@@ -303,7 +304,7 @@ def plotDataMC(h_bkg_vec_, bkg_names, h_data=None, title=None, subtitles=None, d
 
     ## legend
     if legCoords == None:
-        legCoords = (0.65,0.72,0.88,0.89)
+        legCoords = (0.65,0.72,0.87,0.89)
     leg = ROOT.TLegend(*legCoords)
     for i in range(len(h_bkg_vec)):
         leg.AddEntry(h_bkg_vec[-i-1],bkg_names[-i-1],"f")
@@ -345,9 +346,9 @@ def plotDataMC(h_bkg_vec_, bkg_names, h_data=None, title=None, subtitles=None, d
     text.SetTextAlign(11)
     text.SetTextFont(62)
     text.DrawLatex(0.12,0.93,cmsText)
-    #Data/MC integral ratio
-    cursorX = 0.65
-    cursorY = 0.71
+    # Sub-legend text
+    cursorX = legCoords[0]
+    cursorY = legCoords[1]-0.01
     if subLegText==None:
         subLegText=[]
     if type(subLegText)==type(""):
@@ -359,7 +360,7 @@ def plotDataMC(h_bkg_vec_, bkg_names, h_data=None, title=None, subtitles=None, d
         s = s.replace("{datamcsferr}","{2:.2f}")
         text.SetTextFont(62)
         text.SetTextAlign(13)
-        text.SetTextSize(0.03)
+        text.SetTextSize(subLegTextSize)
         text.DrawLatex(cursorX,cursorY,s.format(*vals))
         cursorY -= 0.03+0.005
 
