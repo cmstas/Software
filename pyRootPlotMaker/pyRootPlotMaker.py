@@ -201,7 +201,7 @@ def plotDataMC(h_bkg_vec_, bkg_names, h_data=None, title=None, subtitles=None, d
     if drawSystematicBand and systematics==None:
         raise RuntimeError("Must supply a list of systematics to draw uncertainty band!")
 
-    if len(systematics) != h_bkg_vec_[0].GetNbinsX():
+    if systematics != None and len(systematics) != h_bkg_vec_[0].GetNbinsX():
         raise RuntimeError("length of systematics list does not equal the number of bins!")
         
     # make shallow copies of hists so we don't overwrite the originals
