@@ -354,15 +354,9 @@ def plotDataMC(h_bkg_vec_, bkg_names, h_data=None, title=None, subtitles=None, d
         cursorY -= subtitleSize + 0.015
     # lumi
     if not noLumi:
-        text.SetTextAlign(31)
-        text.SetTextSize(cmsTextSize)
-        text.SetTextFont(42)
-        text.DrawLatex(0.89,0.93,"{0} {1}^{{-1}} ({2} TeV)".format(lumi, lumiUnit, energy))
+        utils.DrawLumiText(pads[0],lumi=lumi,lumiUnit=lumiUnit,energy=energy,textFont=42,textSize=cmsTextSize)
     # CMS text
-    text.SetTextSize(cmsTextSize)
-    text.SetTextAlign(11)
-    text.SetTextFont(62)
-    text.DrawLatex(0.12,0.93,cmsText)
+    utils.DrawCmsText(pads[0],text=cmsText,textFont=62,textSize=cmsTextSize)
     # Sub-legend text
     cursorX = legCoords[0]
     cursorY = legCoords[1]-0.01

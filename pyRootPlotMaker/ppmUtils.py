@@ -118,7 +118,7 @@ def ConvertToPoissonGraph(h_data, graph, drawZeros=True):
         graph.SetPoint(thisPoint, x, y)
         graph.SetPointError(thisPoint, xerr, xerr, yerrminus, yerrplus)
 
-def GetPoissonRatioGraph(h_mc, h_data, g_ratio, drawZeros=True):
+def GetPoissonRatioGraph(h_mc, h_data, g_ratio, drawZeros=True, useMCErr=True):
 
     alpha = 1-0.6827
 
@@ -131,6 +131,8 @@ def GetPoissonRatioGraph(h_mc, h_data, g_ratio, drawZeros=True):
             continue
 
         mcerr = h_mc.GetBinError(i)
+        if not useMCErr:
+            mcerr = 0
         dataerrup = ROOT.Math.gamma_quantile_c(alpha/2, datay+1, 1) - datay
         dataerrdown = 0 if datay==0 else (datay-ROOT.Math.gamma_quantile(alpha/2, datay, 1))
 
@@ -144,4 +146,25 @@ def GetPoissonRatioGraph(h_mc, h_data, g_ratio, drawZeros=True):
         g_ratio.SetPoint(thisPoint, x, r)
         g_ratio.SetPointError(thisPoint, xerr, xerr, rerrdown, rerrup)
 
+def DrawCmsText(canvas, text="CMS Preliminary", textFont=62, textSize=0.035):
+    ttext = ROOT.TLatex()
+    ttext.SetNDC(1)
+    ttext.SetTextFont(textFont)
+    ttext.SetTextAlign(11)
+    ttext.SetTextSize(textSize)
+
+    canvas.cd()
+    ttext.DrawLatex(canvas.GetLeftMargin(), 1.0-canvas.GetTopMargin()+0.01, text)
+
+def DrawLumiText(canvas, lumi=1.0, lumiUnit="fb", energy=13, textFont=42, textSize=0.035):
+    ttext = ROOT.TLatex()
+    ttext.SetNDC(1)
+    ttext.SetTextFont(textFont)
+    ttext.SetTextAlign(31)
+    ttext.SetTextSize(textSize)
+
+    canvas.cd()
+    text = "{0} {1}^{{-1}} ({2} TeV)".format(lumi,lumiUnit,energy)
+    ttext.DrawLatex(1.0-canvas.GetRightMargin()-0.01, 1.0-canvas.GetTopMargin()+0.01, text)
+    
 
