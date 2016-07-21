@@ -55,7 +55,8 @@ OPTIONAL arguments (required to use argument keywords. e.g., pass the argument `
 30. `legCoords` - 4-tuple of legend coordinates, as passed to the ROOT.TLegend constructor.
 31. `convertToPoisson` - set to true to automatically convert data histogram to proper asymmetric poisson errors (see [here](https://twiki.cern.ch/twiki/bin/view/CMS/PoissonErrorBars))
 32. `drawZeros` - if `convertToPoisson` is set to True, this determines whether do draw markers at bins with 0 contents (note that the Poisson error according to the formula at the above link in this case is 1.8)
-
+33. `drawSystematicBand` - draw a band in the ratio plot to show systematic errors.
+34. `systematics` - if the above option is set to True, this is a list of relative systematic errors (i.e., 0.4 for a 40% uncertainty). Must be the same length as the number of bins.
 
 ### Comparison plots
 Use `ppm.plotComparison` to plot a comparison between 2 histograms. This needs more work.
@@ -66,4 +67,5 @@ Use `ppm.plotComparison` to plot a comparison between 2 histograms. This needs m
 1. Custom color schemes
 2. More customizability for positioning, size, etc of text/legend
 3. Ability for multiple data histograms, e.g. for comparing 2 different years.
-4. More than 2 histograms in `plotComparison`
+4. Option to draw signal histograms on top of MC
+5. More than 2 histograms in `plotComparison`

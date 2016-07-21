@@ -403,9 +403,18 @@ def plotDataMC(h_bkg_vec_, bkg_names, h_data=None, title=None, subtitles=None, d
         raw_input()
 
 ## make a comparison plot between two histograms. Plots both histos on one axis, as well as a ratio plot
-def plotComparison(h1, h2, title="", ratioTitle="Data/MC", h1Title="MC", h2Title="Data", saveAs=None,
-                   size=(700,600), xRangeUser=None, markerSize=0.65, doPause=False, isLog=True):
+def plotComparison(h1_, h2_, title="", ratioTitle="Data/MC", h1Title="MC", h2Title="Data", saveAs=None,
+                   size=(700,600), xRangeUser=None, markerSize=0.65, doPause=False, isLog=True,
+                   normalize=False, xAxisTitle=""):
 
+    h1 = ROOT.TH1D()
+    h1_.Copy(h1)
+    h2 = ROOT.TH1D()
+    h2_.Copy(h2)
+
+    if normalize:
+        h1.Scale(1.0/h1.Integral(0,-1))
+        h2.Scale(1.0/h2.Integral(0,-1))
 
     ROOT.gStyle.SetOptStat(0)
 
@@ -417,7 +426,7 @@ def plotComparison(h1, h2, title="", ratioTitle="Data/MC", h1Title="MC", h2Title
     pads.append(ROOT.TPad("2","2",0.0,0.0,1.0,0.17))
 
     pads[0].SetLogy(isLog)
-    pads[0].SetTopMargin(0.07)
+    pads[0].SetTopMargin(0.09)
     pads[0].SetLeftMargin(0.12)
     pads[0].SetBottomMargin(0.10)
     pads[1].SetLeftMargin(0.12)
@@ -432,7 +441,12 @@ def plotComparison(h1, h2, title="", ratioTitle="Data/MC", h1Title="MC", h2Title
     if xRangeUser!=None:
         h1.GetXaxis().SetRangeUser(*xRangeUser)
         h2.GetXaxis().SetRangeUser(*xRangeUser)
-    h1.GetYaxis().SetTitle("Entries / {0} GeV".format(h1.GetXaxis().GetBinWidth(1)))
+    if normalize:
+        h1.GetYaxis().SetTitle("Normalized")
+    else:
+        h1.GetYaxis().SetTitle("Entries / {0} GeV".format(h1.GetXaxis().GetBinWidth(1)))
+    h1.GetYaxis().SetTitleOffset(1.2)
+    h1.GetXaxis().SetTitle(xAxisTitle)
     h1.Draw()
     h2.SetLineColor(ROOT.kBlack)
     h2.Draw("SAME")
