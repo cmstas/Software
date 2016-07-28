@@ -303,6 +303,7 @@ void dataMCplotMaker(TH1F* Data_in, std::vector <std::pair <TH1F*, TH1F*> > Back
   bool markerStyle2 = false;
   float legendWider_ = 0;
   float legendTaller_ = 0;
+  float ratioUpperBound = 2.;
   bool largeLabels = false;
   float yTitleOffset_ = 0;
   bool compareMultiple = 0; 
@@ -384,6 +385,7 @@ void dataMCplotMaker(TH1F* Data_in, std::vector <std::pair <TH1F*, TH1F*> > Back
     else if (Options[i].find("largeLabels") < Options[i].length()) largeLabels = true; 
     else if (Options[i].find("legendWider") < Options[i].length())  legendWider_ = atof( getString(Options[i], "legendWider").c_str() );
     else if (Options[i].find("legendTaller") < Options[i].length()) legendTaller_ = atof( getString(Options[i], "legendTaller").c_str() ); 
+    else if (Options[i].find("ratioUpperBound") < Options[i].length()) ratioUpperBound = atof( getString(Options[i], "ratioUpperBound").c_str() ); 
     else if (Options[i].find("yTitleOffset") < Options[i].length()) yTitleOffset_ = atof( getString(Options[i], "yTitleOffset").c_str() ); 
     else if (Options[i].find("compareMultiple") < Options[i].length()) compareMultiple = true;
     else if (Options[i].find("ratioOnly") < Options[i].length()) ratioOnly = true;
@@ -1210,7 +1212,7 @@ void dataMCplotMaker(TH1F* Data_in, std::vector <std::pair <TH1F*, TH1F*> > Back
     else err_hist->Draw("pESAME"); 
     err_hist->GetXaxis()->SetLabelSize(0);
     err_hist->GetYaxis()->SetLabelSize(0.2);
-    err_hist->GetYaxis()->SetRangeUser(0., 2.);
+    err_hist->GetYaxis()->SetRangeUser(0., ratioUpperBound);
     if (nDivisions != -1 && nDivisions > 0) err_hist->GetXaxis()->SetNdivisions(nDivisions, kTRUE);
     if (nDivisions != -1 && nDivisions < 0) err_hist->GetXaxis()->SetNdivisions(nDivisions, kFALSE);
     err_hist->GetYaxis()->SetNdivisions(505);
