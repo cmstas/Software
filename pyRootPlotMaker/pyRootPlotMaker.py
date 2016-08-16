@@ -413,8 +413,10 @@ def plotComparison(h1_, h2_, title="", ratioTitle="Data/MC", h1Title="MC", h2Tit
     h2_.Copy(h2)
 
     if normalize:
-        h1.Scale(1.0/h1.Integral(0,-1))
-        h2.Scale(1.0/h2.Integral(0,-1))
+        if h1.Integral(0,-1) > 0:
+            h1.Scale(1.0/h1.Integral(0,-1))
+        if h2.Integral(0,-1) > 0:
+            h2.Scale(1.0/h2.Integral(0,-1))
 
     ROOT.gStyle.SetOptStat(0)
 
@@ -447,9 +449,9 @@ def plotComparison(h1_, h2_, title="", ratioTitle="Data/MC", h1Title="MC", h2Tit
         h1.GetYaxis().SetTitle("Entries / {0} GeV".format(h1.GetXaxis().GetBinWidth(1)))
     h1.GetYaxis().SetTitleOffset(1.2)
     h1.GetXaxis().SetTitle(xAxisTitle)
-    h1.Draw()
+    h1.Draw("PE")
     h2.SetLineColor(ROOT.kBlack)
-    h2.Draw("SAME")
+    h2.Draw("SAME PE")
     
     leg = ROOT.TLegend(0.70,0.75,0.89,0.89)
     leg.AddEntry(h1, h1Title)
