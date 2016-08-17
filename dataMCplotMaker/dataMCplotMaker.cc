@@ -839,7 +839,7 @@ void dataMCplotMaker(TH1F* Data_in, std::vector <std::pair <TH1F*, TH1F*> > Back
       for (int j = 1; j <= Backgrounds[i]->GetNbinsX(); j++){
         if (Backgrounds[i]->GetBinContent(j) == 0){
           Backgrounds[i]->SetBinContent(j, 0.0000001); 
-          cout << "Warning! One of your 'dots' is 0 and won't show up.  Setting it to 0.0000001" << endl;  
+		  std::cout << "Warning! One of your 'dots' is 0 and won't show up.  Setting it to 0.0000001" << std::endl;  
         }
       }
     }
@@ -1232,6 +1232,7 @@ void dataMCplotMaker(TH1F* Data_in, std::vector <std::pair <TH1F*, TH1F*> > Back
     if (Backgrounds_pair[i].first  != 0) delete Backgrounds_pair[i].first;
     if (Backgrounds_pair[i].second != 0) delete Backgrounds_pair[i].second;
   }
+  delete background_syst;
 
 }
 
