@@ -209,9 +209,14 @@ def plotDataMC(h_bkg_vec_, bkg_names, h_data=None, title=None, subtitles=None, d
     for i in range(len(h_bkg_vec_)):
         h_bkg_vec_[i].Copy(h_bkg_vec[i])
     if h_data != None:
-        h_data_ = ROOT.TH1D()
-        h_data.Copy(h_data_)
-        h_data = h_data_  #so the arg name doesn't have underscore
+        if type(h_data) != type(list()):
+            h_data = [h_data]
+        if len(h_data) > 4:
+            raise RuntimeError("currently only supports up to 4 data histograms!")
+        h_data_ = [ROOT.TH1D() for h in h_data]
+        for i in range(len(h_data)):
+            h_data[i].Copy(h_data_[i])
+            h_data[i] = h_data_[i]  #so the arg name doesn't have underscore
 
     ROOT.gStyle.SetOptStat(0)
      
@@ -258,12 +263,12 @@ def plotDataMC(h_bkg_vec_, bkg_names, h_data=None, title=None, subtitles=None, d
         bkg_names = bkg_names[::-1]
 
     scaleFactor = 1.0
-    scaleFactorError = 0.0
+    scaleFactorError = 1.0
     if(h_data!=None and scaleMCtoData):
         tot_MC_error = ROOT.TMath.Sqrt(sum([x**2 for x in int_errors]))
         tot_MC_integral = sum(integrals)
         data_error = ROOT.Double(0)
-        data_integral = h_data.IntegralAndError(0,-1,data_error)
+        data_integral = h_data[0].IntegralAndError(0,-1,data_error)
         scaleFactor = data_integral/tot_MC_integral
         scaleFactorError = scaleFactor * (data_error/data_integral + tot_MC_error/tot_MC_integral)
     for i in range(len(h_bkg_vec)):
@@ -271,10 +276,11 @@ def plotDataMC(h_bkg_vec_, bkg_names, h_data=None, title=None, subtitles=None, d
 
     dataMax = 0
     if h_data!=None:
-        for i in range(1,h_data.GetNbinsX()+1):
-            y = h_data.GetBinContent(i)+h_data.GetBinError(i)
-            if y>dataMax:
-                dataMax = y
+        for ih in range(len(h_data)):
+            for i in range(1,h_data[ih].GetNbinsX()+1):
+                y = h_data[ih].GetBinContent(i)+h_data[ih].GetBinError(i)
+                if y>dataMax:
+                    dataMax = y
 
     stack = ROOT.THStack("hs","")
     plotBackgrounds(h_bkg_vec, bkg_names, canvas=pads[0], stack=stack, xRangeUser=xRangeUser, isLog=isLog, 
@@ -293,26 +299,29 @@ def plotDataMC(h_bkg_vec_, bkg_names, h_data=None, title=None, subtitles=None, d
 
     ## data
     if h_data != None:
-        h_data.SetMarkerStyle(20)
-        h_data.SetMarkerSize(markerSize)
-        h_data.SetMarkerColor(ROOT.kBlack)
-        h_data.SetLineColor(ROOT.kBlack)
-        if xRangeUser!=None:
-            h_data.GetXaxis().SetRangeUser(*xRangeUser)
-        N_DATA_EVENTS = int(h_data.GetEntries()) #overflow bin breaks this for some reason, so compute before
-        if doOverflow:
-            utils.PutOverflowInLastBin(h_data, None if xRangeUser==None else xRangeUser[1])
-
+        styles = [20,24,21,25]
+        N_DATA_EVENTS = int(h_data[0].GetEntries()) #curretly only support counting of events for first histogram
+        for ih in range(len(h_data)):
+            h_data[ih].SetMarkerStyle(styles[ih])
+            h_data[ih].SetMarkerSize(markerSize)
+            h_data[ih].SetMarkerColor(ROOT.kBlack)
+            h_data[ih].SetLineColor(ROOT.kBlack)
+            if xRangeUser!=None:
+                h_data[ih].GetXaxis().SetRangeUser(*xRangeUser)
+            if doOverflow:
+                utils.PutOverflowInLastBin(h_data[ih], None if xRangeUser==None else xRangeUser[1])
         if convertToPoisson:
-            h_data_poisson = ROOT.TGraphAsymmErrors()
-            utils.ConvertToPoissonGraph(h_data, h_data_poisson, drawZeros=drawZeros)
-            h_data_poisson.SetMarkerStyle(20)
-            h_data_poisson.SetMarkerSize(markerSize)
-            h_data_poisson.SetMarkerColor(ROOT.kBlack)
-            h_data_poisson.SetLineColor(ROOT.kBlack)
-            h_data_poisson.Draw("SAME PZ")
+            h_data_poisson = [ROOT.TGraphAsymmErrors() for h in h_data]
+            for ih in range(len(h_data)):
+                utils.ConvertToPoissonGraph(h_data[ih], h_data_poisson[ih], drawZeros=drawZeros)
+                h_data_poisson[ih].SetMarkerStyle(styles[ih])
+                h_data_poisson[ih].SetMarkerSize(markerSize)
+                h_data_poisson[ih].SetMarkerColor(ROOT.kBlack)
+                h_data_poisson[ih].SetLineColor(ROOT.kBlack)
+                h_data_poisson[ih].Draw("SAME PZ")
         else:
-            h_data.Draw("SAME E0")
+            for ih in range(len(h_data)):
+                h_data[ih].Draw("SAME E0")
 
     ## functions
     for function in functions:
@@ -320,11 +329,15 @@ def plotDataMC(h_bkg_vec_, bkg_names, h_data=None, title=None, subtitles=None, d
 
 
     ## legend
+        
     if legCoords == None:
         legCoords = (0.65,0.72,0.87,0.89)
     leg = ROOT.TLegend(*legCoords)
     if h_data != None:
-        leg.AddEntry(h_data,dataTitle)
+        if type(dataTitle) != type(list()):
+            dataTitle = [dataTitle]
+        for ih in range(len(h_data)):
+            leg.AddEntry(h_data[ih],dataTitle[ih])
     for i in range(len(h_bkg_vec)):
         leg.AddEntry(h_bkg_vec[-i-1],bkg_names[-i-1],"f")
     leg.Draw()
@@ -389,7 +402,8 @@ def plotDataMC(h_bkg_vec_, bkg_names, h_data=None, title=None, subtitles=None, d
         ratioGraph = ROOT.TGraphAsymmErrors()
         h_syst = ROOT.TH1D()
 
-        plotRatio(h1, h_data, canvas=pads[1], ratioHist=ratioHist, xRangeUser=xRangeUser, markerSize=markerSize,
+        # currently only support drawing ratio for one data histogram. Uses the first one in the list.
+        plotRatio(h1, h_data[0], canvas=pads[1], ratioHist=ratioHist, xRangeUser=xRangeUser, markerSize=markerSize,
                   doPull=doPull, convertToPoisson=convertToPoisson, ratioGraph=ratioGraph, drawZeros=drawZeros,
                   drawSystematicBand=drawSystematicBand, systematics=systematics, h_syst=h_syst)
     
