@@ -197,6 +197,7 @@ def plotDataMC(h_bkg_vec_, bkg_names, h_data=None, title=None, subtitles=None, d
     
     if h_data == None:
         doRatio = False
+        scaleMCtoData = False
         
     if drawSystematicBand and systematics==None:
         raise RuntimeError("Must supply a list of systematics to draw uncertainty band!")
@@ -378,6 +379,8 @@ def plotDataMC(h_bkg_vec_, bkg_names, h_data=None, title=None, subtitles=None, d
     if type(subLegText)==type(""):
         subLegText = [subLegText]
     for s in subLegText:
+        if h_data==None:
+            N_DATA_EVENTS = 1
         vals = (N_DATA_EVENTS,scaleFactor,scaleFactorError)
         s = s.replace("{ndata}","{0:d}")
         s = s.replace("{datamcsf}","{1:.2f}")
@@ -428,9 +431,9 @@ def plotComparison(h1_, h2_, title="", ratioTitle="Data/MC", h1Title="MC", h2Tit
 
     if normalize:
         if h1.Integral(0,-1) > 0:
-            h1.Scale(1.0/h1.Integral(0,-1))
+            h1.Scale(1.0/h1.Integral(0,-1)/h1.GetBinWidth(1))
         if h2.Integral(0,-1) > 0:
-            h2.Scale(1.0/h2.Integral(0,-1))
+            h2.Scale(1.0/h2.Integral(0,-1)/h2.GetBinWidth(1))
 
     ROOT.gStyle.SetOptStat(0)
 
