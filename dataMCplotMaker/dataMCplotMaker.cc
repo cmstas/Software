@@ -320,6 +320,7 @@ void dataMCplotMaker(TH1F* Data_in, std::vector <std::pair <TH1F*, TH1F*> > Back
   int lumiPrec = 2; 
   bool noTextBetweenPads = 0;
   bool poissonErrorsNoZeros = 0;
+  bool makeTable = 0;
 
   //Loop over options and change default settings to user-defined settings
   for (unsigned int i = 0; i < Options.size(); i++){
@@ -399,6 +400,7 @@ void dataMCplotMaker(TH1F* Data_in, std::vector <std::pair <TH1F*, TH1F*> > Back
     else if (Options[i].find("systBlack") < Options[i].length()) systBlack = true; 
     else if (Options[i].find("noTextBetweenPads") < Options[i].length()) noTextBetweenPads = true;
     else if (Options[i].find("poissonErrorsNoZeros") < Options[i].length()) poissonErrorsNoZeros = true;
+    else if (Options[i].find("makeTable") < Options[i].length()) makeTable = true;
     else std::cout << "Warning: Option not recognized!  Option: " << Options[i] << std::endl;
   }
 
@@ -824,11 +826,9 @@ void dataMCplotMaker(TH1F* Data_in, std::vector <std::pair <TH1F*, TH1F*> > Back
     }
   }
 
-  //Show counts
-  if(legendCounts) {
-    for(unsigned int i=0; i<Backgrounds.size(); i++){
+  // Keep track of background counts
+  for (unsigned int i=0; i<Backgrounds.size(); i++){
       counts.push_back(Backgrounds[i]->Integral());
-    }
   }
 
   if (Background_systs.size() == 0) gStyle->SetErrorX(0.001); //why the fuck is this even here?
@@ -953,6 +953,80 @@ void dataMCplotMaker(TH1F* Data_in, std::vector <std::pair <TH1F*, TH1F*> > Back
       g->Draw("PZSAME");
       Data->Draw("PSAME");
     } else Data->Draw("PSAMEE");
+  }
+
+  if (makeTable) {
+      // dump out a table with .txt
+      // TODO: this is ugly. make more general and put in function. right now it only works for cases where we have 1 data and at least 1 background
+      TString buff = "";
+      std::vector<float> bkgTots(Backgrounds.size(), 0.0); // totals along columns, indexed by ib
+      std::vector<float> bkgSqErrors(Backgrounds.size(), 0.0);
+
+      buff += "ibin|xlow|xup|";
+      for (unsigned int ib = 0; ib < Backgrounds.size(); ib++){
+          buff += Titles[ib];
+          buff += "|";
+      }
+      buff += "total_bkg|data|data/bkg\n";
+      for (int xbin=1; xbin <= Data->GetNbinsX(); xbin++) {
+
+          float lowEdge = Data->GetXaxis()->GetBinLowEdge(xbin);
+          float upEdge = Data->GetXaxis()->GetBinUpEdge(xbin);
+          float dataContent = Data->GetBinContent(xbin);
+          buff += Form("%i|%.1f|%.1f|",xbin,lowEdge,upEdge);
+          
+          float bkgTot = 0.0; // total along row
+          float bkgSqError = 0.0;
+          for (unsigned int ib = 0; ib < Backgrounds.size(); ib++){
+
+              float binContent = Backgrounds[ib]->GetBinContent(xbin);
+              float binError = Backgrounds[ib]->GetBinError(xbin);
+
+              bkgTot += binContent;
+              bkgSqError += binError*binError;
+
+              bkgTots[ib] += binContent;
+              bkgSqErrors[ib] += binError*binError;
+
+              buff += Form("%.3f +- %.3f|", binContent, binError);
+          }
+
+          float r = dataContent/bkgTot;
+          
+          // Total columns, ratio
+          buff += Form("%.3f +- %.3f|", bkgTot, sqrt(bkgSqError));
+          buff += Form("%.3f +- %.3f|", dataContent, sqrt(dataContent));
+          buff += Form("%.3f +- %.3f", r, r*sqrt( 1.0/dataContent + bkgSqError/(bkgTot*bkgTot) ));
+
+          buff += "\n";
+
+      }
+
+      // Totals: Last row
+      float totalBkg = 0.;
+      float totalBkgSqError = 0.;
+      for(auto& num : bkgTots) totalBkg += num;
+      for(auto& num : bkgSqErrors) totalBkgSqError += num;
+      buff += " | | |";
+      for (unsigned int ib = 0; ib < Backgrounds.size(); ib++){
+          buff += Form("%.3f +- %.3f", bkgTots[ib], sqrt(bkgSqErrors[ib]));
+          buff += "|";
+      }
+
+      buff += Form("%.3f +- %.3f|", totalBkg, sqrt(totalBkgSqError));
+      buff += Form("%.3f +- %.3f|", Data->GetEntries(), sqrt(Data->GetEntries()));
+
+      float r = 1.0*Data->GetEntries()/totalBkg;
+      buff += Form("%.3f +- %.3f", r, r*sqrt( 1.0/Data->GetEntries() + totalBkgSqError/(totalBkg*totalBkg) ));
+      buff += "\n";
+
+      TString tableFileName(outputName.c_str());
+      std::ofstream tableFile;
+      tableFile.open("tmp_table.txt");
+      tableFile << buff.Data();
+      tableFile.close();
+      system(Form("cat tmp_table.txt | column -t -s'|' -x > %s.txt", tableFileName.Data()));
+
   }
 
   //Legend
@@ -1218,6 +1292,7 @@ void dataMCplotMaker(TH1F* Data_in, std::vector <std::pair <TH1F*, TH1F*> > Back
     err_hist->GetYaxis()->SetNdivisions(505);
   }
   //--------------------------------
+
 
   //Print plot as pdf 
   if (!noOutput){

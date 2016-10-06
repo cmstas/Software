@@ -113,6 +113,7 @@ Supported flags for "options" string:
   - --showZeroRatios: show the ratio plots as zero when the bin is empty.  
   - --noTextBetweenPads: bring ratio pad closer to main pad, no text in between them. All thex inside main pad. Used for SUS-15-008
   - --poissonErrorsNoZeros: avoid showing poissonian error bars for data entries with zero yield (used for SUS-15-008)
+  - --makeTable: makes a table .txt file with the bin contents/totals/errors for data and backgrounds
 
 Example:
 ````

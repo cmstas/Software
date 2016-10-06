@@ -9,11 +9,11 @@ using namespace std;
 void testPlot() {
     std::vector<std::string> titles = { "first", "second", "third"};
     std::vector<TH1F*> h1D_vec;
-    TH1F* data = new TH1F("data","",50,0,5);
+    TH1F* data = new TH1F("data","",5,0,5);
     TH1F *null = new TH1F("null","",1,0,1);
-    TH1F *h1D_one = new TH1F("h1D_one","",50,0,5);
-    TH1F *h1D_two = new TH1F("h1D_two","",50,0,5);
-    TH1F *h1D_three = new TH1F("h1D_three","",50,0,5);
+    TH1F *h1D_one = new TH1F("h1D_one","",5,0,5);
+    TH1F *h1D_two = new TH1F("h1D_two","",5,0,5);
+    TH1F *h1D_three = new TH1F("h1D_three","",5,0,5);
     h1D_vec.push_back(h1D_one);
     h1D_vec.push_back(h1D_two);
     h1D_vec.push_back(h1D_three);
@@ -38,6 +38,7 @@ void testPlot() {
     common += " --legendCounts"; // show counts for backgrounds in legend in brackets
     common += " --type Preliminary";
     common += " --poissonErrorsNoZeros"; // proper asymmetric errors
+    common += " --makeTable"; // print out table to text file
     common += " --isLinear";
 
     dataMCplotMaker(data,h1D_vec,titles,"this is a title","",common+" --outputName h1D_vec.pdf");
