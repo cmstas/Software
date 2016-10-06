@@ -183,7 +183,7 @@ void singlePlotMaker(TH1F* h1, std::string title, std::string options_string) {
     dataMCplotMaker(null, Backgrounds, Titles, title, "", options_string);
 }
 
-void singleComparisonMaker(TH1F* h1, TH1F* h2, std::string title, std::string options_string) {
+void singleComparisonMaker(TH1F* h1, TH1F* h2, std::string title, std::string title2, std::string options_string) {
     if(h1->GetEntries() < 1) {
         std::cout << "Plot with title " << title << " is empty. Not drawing." << std::endl; return;
     }
@@ -191,7 +191,7 @@ void singleComparisonMaker(TH1F* h1, TH1F* h2, std::string title, std::string op
     std::vector <std::string> Titles;
     Backgrounds.push_back(h2);
     Titles.push_back(title);
-    dataMCplotMaker(h1, Backgrounds, Titles, title, "", options_string);
+    dataMCplotMaker(h1, Backgrounds, Titles, title2, "", options_string);
 }
 
 void dataMCplotMaker(TH1F* Data_in, std::vector <std::pair <TH1F*, TH1F*> > Backgrounds_pair_in, std::vector <std::string> Titles, std::string titleIn, std::string title2In, std::string options_string, std::vector <TH1F*> Signals_in, std::vector <std::string> SignalTitles, std::vector <Color_t> color_input){
@@ -270,6 +270,7 @@ void dataMCplotMaker(TH1F* Data_in, std::vector <std::pair <TH1F*, TH1F*> > Back
   bool showDivisionLabel = 1;
   bool xAxisVerticalBinLabels = 0;
   float setMaximum = -1;
+  float setMaxMultiplier = -1;
   float setMinimum = -1;
   float legendUp = 0;
   float legendRight = 0;
@@ -309,6 +310,7 @@ void dataMCplotMaker(TH1F* Data_in, std::vector <std::pair <TH1F*, TH1F*> > Back
   bool compareMultiple = 0; 
   bool noLumi = 0; 
   int ratio = -1; 
+  int ratioNumerBG = -1; 
   bool ratioOnly = 0; 
   bool ratioLine = 0; 
   int bkgd_width = 1; 
@@ -317,7 +319,7 @@ void dataMCplotMaker(TH1F* Data_in, std::vector <std::pair <TH1F*, TH1F*> > Back
   bool noRatioPlot = 0; 
   int systFillStyle = 3644; 
   bool systBlack = 0; 
-  int lumiPrec = 2; 
+  int lumiPrec = 1; 
   bool noTextBetweenPads = 0;
   bool poissonErrorsNoZeros = 0;
   bool makeTable = 0;
@@ -367,6 +369,7 @@ void dataMCplotMaker(TH1F* Data_in, std::vector <std::pair <TH1F*, TH1F*> > Back
     else if (Options[i].find("hLine") < Options[i].length()) hLines.push_back(getString(Options[i], "hLine").c_str());
     else if (Options[i].find("boxLines") < Options[i].length()) boxLines = getString(Options[i], "boxLines").c_str();
     else if (Options[i].find("setMaximum") < Options[i].length()) setMaximum = atof( getString(Options[i], "setMaximum").c_str() );
+    else if (Options[i].find("setMaxMultiplier") < Options[i].length()) setMaxMultiplier = atof( getString(Options[i], "setMaxMultiplier").c_str() );
     else if (Options[i].find("legendUp") < Options[i].length()) legendUp = atof( getString(Options[i], "legendUp").c_str() );
     else if (Options[i].find("legendRight") < Options[i].length()) legendRight = atof( getString(Options[i], "legendRight").c_str() );
     else if (Options[i].find("legendTextSize") < Options[i].length()) legendTextSize = atof( getString(Options[i], "legendTextSize").c_str() );
@@ -391,6 +394,7 @@ void dataMCplotMaker(TH1F* Data_in, std::vector <std::pair <TH1F*, TH1F*> > Back
     else if (Options[i].find("compareMultiple") < Options[i].length()) compareMultiple = true;
     else if (Options[i].find("ratioOnly") < Options[i].length()) ratioOnly = true;
     else if (Options[i].find("ratioLine") < Options[i].length()) ratioLine = true;
+    else if (Options[i].find("ratioNumerBG") < Options[i].length()) ratioNumerBG = atoi( getString(Options[i], "ratioNumerBG").c_str() );
     else if (Options[i].find("ratio") < Options[i].length()) ratio = atoi( getString(Options[i], "ratio").c_str() );
     else if (Options[i].find("noLumi") < Options[i].length()) noLumi = true;
     else if (Options[i].find("bkgd_width") < Options[i].length()) bkgd_width = atoi( getString(Options[i], "bkgd_width").c_str() ); 
@@ -404,7 +408,6 @@ void dataMCplotMaker(TH1F* Data_in, std::vector <std::pair <TH1F*, TH1F*> > Back
     else std::cout << "Warning: Option not recognized!  Option: " << Options[i] << std::endl;
   }
 
- 
   //Print warnings
   if (normalize && !nostack) std::cout << "Warning! You set option to normalize, but not option --noStack.  This won't do much!" << std::endl;
   if (ratioLine && !noErrBars) std::cout << "Warning!  ratioLine won't do much without noErrBars!" << std::endl;
@@ -689,12 +692,13 @@ void dataMCplotMaker(TH1F* Data_in, std::vector <std::pair <TH1F*, TH1F*> > Back
       if (!nostack) Backgrounds[i]->SetFillColor(Colors[i]);
       Backgrounds[i]->SetMarkerColor(Colors[i]);
       if (noBlackLines || nostack) Backgrounds[i]->SetLineColor(Colors[i]);
-      if (darkColorLines) Backgrounds[i]->SetLineColor(TColor::GetColorDark(Colors[i]));
+      else if (darkColorLines) Backgrounds[i]->SetLineColor(TColor::GetColorDark(Colors[i]));
       else Backgrounds[i]->SetLineColor(kBlack);
       Backgrounds[i]->SetLineWidth(Backgrounds[i]->GetLineWidth()/1.5);
       if (nostack && normalize) Backgrounds[i]->Scale(1.0/Backgrounds[i]->Integral());
       stack->Add(Backgrounds[i]);
-      //Backgrounds[i]->SetLineWidth(2);//would be good to have an option for this
+
+      if (noBlackLines || nostack) Backgrounds[i]->SetLineWidth(2);//would be good to have an option for this
     }
   } 
   else if(noFill == 1){
@@ -751,6 +755,8 @@ void dataMCplotMaker(TH1F* Data_in, std::vector <std::pair <TH1F*, TH1F*> > Back
   }
   else if (!linear) myMax = myMax*20.0;
   else myMax = myMax*2;
+
+  if (setMaxMultiplier != -1) myMax *= setMaxMultiplier; 
 
   stack->SetMinimum(myMin);
   stack->SetMaximum(myMax);
@@ -1037,11 +1043,12 @@ void dataMCplotMaker(TH1F* Data_in, std::vector <std::pair <TH1F*, TH1F*> > Back
   leg->SetTextSize(legendTextSize);
   leg->SetTextFont(42);
   if (!noData && !ratioOnly && !legendCounts) leg->AddEntry(Data, dataName.c_str(), "lep");
-  if (!noData && !ratioOnly && legendCounts) leg->AddEntry(Data, Form("%s [%i]",dataName.c_str(),(int)(Data->GetEntries())), "lep");
+  if (!noData && !ratioOnly && legendCounts) leg->AddEntry(Data, Form("%s [%i]",dataName.c_str(),(int)(Data->Integral())), "lep");
   if (showPercentage) for (int i = Titles.size()-1; i > -1; i--) Titles[i] =  Form("%s [%i%%]", Titles[i].c_str(), percent[i]);
   if (legendCounts) for (int i = Titles.size()-1; i > -1; i--) Titles[i] =  Form("%s [%i]", Titles[i].c_str(), counts[i]);
   if (!dots && !nostack) for (int i = Titles.size()-1; i > -1; i--) leg->AddEntry(Backgrounds[i], Titles[i].c_str(), "f");
-  if (dots || nostack) for (int i = Titles.size()-1; i > -1; i--) leg->AddEntry(Backgrounds[i], Titles[i].c_str(), "L");
+  // if (dots || nostack) for (int i = Titles.size()-1; i > -1; i--) leg->AddEntry(Backgrounds[i], Titles[i].c_str(), "L");
+  if (dots || nostack) for (int i = Titles.size()-1; i > -1; i--) leg->AddEntry(Backgrounds[i], Titles[i].c_str(), "f"); // FIXME
   if (use_signals && !compareMultiple) for (int i = SignalTitles.size()-1; i > -1; i--) leg->AddEntry(Signals[i], SignalTitles[i].c_str(), "P");
   leg->SetFillStyle(0);
   if ( legendBox) leg->SetBorderSize(1);
@@ -1245,17 +1252,21 @@ void dataMCplotMaker(TH1F* Data_in, std::vector <std::pair <TH1F*, TH1F*> > Back
     for (int ib = 1; ib < err_hist->GetNbinsX()+1; ib++){
       float MC_value = 0;
       float MC_error_2 = 0;
+      float data_value = Data->GetBinContent(ib);
+      float data_err = Data->GetBinError(ib);
       for (unsigned int i = 0; i < Backgrounds.size(); i++){
+        if (ratioNumerBG >= 0 && ratioNumerBG == Backgrounds_number[i]) {
+            data_value = Backgrounds[i]->GetBinContent(ib);
+            data_err = pow(Backgrounds[i]->GetBinError(ib), 2);
+        }
         if (ratio >= 0 && ratio != Backgrounds_number[i]) continue; 
         MC_value += Backgrounds[i]->GetBinContent(ib);
         MC_error_2 += pow(Backgrounds[i]->GetBinError(ib), 2);
       }
-      float data_value = Data->GetBinContent(ib);
       float value = (MC_value > 0 ? data_value/MC_value : 1000);
       if (data_value != 0 || MC_value != 0) err_hist->SetBinContent(ib, value);
       if (dontShowZeroRatios && data_value == 0){ err_hist->SetBinContent(ib, -9999);  } 
       float MC_err = sqrt(MC_error_2);
-      float data_err = Data->GetBinError(ib);
       if(!noErrBars) err_hist->SetBinError(ib, (data_value == 0 || MC_value == 0) ? 0.001 : (value * sqrt( pow(MC_err/MC_value, 2) + pow(data_err/data_value, 2)) ) );
       if (Background_systs.size() > 0 && background_syst->GetBinContent(ib) > 0) background_syst_ratio->SetBinError(ib, background_syst->GetBinError(ib)/background_syst->GetBinContent(ib)); 
       else if (Background_systs.size() > 0) background_syst_ratio->SetBinError(ib, 0); 

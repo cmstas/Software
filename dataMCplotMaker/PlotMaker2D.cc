@@ -25,6 +25,7 @@ void PlotMaker2D(TH2F* hist, std::string options_string){
   bool isLogy = 0;
   bool isLogz = 0;
   float zMax = -9999.;
+  float zMin = 9999.;
 
   //Loop over options and change default settings to user-defined settings
   for (unsigned int i = 0; i < Options.size(); i++){
@@ -41,8 +42,12 @@ void PlotMaker2D(TH2F* hist, std::string options_string){
     else if (Options[i].find("isLogy") < Options[i].length()) isLogy = 1;
     else if (Options[i].find("isLogz") < Options[i].length()) isLogz = 1;
     else if (Options[i].find("zMax") < Options[i].length()) zMax = atof( getString(Options[i], "zMax").c_str() );
+    else if (Options[i].find("zMin") < Options[i].length()) zMin = atof( getString(Options[i], "zMin").c_str() );
     else cout << "Warning: Option not recognized!  Option: " << Options[i] << endl;
   }
+
+  // Rainbow colors
+  gStyle->SetPalette(55);
 
   //Fix right margin (too much space)
   if (!color) gStyle->SetPadRightMargin(0.04); 
@@ -58,7 +63,7 @@ void PlotMaker2D(TH2F* hist, std::string options_string){
   hist->SetMarkerSize(1.7);
 
   //Set precision
-  gStyle->SetPaintTextFormat(".3f"); 
+  gStyle->SetPaintTextFormat(".2f"); 
 
   //Set title
   if (title != "") hist->SetTitle(title.c_str()); 
@@ -70,7 +75,12 @@ void PlotMaker2D(TH2F* hist, std::string options_string){
   //Set scientific notation if needed
   if (sciNot != "") gStyle->SetPaintTextFormat(Form("%sE", sciNot.c_str()));
 
-  if (zMax > -9999.) hist->GetZaxis()->SetRangeUser(0,zMax);
+  if ((zMax > -9999.) ^ (zMin < 9999)) {
+    cout << "You only specified one of zMax, zMin. Please specify both! Actually, develop PlotMaker2D so that you can specify only one or both." << endl;
+  } else if((zMax > -9999.) && (zMin < 9999)) {
+      hist->GetZaxis()->SetRangeUser(zMin,zMax);
+  } else {
+  }
 
   if (isLogx) canvas->SetLogx();  
   if (isLogy) canvas->SetLogy();  

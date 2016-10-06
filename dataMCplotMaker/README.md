@@ -79,11 +79,12 @@ Supported flags for "options" string:
   - --preserveBackgroundOrder: to keep the backgrounds in the order you specified, rather than putting the smallest backgrounds on the bottom
   - --noOverflow: do not make the last bin an overflow bin (important if your last bin is already an overflow bin).  Also underflow.
   - --noBlackLines: don't put a black line between the various backgrounds
-  - --noColorLines: make the black line a darker variant of the fill color
+  - --darkColorLines: make the black line a darker variant of the fill color
   - --vLine X: insert a vertical line where the x-axis = X; alternatively to only draw a part of the line, you can do --vLine xpos,ymin,ymax
   - --hLine X: insert a horizontal line where the y-axis = X; alternatively, can do --hLine ypos,xmin,xmax
   - --box xleft,ytop,xright,ybottom: draws a box between top left and bottom right coordinates
   - --setMaximum X: change the y-axis maximum from its default value (originally chosen such that the top of the top-most error bar appears at 3/4 of the histogram's height)
+  - --setMaxMultiplier X: factor to multiply the script-set maximum value for the y-axis
   - --setMinimum X: change the y-axis minimum from its default value (originally chosen to be 90% of the smallest bin's height on the bottom background)
   - --noLegend: to suppress the legend
   - --percentageInBox: visual alternative to showPercentage which puts the percentage in the marker boxes of the legend
@@ -106,6 +107,7 @@ Supported flags for "options" string:
   - --ratioOnly: don't show data on the plot, just use it for the ratio plot on top 
   - --errHistAtBottom: to make the Data/MC comparison histogram at the bottom
   - --ratio N: show the ratio plot with the denominator = the Nth background rather than the sum of backgrounds
+  - --ratioNumerBG N: use the Nth background as the numerator in the ratio plot. If used with the --ratio N option, you can plot the ratio of two arbitrary backgrounds
   - --noErrBars: if by any chance you don't want the data points to have error bars (it may be annoying when error bars are too big) (effective at both main hist and err hist)
   - --compareMultiple: useful for when validating new MC.  Put the old plots under backgrounds and the new plots under signals and enable this option.  This will stack the signals and manipulate the colors so you can see the agreement for each background.  Also prints the ratio for the total.
   - --systFillStyle: change the fill style of the systematics, for example to 3005
