@@ -31,4 +31,4 @@ N.B. The branchNamesFile variable is hardcoded to null, and paranoid is an optio
     - If it complains about a ROOT version mismatch, recompile CORE from your current terminal.  That mismatch has been known to lead to this behavior.
   - If it says that a branch does not exist, you're not doing the Init and/or GetEntry properly in your looper.
 
-E-mail Alex with bug reports or feature requests, george AT physics DOT ucsb
+For bug reports or feature requests, open an issue in github.

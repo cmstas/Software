@@ -17,9 +17,9 @@ Quick start/testing:
 
 ##Instructions for 1D plots
 
-To call the function:
+To call the function (first 3 are required):
 ````
-  dataMCplotMaker(TH1F* data, std::vector < TH1F* > Backgrounds, std::vector < string > Titles, string title, string Title2, std::string Options, std::vector < TH1F* > Signals, std::vector < string > SignalTitles, std::vector < Color_t > colors)
+  dataMCplotMaker(TH1F* data, vector<TH1F*> Backgrounds, vector<string> Bkg_titles, string title = "", string Title2, string Options, vector<TH1F*> Signals, vector<string> SignalTitles, vector<Color_t> colors)
 ````
 
 Mandatory arguments:
