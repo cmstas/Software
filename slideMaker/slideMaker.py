@@ -93,26 +93,28 @@ def addSlidePlotPlot(slideTitle, plotName1, plotName2,drawType="includegraphics"
         if(opts["sizeratio"]):
             size1, size2 = float(opts["sizeratio"])*totalSize, (1.0-float(opts["sizeratio"]))*totalSize
 
-        code = """
-        \\begin{frame}\\frametitle{%s}
+        code = "\\begin{frame}\\frametitle{%s}" % (slideTitle)
+        code += utils.handleStartingOpts(opts)
+        code += """
         \\begin{center}
         \\%s[height=%.2f\\textheight,keepaspectratio]{%s}\\vfill
         \\%s[height=%.2f\\textheight,keepaspectratio]{%s}
         \\end{center}
-        """ % (slideTitle, drawType, size1, plotName1, drawType, size2, plotName2)
+        """ % (drawType, size1, plotName1, drawType, size2, plotName2)
     else:
         totalSize = 0.96
         size1, size2 = 0.5*totalSize, 0.5*totalSize
         if(opts["sizeratio"]):
             size1, size2 = float(opts["sizeratio"])*totalSize, (1.0-float(opts["sizeratio"]))*totalSize
 
-        code = """
-        \\begin{frame}\\frametitle{%s}
+        code = "\\begin{frame}\\frametitle{%s}" % (slideTitle)
+        code += utils.handleStartingOpts(opts)
+        code += """
         \\begin{center}
         \\vspace*{-0.035\\textheight}\\%s[width=%.2f\\textwidth,keepaspectratio]{%s} \\hfill
         \\vspace*{-0.035\\textheight}\\%s[width=%.2f\\textwidth,keepaspectratio]{%s}
         \\end{center}
-        """ % (slideTitle, drawType, size1, plotName1, drawType, size2, plotName2)
+        """ % (drawType, size1, plotName1, drawType, size2, plotName2)
 
     return code
 
@@ -123,6 +125,7 @@ def addSlideTextText(slideTitle, bullets1, bullets2,opts=""):
     if(opts["textbottom"]): pos = "[b]"
 
     code = "\\begin{frame}%s\\frametitle{%s} \n" % (pos,slideTitle)
+    code += utils.handleStartingOpts(opts)
     code += "\\begin{columns}\n  \\begin{column}{0.5\\textwidth} \n"
     code += utils.bulletsToCode(bullets1, opts)
     code += "\\end{column}\n  \\begin{column}{0.5\\textwidth}"
@@ -137,12 +140,14 @@ def addSlideText(slideTitle,bullets,opts=""):
     if(opts["texttop"]): pos = "[t]"
     if(opts["textbottom"]): pos = "[b]"
     code = "\\begin{frame}%s\\frametitle{%s} \n" % (pos,slideTitle)
+    code += utils.handleStartingOpts(opts)
     code += utils.bulletsToCode(bullets, opts)
     return code
 
 def addSlideTextPlot(slideTitle,bullets,plotName,drawType="includegraphics",opts=""):
     opts = utils.parseOptions(opts)
     code = "\\begin{frame}\\frametitle{%s} \n" % (slideTitle)
+    code += utils.handleStartingOpts(opts)
     
     if(opts["sidebyside"]):
         code += "\\begin{columns}\n  \\begin{column}{0.5\\textwidth} \n"
@@ -175,6 +180,7 @@ def addSlideTextPlot(slideTitle,bullets,plotName,drawType="includegraphics",opts
 def addSlideTextPlotPlot(slideTitle,bullets,plotName1,plotName2,drawType="includegraphics",opts=""):
     opts = utils.parseOptions(opts)
     code = "\\begin{frame}\\frametitle{%s} \n" % (slideTitle)
+    code += utils.handleStartingOpts(opts)
 
     if(opts["plottop"]):
         code += "\\begin{center}"
@@ -210,6 +216,7 @@ def addSlideTextPlotPlot(slideTitle,bullets,plotName1,plotName2,drawType="includ
 def addSlideTextPlotPlotPlotPlot(slideTitle,bullets,plotName1,plotName2,plotName3,plotName4,drawType="includegraphics",opts=""):
     opts = utils.parseOptions(opts)
     code = "\\begin{frame}\\frametitle{%s} \n" % (slideTitle)
+    code += utils.handleStartingOpts(opts)
     height = 0.5*utils.textLinesToPlotHeight(utils.bulletNLines(bullets))
     width = 1.0
 
@@ -232,6 +239,7 @@ def addSlideTextPlotPlotPlotPlot(slideTitle,bullets,plotName1,plotName2,plotName
 def addSlideTextPlots(slideTitle,bullets,plots=[],drawType="includegraphics",opts=""):
     opts = utils.parseOptions(opts)
     code = "\\begin{frame}\\frametitle{%s} \n" % (slideTitle)
+    code += utils.handleStartingOpts(opts)
     nRows = int(opts["numrows"]) if opts["numrows"] else 2
     plotChunks = [plots[i:i+nRows] for i in range(0,len(plots),nRows)]
     nCols = len(plotChunks)
@@ -254,6 +262,7 @@ def addSlideTextPlots(slideTitle,bullets,plots=[],drawType="includegraphics",opt
 def addSlideTextPlotPlotPlot(slideTitle,bullets,plotName1,plotName2,plotName3,drawType="includegraphics",opts=""):
     opts = utils.parseOptions(opts)
     code = "\\begin{frame}\\frametitle{%s} \n" % (slideTitle)
+    code += utils.handleStartingOpts(opts)
     height = 0.5*utils.textLinesToPlotHeight(utils.bulletNLines(bullets))
     width = 1.0
 
@@ -267,7 +276,7 @@ def addSlideTextPlotPlotPlot(slideTitle,bullets,plotName1,plotName2,plotName3,dr
 
     code += "\\column{0.55\\textwidth}\n"
     code += "\\centering"
-    code += "\\hspace*{-0.15\\textwidth}\\%s[height=%.2f\\textheight,width=%.2f\\textwidth,keepaspectratio]{%s} \n" % (drawType,1.5*height,width,plotName3)
+    code += "\\hspace*{-0.10\\textwidth}\\%s[height=%.2f\\textheight,width=%.2f\\textwidth,keepaspectratio]{%s} \n" % (drawType,1.5*height,width,plotName3)
 
     code += "\\end{columns}"
     return code
@@ -542,7 +551,9 @@ def makeProvenance():
         \begin{frame}[plain,fragile=singleslide,shrink=75]
         \fontsize{0}{0}\color{white}
         \begin{semiverbatim}
+        ### BEGIN PROVENANCE
         %s
+        ### END PROVENANCE
         \end{semiverbatim}
         \end{frame}
         """ % contents
