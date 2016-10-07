@@ -968,7 +968,7 @@ void dataMCplotMaker(TH1F* Data_in, std::vector <std::pair <TH1F*, TH1F*> > Back
       std::vector<float> bkgTots(Backgrounds.size(), 0.0); // totals along columns, indexed by ib
       std::vector<float> bkgSqErrors(Backgrounds.size(), 0.0);
 
-      buff += "ibin|xlow|xup|";
+      buff += "bin|xrange|";
       for (unsigned int ib = 0; ib < Backgrounds.size(); ib++){
           buff += Titles[ib];
           buff += "|";
@@ -979,7 +979,7 @@ void dataMCplotMaker(TH1F* Data_in, std::vector <std::pair <TH1F*, TH1F*> > Back
           float lowEdge = Data->GetXaxis()->GetBinLowEdge(xbin);
           float upEdge = Data->GetXaxis()->GetBinUpEdge(xbin);
           float dataContent = Data->GetBinContent(xbin);
-          buff += Form("%i|%.1f|%.1f|",xbin,lowEdge,upEdge);
+          buff += Form("%i|[%.1f,%.1f]|",xbin,lowEdge,upEdge);
           
           float bkgTot = 0.0; // total along row
           float bkgSqError = 0.0;
@@ -994,36 +994,36 @@ void dataMCplotMaker(TH1F* Data_in, std::vector <std::pair <TH1F*, TH1F*> > Back
               bkgTots[ib] += binContent;
               bkgSqErrors[ib] += binError*binError;
 
-              buff += Form("%.3f +- %.3f|", binContent, binError);
+              buff += Form("%.2f+-%.2f|", binContent, binError);
           }
 
           float r = dataContent/bkgTot;
           
           // Total columns, ratio
-          buff += Form("%.3f +- %.3f|", bkgTot, sqrt(bkgSqError));
-          buff += Form("%.3f +- %.3f|", dataContent, sqrt(dataContent));
-          buff += Form("%.3f +- %.3f", r, r*sqrt( 1.0/dataContent + bkgSqError/(bkgTot*bkgTot) ));
-
+          buff += Form("%.2f+-%.2f|", bkgTot, sqrt(bkgSqError));
+          buff += Form("%.2f+-%.2f|", dataContent, sqrt(dataContent));
+          buff += Form("%.2f+-%.2f", r, r*sqrt( 1.0/dataContent + bkgSqError/(bkgTot*bkgTot) ));
           buff += "\n";
 
       }
+
+      buff += "\n";
 
       // Totals: Last row
       float totalBkg = 0.;
       float totalBkgSqError = 0.;
       for(auto& num : bkgTots) totalBkg += num;
       for(auto& num : bkgSqErrors) totalBkgSqError += num;
-      buff += " | | |";
+      buff += " | |";
       for (unsigned int ib = 0; ib < Backgrounds.size(); ib++){
-          buff += Form("%.3f +- %.3f", bkgTots[ib], sqrt(bkgSqErrors[ib]));
+          buff += Form("%.2f+-%.2f", bkgTots[ib], sqrt(bkgSqErrors[ib]));
           buff += "|";
       }
 
-      buff += Form("%.3f +- %.3f|", totalBkg, sqrt(totalBkgSqError));
-      buff += Form("%.3f +- %.3f|", Data->GetEntries(), sqrt(Data->GetEntries()));
-
       float r = 1.0*Data->GetEntries()/totalBkg;
-      buff += Form("%.3f +- %.3f", r, r*sqrt( 1.0/Data->GetEntries() + totalBkgSqError/(totalBkg*totalBkg) ));
+      buff += Form("%.2f+-%.2f|", totalBkg, sqrt(totalBkgSqError));
+      buff += Form("%.2f+-%.2f|", Data->GetEntries(), sqrt(Data->GetEntries()));
+      buff += Form("%.2f+-%.2f", r, r*sqrt( 1.0/Data->GetEntries() + totalBkgSqError/(totalBkg*totalBkg) ));
       buff += "\n";
 
       TString tableFileName(outputName.c_str());
