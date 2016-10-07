@@ -323,6 +323,7 @@ void dataMCplotMaker(TH1F* Data_in, std::vector <std::pair <TH1F*, TH1F*> > Back
   bool noTextBetweenPads = 0;
   bool poissonErrorsNoZeros = 0;
   bool makeTable = 0;
+  bool makeRootFile = 0;
 
   //Loop over options and change default settings to user-defined settings
   for (unsigned int i = 0; i < Options.size(); i++){
@@ -405,6 +406,7 @@ void dataMCplotMaker(TH1F* Data_in, std::vector <std::pair <TH1F*, TH1F*> > Back
     else if (Options[i].find("noTextBetweenPads") < Options[i].length()) noTextBetweenPads = true;
     else if (Options[i].find("poissonErrorsNoZeros") < Options[i].length()) poissonErrorsNoZeros = true;
     else if (Options[i].find("makeTable") < Options[i].length()) makeTable = true;
+    else if (Options[i].find("makeRootFile") < Options[i].length()) makeRootFile = true;
     else std::cout << "Warning: Option not recognized!  Option: " << Options[i] << std::endl;
   }
 
@@ -1035,6 +1037,7 @@ void dataMCplotMaker(TH1F* Data_in, std::vector <std::pair <TH1F*, TH1F*> > Back
 
   }
 
+
   //Legend
   TLegend *leg;
   if ((Backgrounds.size()+Signals.size() == 1 || Backgrounds.size()+Signals.size() == 2) && (noData || noRatioPlot || ratioOnly) && !compareMultiple) leg = new TLegend(0.7+legendRight,0.79+legendUp,0.92+legendRight+legendWider_,0.87+legendUp+legendTaller_); 
@@ -1310,6 +1313,16 @@ void dataMCplotMaker(TH1F* Data_in, std::vector <std::pair <TH1F*, TH1F*> > Back
     if (outputName.find(".") < outputName.length()) c0.Print(outputName.c_str());
     else if (png) c0.Print(Form("%s.png", outputName.c_str()));
     else c0.Print(Form("%s.pdf", outputName.c_str()));
+  }
+
+  if (makeRootFile) {
+      TFile *outFile = new TFile(Form("%s.root", outputName.c_str()), "RECREATE");
+      Data->Write();
+      for (unsigned int ib = 0; ib < Backgrounds.size(); ib++){
+          Backgrounds[ib]->Write();
+      }
+      c0.Write();
+      outFile->Close();
   }
 
   //Clean up

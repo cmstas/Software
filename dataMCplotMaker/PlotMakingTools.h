@@ -9,6 +9,7 @@
 #include <cstring>
 #include "TH1F.h"
 #include "TCanvas.h"
+#include "TFile.h"
 #include "THStack.h"
 #include "TStyle.h"
 #include "TLegend.h"
