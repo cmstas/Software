@@ -969,6 +969,7 @@ void dataMCplotMaker(TH1F* Data_in, std::vector <std::pair <TH1F*, TH1F*> > Back
       TString buff = "";
       std::vector<float> bkgTots(Backgrounds.size(), 0.0); // totals along columns, indexed by ib
       std::vector<float> bkgSqErrors(Backgrounds.size(), 0.0);
+      int totData = Data->Integral(0,Data->GetNbinsX()+doOverflow);
 
       buff += "bin|xrange|";
       for (unsigned int ib = 0; ib < Backgrounds.size(); ib++){
@@ -1022,10 +1023,10 @@ void dataMCplotMaker(TH1F* Data_in, std::vector <std::pair <TH1F*, TH1F*> > Back
           buff += "|";
       }
 
-      float r = 1.0*Data->GetEntries()/totalBkg;
+      float r = 1.0*totData/totalBkg;
       buff += Form("%.2f+-%.2f|", totalBkg, sqrt(totalBkgSqError));
-      buff += Form("%.2f+-%.2f|", Data->GetEntries(), sqrt(Data->GetEntries()));
-      buff += Form("%.2f+-%.2f", r, r*sqrt( 1.0/Data->GetEntries() + totalBkgSqError/(totalBkg*totalBkg) ));
+      buff += Form("%.2f+-%.2f|", 1.0*totData, sqrt(totData));
+      buff += Form("%.2f+-%.2f", r, r*sqrt( 1.0/totData + totalBkgSqError/(totalBkg*totalBkg) ));
       buff += "\n";
 
       TString tableFileName(outputName.c_str());
