@@ -969,7 +969,7 @@ void dataMCplotMaker(TH1F* Data_in, std::vector <std::pair <TH1F*, TH1F*> > Back
       TString buff = "";
       std::vector<float> bkgTots(Backgrounds.size(), 0.0); // totals along columns, indexed by ib
       std::vector<float> bkgSqErrors(Backgrounds.size(), 0.0);
-      int totData = Data->Integral(0,Data->GetNbinsX()+doOverflow);
+      float totData = 0;
 
       buff += "bin|xrange|";
       for (unsigned int ib = 0; ib < Backgrounds.size(); ib++){
@@ -982,6 +982,7 @@ void dataMCplotMaker(TH1F* Data_in, std::vector <std::pair <TH1F*, TH1F*> > Back
           float lowEdge = Data->GetXaxis()->GetBinLowEdge(xbin);
           float upEdge = Data->GetXaxis()->GetBinUpEdge(xbin);
           float dataContent = Data->GetBinContent(xbin);
+          totData += dataContent;
           buff += Form("%i|[%.1f,%.1f]|",xbin,lowEdge,upEdge);
           
           float bkgTot = 0.0; // total along row
