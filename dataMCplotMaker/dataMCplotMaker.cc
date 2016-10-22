@@ -293,6 +293,7 @@ void dataMCplotMaker(TH1F* Data_in, std::vector <std::pair <TH1F*, TH1F*> > Back
   bool noOutput = false;
   bool noErrBars = false;
   bool noBlackLines = false;
+  bool totalBlackLine = false;
   bool darkColorLines = false;
   bool histoErrors = false;
   bool legendBox = false;
@@ -331,6 +332,7 @@ void dataMCplotMaker(TH1F* Data_in, std::vector <std::pair <TH1F*, TH1F*> > Back
     else if (Options[i].find("preserveBackgroundOrder") < Options[i].length()) preserveBackgroundOrder = 1; 
     else if (Options[i].find("systFillStyle") < Options[i].length()) systFillStyle = atoi( getString(Options[i], "systFillStyle").c_str() );
     else if (Options[i].find("noBlackLines") < Options[i].length()) noBlackLines = 1; 
+    else if (Options[i].find("totalBlackLine") < Options[i].length()) totalBlackLine = 1; 
     else if (Options[i].find("darkColorLines") < Options[i].length()) darkColorLines = 1; 
     else if (Options[i].find("noStack") < Options[i].length()) nostack = 1; 
     else if (Options[i].find("lumiUnit") < Options[i].length()) lumiUnit = getString(Options[i], "lumiUnit"); 
@@ -700,6 +702,7 @@ void dataMCplotMaker(TH1F* Data_in, std::vector <std::pair <TH1F*, TH1F*> > Back
       if (nostack && normalize) Backgrounds[i]->Scale(1.0/Backgrounds[i]->Integral());
       stack->Add(Backgrounds[i]);
 
+      if (totalBlackLine) Backgrounds[i]->SetLineWidth(0);
       if (noBlackLines || nostack) Backgrounds[i]->SetLineWidth(2);//would be good to have an option for this
     }
   } 
@@ -717,6 +720,13 @@ void dataMCplotMaker(TH1F* Data_in, std::vector <std::pair <TH1F*, TH1F*> > Back
     for (unsigned int i = 0; i < Backgrounds.size(); i++){
       Backgrounds[i]->SetMarkerColor(Colors[i]);
     }
+  }
+
+  if (totalBlackLine) {
+      if (Backgrounds.size()) {
+          Backgrounds[Backgrounds.size()-1]->SetLineWidth(2);
+          Backgrounds[Backgrounds.size()-1]->SetLineColor(kBlack);
+      }
   }
 
   //Try this

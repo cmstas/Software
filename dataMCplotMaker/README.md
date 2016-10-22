@@ -79,6 +79,7 @@ Supported flags for "options" string:
   - --preserveBackgroundOrder: to keep the backgrounds in the order you specified, rather than putting the smallest backgrounds on the bottom
   - --noOverflow: do not make the last bin an overflow bin (important if your last bin is already an overflow bin).  Also underflow.
   - --noBlackLines: don't put a black line between the various backgrounds
+  - --totalBlackLine: put a black line only on the total background
   - --darkColorLines: make the black line a darker variant of the fill color
   - --vLine X: insert a vertical line where the x-axis = X; alternatively to only draw a part of the line, you can do --vLine xpos,ymin,ymax
   - --hLine X: insert a horizontal line where the y-axis = X; alternatively, can do --hLine ypos,xmin,xmax

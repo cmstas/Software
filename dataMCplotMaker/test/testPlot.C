@@ -35,7 +35,8 @@ void testPlot() {
     common += " --vLine 1.5, 0.1, 120"; // vertical line at x=1.5 from y=0.1 to y=120
     common += " --hLine 200 "; // horizontal line at y=200 across whole range
     common += " --boxLines 3.0,90,4.5,10.0 "; // box with top left corner at x,y=3.0,90 and bottom right at 4.5,10.0
-    common += " --darkColorLines"; // make the black lines for filled histograms into darker variants of the fill color
+    // common += " --darkColorLines"; // make the black lines for filled histograms into darker variants of the fill color
+    common += " --totalBlackLine"; // make the black lines for filled histograms into darker variants of the fill color
     common += " --legendCounts"; // show counts for backgrounds in legend in brackets
     common += " --type Preliminary";
     common += " --poissonErrorsNoZeros"; // proper asymmetric errors
