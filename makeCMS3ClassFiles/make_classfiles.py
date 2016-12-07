@@ -210,7 +210,7 @@ if __name__ == "__main__":
         alias = d_bname_to_info[bname]["alias"]
         typ = d_bname_to_info[bname]["type"]
         cname = d_bname_to_info[bname]["class"]
-        buff += '\t%s %s%s_;\n' % (typ.replace("const","").strip(),"*" if "LorentzVector" in cname else "", alias) # NJA
+        buff += '\t%s %s_;\n' % (typ.replace("const","").strip(), alias) # NJA
         buff += '\tTBranch *%s_branch;\n' % (alias)
         buff += '\tbool %s_isLoaded;\n' % (alias)
     buff += 'public:\n'
@@ -331,7 +331,7 @@ if __name__ == "__main__":
         buff += "\t\t}\n"
         buff += "\t\t%s_isLoaded = true;\n" % (alias)
         buff += "\t}\n"
-        buff += "\treturn %s%s_;\n" % ("*" if "LorentzVector" in cname else "", alias)
+        buff += "\treturn %s_;\n" % (alias)
         buff += "}\n"
 
     if haveHLTInfo:
