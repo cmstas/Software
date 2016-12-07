@@ -419,6 +419,7 @@ if __name__ == "__main__":
         buff += "\t\treturn taus_pf_IDs().at(tauIndex).at(idIndex);\n"
         buff += "\telse {\n"
         buff += "\tstd::cout << \"Cannot find tau # \" << tauIndex << std::endl;\n"
+        buff += "\treturn 0;\n"
         buff += "\t}\n"
         buff += "}\n"        
 
@@ -438,6 +439,7 @@ if __name__ == "__main__":
         buff += "\t\treturn taus_pf_IDs().at(jetIndex).at(bDiscriminatorIndex);\n"
         buff += "\telse {\n"
         buff += "\tstd::cout << \"Cannot find jet # \" << jetIndex << std::endl;\n"
+        buff += "\treturn 0;\n"        
         buff += "\t}\n"
         buff += "}\n"        
         
