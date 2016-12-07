@@ -467,6 +467,16 @@ if __name__ == "__main__":
         alias = d_bname_to_info[bname]["alias"]
         typ = d_bname_to_info[bname]["type"]
         buff += "\t%s &%s() { return %s.%s(); }\n" % (typ, alias, objectname, alias)
+    if haveHLTInfo:
+        buff += "\tbool passHLTTrigger(TString trigName) {return cms3.passHLTTrigger(trigName);}\n"
+    if haveHLT8E29Info:
+        buff += "\tbool passHLT8E29Trigger(TString trigName) {return cms3.passHLT8E29Trigger(trigName);}\n"
+    if haveL1Info:
+        buff += "\tbool passL1Trigger(TString trigName) {return cms3.passL1Trigger(trigName);}\n"
+    if haveTauIDInfo:
+        buff += "\tfloat passTauID(TString idName, unsigned int tauIndex) {return cms3.passTauID(idName, tauIndex);}\n"
+    if haveBtagInfo:
+        buff += "\tfloat getbtagvalue(TString bDiscriminatorName, unsigned int jetIndex) {return cms3.getbtagvalue(bDiscriminatorName, jetIndex);}\n" 
     buff += "}\n"
 
     with open("%s.cc" % classname, "w") as fhout:
