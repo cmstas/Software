@@ -3,11 +3,13 @@
 
 #include <string>
 #include <iostream>
+#include <fstream>
 #include <vector>
 #include <algorithm>
 #include <cstring>
 #include "TH1F.h"
 #include "TCanvas.h"
+#include "TFile.h"
 #include "THStack.h"
 #include "TStyle.h"
 #include "TLegend.h"

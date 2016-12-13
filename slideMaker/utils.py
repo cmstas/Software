@@ -2,7 +2,7 @@
 import commands, os, sys, json, random
 
 basepath = os.path.dirname(os.path.abspath(__file__))
-listOfOptions = ["dump", "copy", "compile", "graphicspaths", "shorttitle", "themecolor", "sidebyside", "modernfont", "noarrowhead","rotate","drawtype","crayon","shadow","makegrid","makegui","dashed","brace","flip","casual","texttop", "textbottom", "resetnumbering", "vertical", "sizeratio","textsize","movedowntext","plottop","fithorizontal","numrows","plotsleft", "font","provenance"]
+listOfOptions = ["dump", "copy", "compile", "graphicspaths", "shorttitle", "themecolor", "sidebyside", "modernfont", "noarrowhead","rotate","drawtype","crayon","shadow","makegrid","makegui","dashed","brace","flip","casual","texttop", "textbottom", "resetnumbering", "vertical", "sizeratio","textsize","movedowntext","plottop","fithorizontal","numrows","plotsleft", "font","provenance", "label"]
 def parseOptions(optString):
     opts = { }
     for optName in listOfOptions:
@@ -178,6 +178,14 @@ def getCircleCode(obj):
     """ % (midpoint[0], midpoint[1], color,type, rad)
 
     return code
+
+def handleStartingOpts(opts):
+    tmp = ""
+    if opts["label"]:
+        tmp += "\\label{%s}" % opts["label"]
+
+    return tmp
+
 
 def cleanTex(text):
     text = text.replace("\\","@")

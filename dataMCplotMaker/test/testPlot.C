@@ -29,15 +29,19 @@ void testPlot() {
     common += " --legendTaller -0.05 ";
     common += " --outOfFrame"; // move CMS and lumi stuff to top of frame
     common += " --legendUp 0.1";
+    common += " --legendRight -0.1";
     common += " --percentageInBox  "; // show percentage of backgrounds out of total
     common += " --hLine 100,1,3"; // horizontal line at y=100 from x=1 to x=3
     common += " --vLine 1.5, 0.1, 120"; // vertical line at x=1.5 from y=0.1 to y=120
     common += " --hLine 200 "; // horizontal line at y=200 across whole range
     common += " --boxLines 3.0,90,4.5,10.0 "; // box with top left corner at x,y=3.0,90 and bottom right at 4.5,10.0
-    common += " --darkColorLines"; // make the black lines for filled histograms into darker variants of the fill color
+    // common += " --darkColorLines"; // make the black lines for filled histograms into darker variants of the fill color
+    common += " --totalBlackLine"; // make the black lines for filled histograms into darker variants of the fill color
     common += " --legendCounts"; // show counts for backgrounds in legend in brackets
     common += " --type Preliminary";
     common += " --poissonErrorsNoZeros"; // proper asymmetric errors
+    common += " --makeTable"; // print out table to text file
+    common += " --makeRootFile"; // make ROOT file
     common += " --isLinear";
 
     dataMCplotMaker(data,h1D_vec,titles,"this is a title","",common+" --outputName h1D_vec.pdf");

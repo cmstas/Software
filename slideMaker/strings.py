@@ -36,10 +36,12 @@ commonHeader = """
 
 
 \\newcommand{\\met}{\\slashed{E}_T}
+\\newcommand{\\ifb}{fb${}^{-1}$}
 \\newcommand{\\pt}{p_{T}}
 \\newcommand{\\Ht}{H_{T}}
 \\newcommand{\\mt}{m_{T}}
 \\newcommand{\\mtmin}{m_{T}^\\text{min}}
+\\newcommand{\\ttbar}{t\\bar{t}}
 \\newcommand{\\red}[1]{\\textcolor{red}{#1}}
 \\newcommand{\\babyblue}[1]{\\textcolor{babyblue}{#1}}
 \\newcommand{\\blue}[1]{\\textcolor{blue}{#1}}
