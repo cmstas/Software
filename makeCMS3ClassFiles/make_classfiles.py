@@ -435,7 +435,7 @@ if __name__ == "__main__":
         buff += "\t\tstd::cout << \"Cannot find b-discriminator \" << bDiscriminatorName << std::endl;\n"
         buff += "\t\treturn 0;\n"
         buff += "\t}\n"
-        buff += "\tif (jetIndex < pfjets_bDiscriminatorNames().size())\n"
+        buff += "\tif (jetIndex < pfjets_bDiscriminators().size())\n"
         buff += "\t\treturn pfjets_bDiscriminators().at(jetIndex).at(bDiscriminatorIndex);\n"
         buff += "\telse {\n"
         buff += "\tstd::cout << \"Cannot find jet # \" << jetIndex << std::endl;\n"
