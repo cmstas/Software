@@ -275,7 +275,7 @@ if __name__ == "__main__":
     for bname in d_bname_to_info:
         alias = d_bname_to_info[bname]["alias"]
         cname = d_bname_to_info[bname]["class"]
-        if not("TBits" in cname or "LorentzVector" in cname): continue # NOTE
+        if not(("TBits" in cname or "LorentzVector" in cname) and not "vector<vector" in cname): continue # NOTE
         buff += '\t%s_branch = 0;\n' % (alias)
         if have_aliases:
             buff += '\tif (tree->GetAlias("%s") != 0) {\n' % (alias)
@@ -290,7 +290,7 @@ if __name__ == "__main__":
     for bname in d_bname_to_info:
         alias = d_bname_to_info[bname]["alias"]
         cname = d_bname_to_info[bname]["class"]
-        if "TBits" in cname or "LorentzVector" in cname: continue # NOTE
+        if ("TBits" in cname or "LorentzVector" in cname) and not "vector<vector" in cname: continue # NOTE
         buff += '\t%s_branch = 0;\n' % (alias)
         if have_aliases:
             buff += '\tif (tree->GetAlias("%s") != 0) {\n' % (alias)
