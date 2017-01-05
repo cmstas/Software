@@ -205,33 +205,33 @@ if __name__ == "__main__":
     buff += 'class %s {\n' % classname
     buff += 'private:\n'
     buff += 'protected:\n'
-    buff += '\tunsigned int index;\n'
+    buff += '  unsigned int index;\n'
     for bname in d_bname_to_info:        
         alias = d_bname_to_info[bname]["alias"]
         typ = d_bname_to_info[bname]["type"]
         cname = d_bname_to_info[bname]["class"]
-        buff += '\t%s %s_;\n' % (typ.replace("const","").strip(), alias) # NJA
-        buff += '\tTBranch *%s_branch;\n' % (alias)
-        buff += '\tbool %s_isLoaded;\n' % (alias)
+        buff += '  %s %s_;\n' % (typ.replace("const","").strip(), alias) # NJA
+        buff += '  TBranch *%s_branch;\n' % (alias)
+        buff += '  bool %s_isLoaded;\n' % (alias)
     buff += 'public:\n'
-    buff += '\tvoid Init(TTree *tree);\n'
-    buff += '\tvoid GetEntry(unsigned int idx);\n'
-    buff += '\tvoid LoadAllBranches();\n'
+    buff += '  void Init(TTree *tree);\n'
+    buff += '  void GetEntry(unsigned int idx);\n'
+    buff += '  void LoadAllBranches();\n'
     for bname in d_bname_to_info:
         alias = d_bname_to_info[bname]["alias"]
         typ = d_bname_to_info[bname]["type"]
-        buff += '\t%s &%s();\n' % (typ, alias)
+        buff += '  %s &%s();\n' % (typ, alias)
     if haveHLTInfo:
-        buff += "\tbool passHLTTrigger(TString trigName);\n"
+        buff += "  bool passHLTTrigger(TString trigName);\n"
     if haveHLT8E29Info:
-        buff += "\tbool passHLT8E29Trigger(TString trigName);\n"
+        buff += "  bool passHLT8E29Trigger(TString trigName);\n"
     if haveL1Info:
-        buff += "\tbool passL1Trigger(TString trigName);\n"
+        buff += "  bool passL1Trigger(TString trigName);\n"
     if haveTauIDInfo:
-        buff += "\tfloat passTauID(TString idName, unsigned int tauIndex);\n"
+        buff += "  float passTauID(TString idName, unsigned int tauIndex);\n"
     if haveBtagInfo:
-        buff += "\tfloat getbtagvalue(TString bDiscriminatorName, unsigned int jetIndex);\n" 
-    buff += "\tstatic void progress( int nEventsTotal, int nEventsChain );\n"
+        buff += "  float getbtagvalue(TString bDiscriminatorName, unsigned int jetIndex);\n" 
+    buff += "  static void progress( int nEventsTotal, int nEventsChain );\n"
     buff += '};\n\n'
 
     buff += "#ifndef __CINT__\n"
@@ -243,17 +243,17 @@ if __name__ == "__main__":
     for bname in d_bname_to_info:
         alias = d_bname_to_info[bname]["alias"]
         typ = d_bname_to_info[bname]["type"]
-        buff += "\t%s &%s();\n" % (typ, alias)
+        buff += "  %s &%s();\n" % (typ, alias)
     if haveHLTInfo:
-        buff += "\tbool passHLTTrigger(TString trigName);"
+        buff += "  bool passHLTTrigger(TString trigName);\n"
     if haveHLT8E29Info:
-        buff += "\tbool passHLT8E29Trigger(TString trigName);"
+        buff += "  bool passHLT8E29Trigger(TString trigName);\n"
     if haveL1Info:
-        buff += "\tbool passL1Trigger(TString trigName);"
+        buff += "  bool passL1Trigger(TString trigName);\n"
     if haveTauIDInfo:
-        buff += "\tfloat passTauID(TString idName, unsigned int tauIndex);"
+        buff += "  float passTauID(TString idName, unsigned int tauIndex);\n"
     if haveBtagInfo:
-        buff += "\tfloat getbtagvalue(TString bDiscriminatorName, unsigned int jetIndex);" 
+        buff += "  float getbtagvalue(TString bDiscriminatorName, unsigned int jetIndex);\n" 
     buff += "}\n"
     buff += "#endif\n"
 
@@ -276,45 +276,45 @@ if __name__ == "__main__":
         alias = d_bname_to_info[bname]["alias"]
         cname = d_bname_to_info[bname]["class"]
         if not(("TBits" in cname or "LorentzVector" in cname) and not "vector<vector" in cname): continue # NOTE
-        buff += '\t%s_branch = 0;\n' % (alias)
+        buff += '  %s_branch = 0;\n' % (alias)
         if have_aliases:
-            buff += '\tif (tree->GetAlias("%s") != 0) {\n' % (alias)
-            buff += '\t\t%s_branch = tree->GetBranch(tree->GetAlias("%s"));\n' % (alias, alias)
+            buff += '  if (tree->GetAlias("%s") != 0) {\n' % (alias)
+            buff += '    %s_branch = tree->GetBranch(tree->GetAlias("%s"));\n' % (alias, alias)
         else:
-            buff += '\tif (tree->GetBranch("%s") != 0) {\n' % (alias)
-            buff += '\t\t%s_branch = tree->GetBranch("%s");\n' % (alias, alias)
-        buff += '\t\tif (%s_branch) { %s_branch->SetAddress(&%s_); }\n' % (alias, alias, alias)
-        buff += '\t}\n'
+            buff += '  if (tree->GetBranch("%s") != 0) {\n' % (alias)
+            buff += '    %s_branch = tree->GetBranch("%s");\n' % (alias, alias)
+        buff += '    if (%s_branch) { %s_branch->SetAddress(&%s_); }\n' % (alias, alias, alias)
+        buff += '  }\n'
 
-    buff += "\ttree->SetMakeClass(1);\n"
+    buff += "  tree->SetMakeClass(1);\n"
     for bname in d_bname_to_info:
         alias = d_bname_to_info[bname]["alias"]
         cname = d_bname_to_info[bname]["class"]
         if ("TBits" in cname or "LorentzVector" in cname) and not "vector<vector" in cname: continue # NOTE
-        buff += '\t%s_branch = 0;\n' % (alias)
+        buff += '  %s_branch = 0;\n' % (alias)
         if have_aliases:
-            buff += '\tif (tree->GetAlias("%s") != 0) {\n' % (alias)
-            buff += '\t\t%s_branch = tree->GetBranch(tree->GetAlias("%s"));\n' % (alias, alias)
+            buff += '  if (tree->GetAlias("%s") != 0) {\n' % (alias)
+            buff += '    %s_branch = tree->GetBranch(tree->GetAlias("%s"));\n' % (alias, alias)
         else:
-            buff += '\tif (tree->GetBranch("%s") != 0) {\n' % (alias)
-            buff += '\t\t%s_branch = tree->GetBranch("%s");\n' % (alias, alias)
-        buff += '\t\tif (%s_branch) { %s_branch->SetAddress(&%s_); }\n' % (alias, alias, alias)
-        buff += '\t}\n'
+            buff += '  if (tree->GetBranch("%s") != 0) {\n' % (alias)
+            buff += '    %s_branch = tree->GetBranch("%s");\n' % (alias, alias)
+        buff += '    if (%s_branch) { %s_branch->SetAddress(&%s_); }\n' % (alias, alias, alias)
+        buff += '  }\n'
 
-    buff += '\ttree->SetMakeClass(0);\n'
+    buff += '  tree->SetMakeClass(0);\n'
     buff += "}\n"
 
     buff += "void %s::GetEntry(unsigned int idx) {\n" % classname
-    buff += "\tindex = idx;\n"
+    buff += "  index = idx;\n"
     for bname in d_bname_to_info:
         alias = d_bname_to_info[bname]["alias"]
-        buff += '\t%s_isLoaded = false;\n' % (alias)
+        buff += '  %s_isLoaded = false;\n' % (alias)
     buff += "}\n"
 
     buff += "void %s::LoadAllBranches() {\n" % classname
     for bname in d_bname_to_info:
         alias = d_bname_to_info[bname]["alias"]
-        buff += '\tif (%s_branch != 0) %s();\n' % (alias, alias)
+        buff += '  if (%s_branch != 0) %s();\n' % (alias, alias)
     buff += "}\n"
     
     for bname in d_bname_to_info:
@@ -322,60 +322,60 @@ if __name__ == "__main__":
         typ = d_bname_to_info[bname]["type"]
         cname = d_bname_to_info[bname]["class"]
         buff += "%s &%s::%s() {\n" % (typ, classname, alias)
-        buff += "\tif (not %s_isLoaded) {\n" % (alias)
-        buff += "\t\tif (%s_branch != 0) {\n" % (alias)
-        buff += "\t\t\t%s_branch->GetEntry(index);\n" % (alias)
-        buff += "\t\t} else {\n"
-        buff += '\t\t\tprintf("branch %s_branch does not exist!\\n");\n' % (alias)
-        buff += "\t\t\texit(1);\n"
-        buff += "\t\t}\n"
-        buff += "\t\t%s_isLoaded = true;\n" % (alias)
-        buff += "\t}\n"
-        buff += "\treturn %s_;\n" % (alias)
+        buff += "  if (not %s_isLoaded) {\n" % (alias)
+        buff += "    if (%s_branch != 0) {\n" % (alias)
+        buff += "      %s_branch->GetEntry(index);\n" % (alias)
+        buff += "    } else {\n"
+        buff += '      printf("branch %s_branch does not exist!\\n");\n' % (alias)
+        buff += "      exit(1);\n"
+        buff += "    }\n"
+        buff += "    %s_isLoaded = true;\n" % (alias)
+        buff += "  }\n"
+        buff += "  return %s_;\n" % (alias)
         buff += "}\n"
 
     if haveHLTInfo:
         buff += "bool %s::passHLTTrigger(TString trigName) {\n" % (classname)
-        buff += "\tint trigIndex;\n"
-        buff += "\tstd::vector<TString>::const_iterator begin_it = hlt_trigNames().begin();\n"
-        buff += "\tstd::vector<TString>::const_iterator end_it = hlt_trigNames().end();\n"
-        buff += "\tstd::vector<TString>::const_iterator found_it = std::find(begin_it, end_it, trigName);\n"
-        buff += "\tif (found_it != end_it)\n"
-        buff += "\t\ttrigIndex = found_it - begin_it;\n"
-        buff += "\telse {\n"
-        buff += "\t\tstd::cout << \"Cannot find trigger \" << trigName << std::endl;\n"
-        buff += "\t\treturn 0;\n"
-        buff += "\t}\n"
-        buff += "\treturn hlt_bits().TestBitNumber(trigIndex);\n"
+        buff += "  int trigIndex;\n"
+        buff += "  std::vector<TString>::const_iterator begin_it = hlt_trigNames().begin();\n"
+        buff += "  std::vector<TString>::const_iterator end_it = hlt_trigNames().end();\n"
+        buff += "  std::vector<TString>::const_iterator found_it = std::find(begin_it, end_it, trigName);\n"
+        buff += "  if (found_it != end_it)\n"
+        buff += "    trigIndex = found_it - begin_it;\n"
+        buff += "  else {\n"
+        buff += "    std::cout << \"Cannot find trigger \" << trigName << std::endl;\n"
+        buff += "    return 0;\n"
+        buff += "  }\n"
+        buff += "  return hlt_bits().TestBitNumber(trigIndex);\n"
         buff += "}\n"
 
     if haveHLT8E29Info:
         buff += "bool %s::passHLT8E29Trigger(TString trigName) {\n" % (classname)
-        buff += "\tint trigIndex;\n"
-        buff += "\tstd::vector<TString>::const_iterator begin_it = hlt8e29_trigNames().begin()\n;"
-        buff += "\tstd::vector<TString>::const_iterator end_it = hlt8e29_trigNames().end();\n"
-        buff += "\tstd::vector<TString>::const_iterator found_it = std::find(begin_it, end_it, trigName);\n"
-        buff += "\tif (found_it != end_it)\n"
-        buff += "\t\ttrigIndex = found_it - begin_it;\n"
-        buff += "\telse {\n"
-        buff += "\t\tstd::cout << \"Cannot find trigger \" << trigName << std::endl;\n"
-        buff += "\t\treturn 0;\n"
-        buff += "\t}\n"
-        buff += "\treturn hlt8e29_bits().TestBitNumber(trigIndex);\n"
+        buff += "  int trigIndex;\n"
+        buff += "  std::vector<TString>::const_iterator begin_it = hlt8e29_trigNames().begin()\n;"
+        buff += "  std::vector<TString>::const_iterator end_it = hlt8e29_trigNames().end();\n"
+        buff += "  std::vector<TString>::const_iterator found_it = std::find(begin_it, end_it, trigName);\n"
+        buff += "  if (found_it != end_it)\n"
+        buff += "    trigIndex = found_it - begin_it;\n"
+        buff += "  else {\n"
+        buff += "    std::cout << \"Cannot find trigger \" << trigName << std::endl;\n"
+        buff += "    return 0;\n"
+        buff += "  }\n"
+        buff += "  return hlt8e29_bits().TestBitNumber(trigIndex);\n"
         buff += "}\n"
 
     if haveL1Info:
         buff += "bool %s::passL1Trigger(TString trigName) {\n" % (classname)
-        buff += "\tint trigIndex;\n"
-        buff += "\tstd::vector<TString>::const_iterator begin_it = l1_trigNames().begin();\n"
-        buff += "\tstd::vector<TString>::const_iterator end_it = l1_trigNames().end();\n"
-        buff += "\tstd::vector<TString>::const_iterator found_it = std::find(begin_it, end_it, trigName);\n"
-        buff += "\tif (found_it != end_it)\n"
-        buff += "\t\ttrigIndex = found_it - begin_it;\n"
-        buff += "\telse {\n"
-        buff += "\t\tstd::cout << \"Cannot find trigger \" << trigName << std::endl;\n"
-        buff += "\t\treturn 0;\n"
-        buff += "\t}\n"
+        buff += "  int trigIndex;\n"
+        buff += "  std::vector<TString>::const_iterator begin_it = l1_trigNames().begin();\n"
+        buff += "  std::vector<TString>::const_iterator end_it = l1_trigNames().end();\n"
+        buff += "  std::vector<TString>::const_iterator found_it = std::find(begin_it, end_it, trigName);\n"
+        buff += "  if (found_it != end_it)\n"
+        buff += "    trigIndex = found_it - begin_it;\n"
+        buff += "  else {\n"
+        buff += "    std::cout << \"Cannot find trigger \" << trigName << std::endl;\n"
+        buff += "    return 0;\n"
+        buff += "  }\n"
         list_of_aliases = []
         for iala, ala in enaliases:
             alias = ala.GetName()
@@ -389,58 +389,58 @@ if __name__ == "__main__":
             list_of_aliases.append(alias)
         for iala, ala in enumerate(sorted(list_of_aliases)):
             if iala == 0:
-                buff += "\tif (trigIndex <= 31) {\n"
-                buff += "\t\tunsigned int bitmask = 1;\n"
-                buff += "\t\tbitmask <<= trigIndex;\n"
-                buff += "\t\treturn %s() & bitmask;\n" % (ala)
-                buff += "\t}\n"
+                buff += "  if (trigIndex <= 31) {\n"
+                buff += "    unsigned int bitmask = 1;\n"
+                buff += "    bitmask <<= trigIndex;\n"
+                buff += "    return %s() & bitmask;\n" % (ala)
+                buff += "  }\n"
             else:
-                buff += "\tif (trigIndex >= %d && trigIndex <= %d) {\n" % (32*iala, 32+iala+31)
-                buff += "\t\tunsigned int bitmask = 1;\n"
-                buff += "\t\tbitmask <<= (trigIndex - %d);\n" % (32*iala)
-                buff += "\t\treturn %s() & bitmask;\n" % (ala)
-                buff += "\t}\n"                
-        buff += "\treturn 0;\n"        
+                buff += "  if (trigIndex >= %d && trigIndex <= %d) {\n" % (32*iala, 32+iala+31)
+                buff += "    unsigned int bitmask = 1;\n"
+                buff += "    bitmask <<= (trigIndex - %d);\n" % (32*iala)
+                buff += "    return %s() & bitmask;\n" % (ala)
+                buff += "  }\n"                
+        buff += "  return 0;\n"        
         buff += "}\n"
 
     if haveTauIDInfo:
         buff += "float %s::passTauID(TString idName, unsigned int tauIndex) {\n" % (classname)
-        buff += "\tint idIndex;\n"
-        buff += "\tstd::vector<TString>::const_iterator begin_it = taus_pf_IDnames().begin();\n"
-        buff += "\tstd::vector<TString>::const_iterator end_it = taus_pf_IDnames().end();\n"
-        buff += "\tstd::vector<TString>::const_iterator found_it = std::find(begin_it, end_it, idName);\n"
-        buff += "\tif (found_it != end_it)\n"
-        buff += "\t\tidIndex = found_it - begin_it;\n"
-        buff += "\telse {\n"
-        buff += "\t\tstd::cout << \"Cannot find tau ID \" << idName << std::endl;\n"
-        buff += "\t\treturn 0;\n"
-        buff += "\t}\n"
-        buff += "\tif (tauIndex < taus_pf_IDs().size())\n"
-        buff += "\t\treturn taus_pf_IDs().at(tauIndex).at(idIndex);\n"
-        buff += "\telse {\n"
-        buff += "\tstd::cout << \"Cannot find tau # \" << tauIndex << std::endl;\n"
-        buff += "\treturn 0;\n"
-        buff += "\t}\n"
+        buff += "  int idIndex;\n"
+        buff += "  std::vector<TString>::const_iterator begin_it = taus_pf_IDnames().begin();\n"
+        buff += "  std::vector<TString>::const_iterator end_it = taus_pf_IDnames().end();\n"
+        buff += "  std::vector<TString>::const_iterator found_it = std::find(begin_it, end_it, idName);\n"
+        buff += "  if (found_it != end_it)\n"
+        buff += "    idIndex = found_it - begin_it;\n"
+        buff += "  else {\n"
+        buff += "    std::cout << \"Cannot find tau ID \" << idName << std::endl;\n"
+        buff += "    return 0;\n"
+        buff += "  }\n"
+        buff += "  if (tauIndex < taus_pf_IDs().size())\n"
+        buff += "    return taus_pf_IDs().at(tauIndex).at(idIndex);\n"
+        buff += "  else {\n"
+        buff += "    std::cout << \"Cannot find tau # \" << tauIndex << std::endl;\n"
+        buff += "    return 0;\n"
+        buff += "  }\n"
         buff += "}\n"        
 
     if haveBtagInfo:
         buff += "float %s::getbtagvalue(TString bDiscriminatorName, unsigned int jetIndex) {\n" % (classname)
-        buff += "\tsize_t bDiscriminatorIndex;\n"
-        buff += "\tstd::vector<TString>::const_iterator begin_it = pfjets_bDiscriminatorNames().begin();\n"
-        buff += "\tstd::vector<TString>::const_iterator end_it = pfjets_bDiscriminatorNames().end();\n"
-        buff += "\tstd::vector<TString>::const_iterator found_it = std::find(begin_it, end_it, bDiscriminatorName);\n"
-        buff += "\tif (found_it != end_it)\n"
-        buff += "\t\tbDiscriminatorIndex = found_it - begin_it;\n"
-        buff += "\telse {\n"
-        buff += "\t\tstd::cout << \"Cannot find b-discriminator \" << bDiscriminatorName << std::endl;\n"
-        buff += "\t\treturn 0;\n"
-        buff += "\t}\n"
-        buff += "\tif (jetIndex < pfjets_bDiscriminators().size())\n"
-        buff += "\t\treturn pfjets_bDiscriminators().at(jetIndex).at(bDiscriminatorIndex);\n"
-        buff += "\telse {\n"
-        buff += "\tstd::cout << \"Cannot find jet # \" << jetIndex << std::endl;\n"
-        buff += "\treturn 0;\n"        
-        buff += "\t}\n"
+        buff += "  size_t bDiscriminatorIndex;\n"
+        buff += "  std::vector<TString>::const_iterator begin_it = pfjets_bDiscriminatorNames().begin();\n"
+        buff += "  std::vector<TString>::const_iterator end_it = pfjets_bDiscriminatorNames().end();\n"
+        buff += "  std::vector<TString>::const_iterator found_it = std::find(begin_it, end_it, bDiscriminatorName);\n"
+        buff += "  if (found_it != end_it)\n"
+        buff += "    bDiscriminatorIndex = found_it - begin_it;\n"
+        buff += "  else {\n"
+        buff += "    std::cout << \"Cannot find b-discriminator \" << bDiscriminatorName << std::endl;\n"
+        buff += "    return 0;\n"
+        buff += "  }\n"
+        buff += "  if (jetIndex < pfjets_bDiscriminators().size())\n"
+        buff += "    return pfjets_bDiscriminators().at(jetIndex).at(bDiscriminatorIndex);\n"
+        buff += "  else {\n"
+        buff += "    std::cout << \"Cannot find jet # \" << jetIndex << std::endl;\n"
+        buff += "    return 0;\n"        
+        buff += "  }\n"
         buff += "}\n"        
         
     buff += "void %s::progress( int nEventsTotal, int nEventsChain ){\n" % (classname)
@@ -450,7 +450,7 @@ if __name__ == "__main__":
     buff += "      if( ( nEventsChain - nEventsTotal ) > period ){\n"
     buff += "        float frac = (float)nEventsTotal/(nEventsChain*0.01);\n"
     buff += "        printf(\"\\015\\033[32m ---> \\033[1m\\033[31m%4.1f%%\"\n"
-    buff += "             \"\\033[0m\\033[32m <---\\033[0m\\015\", frac);\n"
+    buff += "               \"\\033[0m\\033[32m <---\\033[0m\\015\", frac);\n"
     buff += "        fflush(stdout);\n"
     buff += "      }\n"
     buff += "      else {\n"
@@ -466,17 +466,17 @@ if __name__ == "__main__":
     for bname in d_bname_to_info:
         alias = d_bname_to_info[bname]["alias"]
         typ = d_bname_to_info[bname]["type"]
-        buff += "\t%s &%s() { return %s.%s(); }\n" % (typ, alias, objectname, alias)
+        buff += "  %s &%s() { return %s.%s(); }\n" % (typ, alias, objectname, alias)
     if haveHLTInfo:
-        buff += "\tbool passHLTTrigger(TString trigName) {return cms3.passHLTTrigger(trigName);}\n"
+        buff += "  bool passHLTTrigger(TString trigName) { return cms3.passHLTTrigger(trigName); }\n"
     if haveHLT8E29Info:
-        buff += "\tbool passHLT8E29Trigger(TString trigName) {return cms3.passHLT8E29Trigger(trigName);}\n"
+        buff += "  bool passHLT8E29Trigger(TString trigName) { return cms3.passHLT8E29Trigger(trigName); }\n"
     if haveL1Info:
-        buff += "\tbool passL1Trigger(TString trigName) {return cms3.passL1Trigger(trigName);}\n"
+        buff += "  bool passL1Trigger(TString trigName) { return cms3.passL1Trigger(trigName); }\n"
     if haveTauIDInfo:
-        buff += "\tfloat passTauID(TString idName, unsigned int tauIndex) {return cms3.passTauID(idName, tauIndex);}\n"
+        buff += "  float passTauID(TString idName, unsigned int tauIndex) { return cms3.passTauID(idName, tauIndex); }\n"
     if haveBtagInfo:
-        buff += "\tfloat getbtagvalue(TString bDiscriminatorName, unsigned int jetIndex) {return cms3.getbtagvalue(bDiscriminatorName, jetIndex);}\n" 
+        buff += "  float getbtagvalue(TString bDiscriminatorName, unsigned int jetIndex) { return cms3.getbtagvalue(bDiscriminatorName, jetIndex); }\n" 
     buff += "}\n"
 
     with open("%s.cc" % classname, "w") as fhout:
