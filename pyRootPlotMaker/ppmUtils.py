@@ -6,7 +6,7 @@ def GetMT2Color(sample):
     ## if we are using nice titles
     if 'top' in sample: return 855
     if 'w+jets' in sample: return 417
-    if 'ww' in sample: return 417
+    if 'ww' in sample: return 419
     if 'qcd' in sample: return 401
     if 'rs qcd' in sample: return 401
     if 'prompt' in sample: return 18
