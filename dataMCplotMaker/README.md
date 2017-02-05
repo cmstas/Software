@@ -15,6 +15,9 @@ Quick start/testing:
   1.  cd test/
   2.  root -b -q doAll.C
 
+##Instructions for Python usage
+This is all that matters. Simply open dataMCplotMaker.py and execute it to see an example. This is perfectly importable.
+
 ##Instructions for 1D plots
 
 To call the function (first 3 are required):
