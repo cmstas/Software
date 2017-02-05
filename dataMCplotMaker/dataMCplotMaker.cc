@@ -1266,6 +1266,7 @@ void dataMCplotMaker(TH1F* Data_in, std::vector <std::pair <TH1F*, TH1F*> > Back
   if (nDivisions != -1 && nDivisions < 0) stack->GetXaxis()->SetNdivisions(nDivisions, kFALSE);
 
   //-----------Second pad: data/MC yields---------------
+  TH1F* background_syst_ratio = 0;
   if ((!noData || compareMultiple) && !noRatioPlot){
     if (compareMultiple) Data = (TH1F*)Signals[0]->Clone();
     if (compareMultiple && Signals.size() > 1) for (unsigned int i = 1; i < Signals.size(); i++) Data->Add(Signals[i]); 
@@ -1280,7 +1281,6 @@ void dataMCplotMaker(TH1F* Data_in, std::vector <std::pair <TH1F*, TH1F*> > Back
     err_hist->GetYaxis()->SetTitle("Data/MC");
     err_hist->GetYaxis()->SetTitleSize(0.08);
     err_hist->GetYaxis()->SetTitleOffset(1.8);
-    TH1F* background_syst_ratio = 0; 
     if (Background_systs.size() > 0) background_syst_ratio = (TH1F*)background_syst->Clone();
     for (int ib = 1; ib < err_hist->GetNbinsX()+1; ib++){
       float MC_value = 0;
@@ -1394,7 +1394,7 @@ void dataMCplotMaker(TH1F* Data_in, std::vector <std::pair <TH1F*, TH1F*> > Back
     if (Backgrounds_pair[i].second != 0) delete Backgrounds_pair[i].second;
   }
   delete background_syst;
-
+  if( background_syst_ratio != 0 ) delete background_syst_ratio;
 }
 
 //Overload function for case of no stat errors
