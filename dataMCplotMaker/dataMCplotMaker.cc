@@ -194,7 +194,14 @@ void singleComparisonMaker(TH1F* h1, TH1F* h2, std::string title, std::string ti
     dataMCplotMaker(h1, Backgrounds, Titles, title2, "", options_string);
 }
 
-void dataMCplotMaker(TH1F* Data_in, std::vector <std::pair <TH1F*, TH1F*> > Backgrounds_pair_in, std::vector <std::string> Titles, std::string titleIn, std::string title2In, std::string options_string, std::vector <TH1F*> Signals_in, std::vector <std::string> SignalTitles, std::vector <Color_t> color_input){
+
+///////////////////
+///////////////////
+// MAIN FUNCTION //
+///////////////////
+///////////////////
+
+void dataMCplotMaker(TH1F* Data_in, std::vector <std::pair <TH1F*, TH1F*> > Backgrounds_pair_in, std::vector <std::string> Titles, std::string titleIn, std::string title2In, std::string options_string, std::vector <TH1F*> Signals_in, std::vector <std::string> SignalTitles, std::vector <Color_t> color_input, TH1F* overrideSyst) {
 
   //Copy inputs
   TH1F* Data = new TH1F(*Data_in); 
@@ -222,6 +229,8 @@ void dataMCplotMaker(TH1F* Data_in, std::vector <std::pair <TH1F*, TH1F*> > Back
     TH1F* blah = new TH1F(*Signals_in[i]); 
     Signals.push_back(blah);  
   }
+
+
 
   //Convert titles to fucking char*s 
   char* title = (char *)alloca(titleIn.size() + 1);
@@ -279,6 +288,7 @@ void dataMCplotMaker(TH1F* Data_in, std::vector <std::pair <TH1F*, TH1F*> > Back
   std::vector <std::string> hLines;
   std::string boxLines = "";
   bool doHalf = 0;
+  bool doPull = 0;
   Int_t nDivisions = -1;
   bool noLegend = false;
   bool png = false;
@@ -352,6 +362,7 @@ void dataMCplotMaker(TH1F* Data_in, std::vector <std::pair <TH1F*, TH1F*> > Back
     else if (Options[i].find("colorTitle") < Options[i].length()) colorTitle = 1; 
     else if (Options[i].find("noXaxisUnit") < Options[i].length()) showXaxisUnit = 0; 
     else if (Options[i].find("divHalf") < Options[i].length()) doHalf = 1; 
+    else if (Options[i].find("doPull") < Options[i].length()) doPull = 1; 
     else if (Options[i].find("energy") < Options[i].length()) energy = getString(Options[i], "energy");
     else if (Options[i].find("lumi") < Options[i].length()) lumi = getString(Options[i], "lumi");
     else if (Options[i].find("yAxisLabel") < Options[i].length()) yAxisLabel = getString(Options[i], "yAxisLabel");
@@ -925,7 +936,7 @@ void dataMCplotMaker(TH1F* Data_in, std::vector <std::pair <TH1F*, TH1F*> > Back
   if (Background_systs.size() > 0){
     background_syst = new TH1F(*Background_systs[0]); 
     if (!background_syst->GetSumw2N()) background_syst->Sumw2(); 
-    background_syst->SetFillColor(kGray+1); 
+    background_syst->SetFillColor(kGray+2); 
     background_syst->SetFillStyle(systFillStyle); 
     if (systBlack) background_syst->SetFillColor(kBlack); //should have a better option for these?
   }
@@ -949,6 +960,13 @@ void dataMCplotMaker(TH1F* Data_in, std::vector <std::pair <TH1F*, TH1F*> > Back
       background_syst->SetBinError(i, sqrt( pow(err, 2) + pow(stat, 2) ) ); 
     }
   }
+
+    if(overrideSyst->GetEntries() > 0) {
+        overrideSyst->SetFillColor(kGray+2); 
+        overrideSyst->SetFillStyle(systFillStyle); 
+        overrideSyst->Draw("E2 SAME");
+    }
+
   if (background_syst != 0 && do_background_syst == true) background_syst->Draw("E2 SAME");
 
   //Redraw the data on top of the shaded area
@@ -1286,6 +1304,35 @@ void dataMCplotMaker(TH1F* Data_in, std::vector <std::pair <TH1F*, TH1F*> > Back
       if (Background_systs.size() > 0 && background_syst->GetBinContent(ib) > 0) background_syst_ratio->SetBinError(ib, background_syst->GetBinError(ib)/background_syst->GetBinContent(ib)); 
       else if (Background_systs.size() > 0) background_syst_ratio->SetBinError(ib, 0); 
       if (Background_systs.size() > 0) background_syst_ratio->SetBinContent(ib, 1); 
+
+      if (doPull) {
+          // float pull = RooStats::NumberCountingUtils::BinomialObsZ(19,41,0.5);
+          // Do the below because the stupid line above isn't working with root, even
+          // with the proper includes. For reference, the implementation matches
+          // https://root.cern.ch/doc/master/NumberCountingUtils_8cxx_source.html#l00090
+          int mainObs = data_value;
+          float backgroundObs = MC_value;
+          float relativeBkgUncert = overrideSyst->GetBinError(ib) / MC_value;
+
+          Double_t tau = 1./backgroundObs/(relativeBkgUncert*relativeBkgUncert);
+          Double_t auxiliaryInf = backgroundObs*tau;
+
+          if (mainObs == 0) {
+              tau = 999.;
+              auxiliaryInf = 1.0;
+          }
+          Double_t P_Bi = TMath::BetaIncomplete(1./(1.+tau),mainObs,auxiliaryInf+1);
+          float pull = ROOT::Math::normal_quantile_c(P_Bi,1);
+
+          // For mainObs==0, P_Bi is 0 and pull becomes infinite
+          // Screw it and just use gaussian pull at this point
+          if (pull>100) pull = (data_value-MC_value) / sqrt(data_value + pow(overrideSyst->GetBinError(ib),0.5));
+          
+          // Naive gaussian pulls:
+          // float pull = (data_value-MC_value) / sqrt(data_value + pow(overrideSyst->GetBinError(ib),0.5));
+          err_hist->SetBinContent(ib, pull);
+          err_hist->SetBinError(ib, 0.0);
+      }
     }
     if (!ratioLine) {
       err_hist->SetMarkerStyle(20);
@@ -1300,12 +1347,12 @@ void dataMCplotMaker(TH1F* Data_in, std::vector <std::pair <TH1F*, TH1F*> > Back
     blah->SetTextFont(42);
     blah->SetTextSize(0.17);
     blah->SetTextAngle(90);
-    blah->DrawTextNDC(0.045,0.15,topYaxisTitle.c_str());
+    blah->DrawTextNDC(0.045,topYaxisTitle.length()<6?0.35:0.15,topYaxisTitle.c_str());
     TLine line;
     line.SetLineColor(kGray+2);
     line.SetLineWidth(2);
     int maxbin = err_hist->GetXaxis()->GetNbins();
-    line.DrawLine(err_hist->GetXaxis()->GetBinLowEdge(1),1,err_hist->GetXaxis()->GetBinUpEdge(maxbin),1);
+    line.DrawLine(err_hist->GetXaxis()->GetBinLowEdge(1),doPull?0:1,err_hist->GetXaxis()->GetBinUpEdge(maxbin),doPull?0:1);
     if (do_background_syst && Background_systs.size() > 0) background_syst_ratio->Draw("E2 SAME");//draw the shaded area before the dots
     if(noErrBars && ratioLine) err_hist->Draw("HIST SAME");
     else if(noErrBars) err_hist->Draw("pSAME");
@@ -1313,6 +1360,9 @@ void dataMCplotMaker(TH1F* Data_in, std::vector <std::pair <TH1F*, TH1F*> > Back
     err_hist->GetXaxis()->SetLabelSize(0);
     err_hist->GetYaxis()->SetLabelSize(0.2);
     err_hist->GetYaxis()->SetRangeUser(0., ratioUpperBound);
+    if (doPull) {
+        err_hist->GetYaxis()->SetRangeUser(-2.5,2.5);
+    }
     if (nDivisions != -1 && nDivisions > 0) err_hist->GetXaxis()->SetNdivisions(nDivisions, kTRUE);
     if (nDivisions != -1 && nDivisions < 0) err_hist->GetXaxis()->SetNdivisions(nDivisions, kFALSE);
     err_hist->GetYaxis()->SetNdivisions(505);
@@ -1348,7 +1398,7 @@ void dataMCplotMaker(TH1F* Data_in, std::vector <std::pair <TH1F*, TH1F*> > Back
 }
 
 //Overload function for case of no stat errors
-void dataMCplotMaker(TH1F* Data_in, std::vector <TH1F*> Backgrounds_in, std::vector <std::string> Titles, std::string titleIn, std::string title2In, std::string options_string, std::vector <TH1F*> Signals_in, std::vector <std::string> SignalTitles, std::vector <Color_t> color_input){
+void dataMCplotMaker(TH1F* Data_in, std::vector <TH1F*> Backgrounds_in, std::vector <std::string> Titles, std::string titleIn, std::string title2In, std::string options_string, std::vector <TH1F*> Signals_in, std::vector <std::string> SignalTitles, std::vector <Color_t> color_input, TH1F* overrideSyst){
 
   do_background_syst = false;
 
@@ -1360,7 +1410,7 @@ void dataMCplotMaker(TH1F* Data_in, std::vector <TH1F*> Backgrounds_in, std::vec
     Backgrounds_pair_in.push_back(temp); 
   }
 
-  dataMCplotMaker(Data_in, Backgrounds_pair_in, Titles, titleIn, title2In, options_string, Signals_in, SignalTitles, color_input); 
+  dataMCplotMaker(Data_in, Backgrounds_pair_in, Titles, titleIn, title2In, options_string, Signals_in, SignalTitles, color_input, overrideSyst); 
 
   for (unsigned int i = 0; i < Backgrounds_in.size(); i++){
     delete Backgrounds_pair_in[i].second;

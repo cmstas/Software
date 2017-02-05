@@ -118,6 +118,7 @@ Supported flags for "options" string:
   - --poissonErrorsNoZeros: avoid showing poissonian error bars for data entries with zero yield (used for SUS-15-008)
   - --makeTable: makes a table .txt file with the bin contents/totals/errors for data and backgrounds
   - --makeRootFile: makes a ROOT file with data and the backgrounds
+  - --doPull: ratio plot is a pull plot, must feed in overrideSyst
 
 Example:
 ````
