@@ -21,7 +21,7 @@
 #include "TROOT.h"
 
 //Parse Parameters from options input string
-std::vector <std::string> GetParms(std::string blah){
+inline std::vector <std::string> GetParms(std::string blah){
   int a = -1;
   int length = blah.length();
   std::vector <std::string> options;
@@ -40,7 +40,7 @@ std::vector <std::string> GetParms(std::string blah){
 }
 
 //Turn parsed argument from string into const char*.  Remove leading and trailing whitespace
-std::string getString(std::string initial, std::string result){
+inline std::string getString(std::string initial, std::string result){
   int temp = initial.find(result); 
   std::string substring = initial.substr(temp+result.length());
   while (substring[0] == ' '){
@@ -56,7 +56,7 @@ std::string getString(std::string initial, std::string result){
 }
 
 //Needed for freaking vertical lines
-void DrawVerticalLine(Double_t x){
+inline void DrawVerticalLine(Double_t x){
   TLine l;
   l.SetLineStyle(2);
   l.SetLineWidth(2);

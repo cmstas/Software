@@ -4,6 +4,7 @@
 #include "TMath.h"
 
 bool do_background_syst = true;
+TStyle *tdrStyleAG = NULL;
 
 //Comparison to put smallest histogram on bottom of stack
 bool Integral(PlotInfo plot1, PlotInfo plot2){
