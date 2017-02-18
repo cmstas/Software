@@ -986,6 +986,7 @@ void dataMCplotMaker(TH1F* Data_in, std::vector <std::pair <TH1F*, TH1F*> > Back
         double U = (N==0) ? 0 : (ROOT::Math::gamma_quantile_c(alpha/2,N+1,1));
         g->SetPointEYlow(i, N-L);
         g->SetPointEYhigh(i, U-N);
+        // std::cout << " i: " << i << " N: " << N << " U: " << U << " L: " << L << " N-L: " << N-L << " U-N: " << U-N << std::endl;
       }
       g->Draw("PZSAME");
       Data->Draw("PSAME");
@@ -1306,6 +1307,7 @@ void dataMCplotMaker(TH1F* Data_in, std::vector <std::pair <TH1F*, TH1F*> > Back
       else if (Background_systs.size() > 0) background_syst_ratio->SetBinError(ib, 0); 
       if (Background_systs.size() > 0) background_syst_ratio->SetBinContent(ib, 1); 
 
+
       if (doPull) {
           // float pull = RooStats::NumberCountingUtils::BinomialObsZ(19,41,0.5);
           // Do the below because the stupid line above isn't working with root, even
@@ -1357,6 +1359,7 @@ void dataMCplotMaker(TH1F* Data_in, std::vector <std::pair <TH1F*, TH1F*> > Back
     if (do_background_syst && Background_systs.size() > 0) background_syst_ratio->Draw("E2 SAME");//draw the shaded area before the dots
     if(noErrBars && ratioLine) err_hist->Draw("HIST SAME");
     else if(noErrBars) err_hist->Draw("pSAME");
+    else if (poissonErrorsNoZeros) err_hist->Draw("pSAME");
     else err_hist->Draw("pESAME"); 
     err_hist->GetXaxis()->SetLabelSize(0);
     err_hist->GetYaxis()->SetLabelSize(0.2);
@@ -1367,6 +1370,47 @@ void dataMCplotMaker(TH1F* Data_in, std::vector <std::pair <TH1F*, TH1F*> > Back
     if (nDivisions != -1 && nDivisions > 0) err_hist->GetXaxis()->SetNdivisions(nDivisions, kTRUE);
     if (nDivisions != -1 && nDivisions < 0) err_hist->GetXaxis()->SetNdivisions(nDivisions, kFALSE);
     err_hist->GetYaxis()->SetNdivisions(505);
+
+    ///////
+    ///////
+    if (poissonErrorsNoZeros) {
+        //do this to avoid showing error bars for zero entries
+        const double alpha = 1 - 0.6827;
+        TGraphAsymmErrors * g = new TGraphAsymmErrors();
+        for (int ib = 1; ib < err_hist->GetNbinsX()+1; ib++){
+            float MC_value = 0;
+            float MC_error = 0;
+            float MC_error_2 = 0;
+            float data_value = Data->GetBinContent(ib);
+            float data_err = Data->GetBinError(ib);
+            for (unsigned int i = 0; i < Backgrounds.size(); i++){
+                MC_value += Backgrounds[i]->GetBinContent(ib);
+                MC_error_2 += pow(Backgrounds[i]->GetBinError(ib), 2);
+            }
+            MC_error = pow(MC_error_2, 0.5);
+
+            double data_up = ROOT::Math::gamma_quantile_c(alpha/2,data_value+1,1) - data_value;
+            double data_down = data_value == 0 ? 0. : data_value - ROOT::Math::gamma_quantile(alpha/2,data_value,1);
+
+            double ratio = data_value / MC_value;
+            double xerr = err_hist->GetBinWidth(ib)/2.;
+            double rerrup = pow(pow(data_up/MC_value,2) + pow(MC_error*data_value/(MC_value*MC_value),2), 0.5);
+            double rerrdown = pow(pow(data_down/MC_value,2) + pow(MC_error*data_value/(MC_value*MC_value),2), 0.5);
+            int ipoint = g->GetN();
+            g->SetPoint(ipoint, err_hist->GetBinCenter(ib), ratio);
+            g->SetPointError(ipoint, xerr, xerr, rerrdown, rerrup);
+            // std::cout << " ib: " << ib << " ratio: " << ratio << " xerr: " << xerr << " rerrdown: " << rerrdown << " rerrup: " << rerrup << " data_value: " << data_value << " MC_value: " << MC_value << " MC_error: " << MC_error << " data_up: " << data_up << " data_down: " << data_down << std::endl;
+            // ib ratio xerr rerrdown rerrup data_value MC_value MC_error data_up data_down
+        }
+        // g->SetMarkerSize(0);
+        g->SetLineWidth(Data->GetLineWidth());
+        // g->SetLineColor(Data->GetLineColor());
+        g->SetLineColor(kBlack);
+        g->Draw("PEZSAME");
+    }
+    ///////
+    ///////
+
   }
   //--------------------------------
 
