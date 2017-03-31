@@ -3,7 +3,7 @@ import ROOT as r
 r.gROOT.ProcessLine(".L {0}/dataMCplotMaker.cc+".format(os.path.realpath(__file__).rsplit("/",1)[0]))
 from ROOT import dataMCplotMaker
 
-def dataMCplot(data, bgs=[], systs=[], titles=[], title="", subtitle="", colors=[], opts={}):
+def dataMCplot(data, bgs=[], systs=[], titles=[], sigs=[], sigtitles=[], title="", subtitle="", colors=[], opts={}, opts_str=""):
     v_bgs = r.vector("TH1F*")()
     v_sigs = r.vector("TH1F*")()
     v_titles = r.vector('string')()
@@ -11,12 +11,11 @@ def dataMCplot(data, bgs=[], systs=[], titles=[], title="", subtitle="", colors=
     v_colors = r.vector('Color_t')()
     v_bgsysts = r.vector('pair<TH1F*,float>')()
 
-    opt_str = ""
     for k,v in opts.items():
         if type(v) is bool:
-            if v: opt_str += "--{0} ".format(k)
+            if v: opts_str += "--{0} ".format(k)
         else:
-            opt_str += "--{0} {1} ".format(str(k),str(v))
+            opts_str += "--{0} {1} ".format(str(k),str(v))
 
     if "outputName" in opts:
         dir_name = opts["outputName"].rsplit("/",1)[0]
@@ -25,6 +24,8 @@ def dataMCplot(data, bgs=[], systs=[], titles=[], title="", subtitle="", colors=
 
     the_bgs = None
     for tit in titles: v_titles.push_back(tit)
+    for sig in sigs: v_sigs.push_back(sig)
+    for sigtit in sigtitles: v_sigtitles.push_back(sigtit)
     for col in colors: v_colors.push_back(col)
     if systs and len(systs) == len(bgs):
         for bg,syst in zip(bgs,systs):
@@ -34,7 +35,7 @@ def dataMCplot(data, bgs=[], systs=[], titles=[], title="", subtitle="", colors=
         for bg in bgs: 
             v_bgs.push_back(bg)
         the_bgs = v_bgs
-    dataMCplotMaker(data, the_bgs, v_titles, title, subtitle, opt_str, v_sigs, v_sigtitles, v_colors)
+    dataMCplotMaker(data, the_bgs, v_titles, title, subtitle, opts_str, v_sigs, v_sigtitles, v_colors)
 
 if __name__ == "__main__":
     h_data = r.TH1F("data", "", 7, 0, 7)

@@ -573,6 +573,10 @@ void dataMCplotMaker(TH1F* Data_in, std::vector <std::pair <TH1F*, TH1F*> > Back
     Colors.push_back(kOrange+6);
   }
 
+  if (color_input.size() > 0 && use_signals == 1){
+    Colors.push_back(kRed);
+  }
+
   //Black Signals
   if (blackSignals){
     for (unsigned int i = Backgrounds.size(); i < Colors.size(); i++) Colors[i] = kBlack; 
@@ -716,6 +720,7 @@ void dataMCplotMaker(TH1F* Data_in, std::vector <std::pair <TH1F*, TH1F*> > Back
 
       if (totalBlackLine) Backgrounds[i]->SetLineWidth(0);
       if (noBlackLines || nostack) Backgrounds[i]->SetLineWidth(2);//would be good to have an option for this
+      // if (noBlackLines || nostack) Backgrounds[i]->SetLineWidth(4);//would be good to have an option for this // FIXME
     }
   } 
   else if(noFill == 1){
@@ -924,10 +929,21 @@ void dataMCplotMaker(TH1F* Data_in, std::vector <std::pair <TH1F*, TH1F*> > Back
     if (compareMultiple) Signals[i]->SetMarkerColor(Colors2[i]); 
     if (compareMultiple) signalsAG.Add(Signals[i]); 
     else if (Colors.size() >= i + Backgrounds.size() + 1) Signals[i]->SetMarkerColor(Colors[i + Backgrounds.size()]);
-    Signals[i]->SetLineColor(kBlack);
-    Signals[i]->SetLineWidth(3);
-    if (!markerStyle2) Signals[i]->SetMarkerStyle(markerStyle[i%7]);
-    if ( markerStyle2) Signals[i]->SetMarkerStyle(markerStyle2_[i%7]);
+
+    bool hack = true;
+
+    if (!hack) {
+        Signals[i]->SetLineColor(kBlack);
+        Signals[i]->SetLineWidth(3);
+        if (!markerStyle2) Signals[i]->SetMarkerStyle(markerStyle[i%7]);
+        if ( markerStyle2) Signals[i]->SetMarkerStyle(markerStyle2_[i%7]);
+    } else {
+        Signals[i]->SetLineColor(kRed);
+        Signals[i]->SetLineWidth(4);
+        Signals[i]->SetMarkerSize(4);
+        Signals[i]->Draw("SAMEHISTLPE");
+    }
+
   }
   if (compareMultiple) signalsAG.Draw("SAMEHISTP");
 
@@ -984,6 +1000,8 @@ void dataMCplotMaker(TH1F* Data_in, std::vector <std::pair <TH1F*, TH1F*> > Back
         int N = g->GetY()[i];
         double L = (N==0) ? 0 : (ROOT::Math::gamma_quantile(alpha/2,N,1.));
         double U = (N==0) ? 0 : (ROOT::Math::gamma_quantile_c(alpha/2,N+1,1));
+        // // poisson grass
+        // double U = (ROOT::Math::gamma_quantile_c(alpha/2,N+1,1));
         g->SetPointEYlow(i, N-L);
         g->SetPointEYhigh(i, U-N);
         // std::cout << " i: " << i << " N: " << N << " U: " << U << " L: " << L << " N-L: " << N-L << " U-N: " << U-N << std::endl;
@@ -1084,7 +1102,7 @@ void dataMCplotMaker(TH1F* Data_in, std::vector <std::pair <TH1F*, TH1F*> > Back
   if (!dots && !nostack) for (int i = Titles.size()-1; i > -1; i--) leg->AddEntry(Backgrounds[i], Titles[i].c_str(), "f");
   // if (dots || nostack) for (int i = Titles.size()-1; i > -1; i--) leg->AddEntry(Backgrounds[i], Titles[i].c_str(), "L");
   if (dots || nostack) for (int i = Titles.size()-1; i > -1; i--) leg->AddEntry(Backgrounds[i], Titles[i].c_str(), "f"); // FIXME
-  if (use_signals && !compareMultiple) for (int i = SignalTitles.size()-1; i > -1; i--) leg->AddEntry(Signals[i], SignalTitles[i].c_str(), "P");
+  if (use_signals && !compareMultiple) for (int i = SignalTitles.size()-1; i > -1; i--) leg->AddEntry(Signals[i], SignalTitles[i].c_str(), "LPE");
   leg->SetFillStyle(0);
   if ( legendBox) leg->SetBorderSize(1);
   if (!legendBox) leg->SetBorderSize(0);
@@ -1136,8 +1154,8 @@ void dataMCplotMaker(TH1F* Data_in, std::vector <std::pair <TH1F*, TH1F*> > Back
   if (outOfFrame && (noData || noRatioPlot)) title_y_coord += 0.09;
   if (colorTitle) title = Form("#color[4]{%s}",title);
   if (noTextBetweenPads) title_y_coord-=0.02;
-  tex->DrawLatex(0.16,title_y_coord,title);
-  tex->DrawLatex(0.16,title_y_coord-0.05,title2);
+  tex->DrawLatex(0.18,title_y_coord,title);
+  tex->DrawLatex(0.18,title_y_coord-0.05,title2);
   float yCounts = (strcmp(title2, "") == 0) ? title_y_coord-0.05 : title_y_coord-0.10; 
   if ( !noData && !noRatioPlot && doCounts) tex->DrawLatex(0.16,yCounts,Form("%i (Data), %0.1f (MC)",nEventsData,nEventsMC)); 
   if (( noData || noRatioPlot) && doCounts) tex->DrawLatex(0.16,yCounts,Form("%0.1f (MC)",nEventsMC)); 
@@ -1229,10 +1247,13 @@ void dataMCplotMaker(TH1F* Data_in, std::vector <std::pair <TH1F*, TH1F*> > Back
     if (!noLumi && lumiPrec == 2) tex->DrawLatex(xpos,type_y,Form("%.2f %s^{-1} (%s TeV)", stof(lumi), lumiUnit.c_str(), energy.c_str()));
     if (!noLumi && lumiPrec == 1) tex->DrawLatex(xpos,type_y,Form("%.1f %s^{-1} (%s TeV)", stof(lumi), lumiUnit.c_str(), energy.c_str()));
     if (!noLumi && lumiPrec == 0) tex->DrawLatex(xpos,type_y,Form("%.0f %s^{-1} (%s TeV)", stof(lumi), lumiUnit.c_str(), energy.c_str()));
-    if ( noLumi) tex->DrawLatex(xpos,type_y,Form("           (%s TeV)", energy.c_str()));
+    // if ( noLumi) tex->DrawLatex(xpos,type_y,Form("           (%s TeV)", energy.c_str()));
+    if ( noLumi) tex->DrawLatex(xpos,type_y,"                   "); // FIXME
     tex->SetTextAlign(11);
   }
-  float xshift = -0.03;//configurable?
+  // float xshift = -0.00;//configurable?
+  float xshift = (linear ? -0.00 : -0.03) ;//configurable?
+
   if (!noType) {
     if ((noData || noRatioPlot) && overrideHeader[0] == '\0'){
       float ycoord = outOfFrame ? .00 : .08;
@@ -1278,7 +1299,10 @@ void dataMCplotMaker(TH1F* Data_in, std::vector <std::pair <TH1F*, TH1F*> > Back
     if (!compareMultiple) err_hist = (TH1F*)Backgrounds[0]->Clone(); 
     err_hist->SetTitle("");
     err_hist->Draw();
-    err_hist->SetLineColor(ratioColor);
+
+    if (poissonErrorsNoZeros) err_hist->SetLineColor(0);
+    else err_hist->SetLineColor(ratioColor);
+
     if (!ratioLine) err_hist->SetMarkerColor(ratioColor);
     err_hist->GetYaxis()->SetTitle("Data/MC");
     err_hist->GetYaxis()->SetTitleSize(0.08);
@@ -1343,8 +1367,10 @@ void dataMCplotMaker(TH1F* Data_in, std::vector <std::pair <TH1F*, TH1F*> > Back
       else if (err_hist->GetNbinsX() > 100) err_hist->SetMarkerSize(0.6);
       else if (err_hist->GetNbinsX() > 60) err_hist->SetMarkerSize(0.8);
     }
-    if(noErrBars && ratioLine) err_hist->Draw("HIST");
-    else if(noErrBars) err_hist->Draw("P");
+    if(noErrBars && ratioLine && !poissonErrorsNoZeros) err_hist->Draw("HIST");
+    else if(noErrBars && !poissonErrorsNoZeros) err_hist->Draw("P");
+    else if(poissonErrorsNoZeros) {
+    }
     else err_hist->Draw("PE");
     TText *blah = new TText();
     blah->SetTextFont(42);
@@ -1357,9 +1383,10 @@ void dataMCplotMaker(TH1F* Data_in, std::vector <std::pair <TH1F*, TH1F*> > Back
     int maxbin = err_hist->GetXaxis()->GetNbins();
     line.DrawLine(err_hist->GetXaxis()->GetBinLowEdge(1),doPull?0:1,err_hist->GetXaxis()->GetBinUpEdge(maxbin),doPull?0:1);
     if (do_background_syst && Background_systs.size() > 0) background_syst_ratio->Draw("E2 SAME");//draw the shaded area before the dots
-    if(noErrBars && ratioLine) err_hist->Draw("HIST SAME");
-    else if(noErrBars) err_hist->Draw("pSAME");
-    else if (poissonErrorsNoZeros) err_hist->Draw("pSAME");
+    if(noErrBars && ratioLine && !poissonErrorsNoZeros) err_hist->Draw("HIST SAME");
+    else if(noErrBars && !poissonErrorsNoZeros) err_hist->Draw("pSAME");
+    else if (poissonErrorsNoZeros) {
+    }
     else err_hist->Draw("pESAME"); 
     err_hist->GetXaxis()->SetLabelSize(0);
     err_hist->GetYaxis()->SetLabelSize(0.2);
@@ -1387,7 +1414,11 @@ void dataMCplotMaker(TH1F* Data_in, std::vector <std::pair <TH1F*, TH1F*> > Back
                 MC_value += Backgrounds[i]->GetBinContent(ib);
                 MC_error_2 += pow(Backgrounds[i]->GetBinError(ib), 2);
             }
-            MC_error = pow(MC_error_2, 0.5);
+
+            if (MC_value < 1e-6 && data_value == 0) continue;
+
+            // MC_error = pow(MC_error_2, 0.5);
+            MC_error = 0.0;
 
             double data_up = ROOT::Math::gamma_quantile_c(alpha/2,data_value+1,1) - data_value;
             double data_down = data_value == 0 ? 0. : data_value - ROOT::Math::gamma_quantile(alpha/2,data_value,1);
@@ -1404,9 +1435,12 @@ void dataMCplotMaker(TH1F* Data_in, std::vector <std::pair <TH1F*, TH1F*> > Back
         }
         // g->SetMarkerSize(0);
         g->SetLineWidth(Data->GetLineWidth());
-        // g->SetLineColor(Data->GetLineColor());
-        g->SetLineColor(kBlack);
-        g->Draw("PEZSAME");
+        g->SetLineColor(Data->GetLineColor());
+        // g->SetLineColor(kBlue);
+        // g->SetLineColor(kBlack);
+        g->Draw("PEZSAME0");
+        // g->Draw("PEZSAME");
+        // g->Draw("PEZ");
     }
     ///////
     ///////
