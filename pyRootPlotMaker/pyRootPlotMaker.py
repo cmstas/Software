@@ -470,7 +470,7 @@ def plotComparison(h1_, h2_, title="", ratioTitle="Data/MC", h1Title="MC", h2Tit
     h2.SetLineColor(ROOT.kBlack)
     h2.Draw("SAME PE")
     
-    leg = ROOT.TLegend(0.70,0.75,0.89,0.89)
+    leg = ROOT.TLegend(0.60,0.75,0.89,0.89)
     leg.AddEntry(h1, h1Title)
     leg.AddEntry(h2, h2Title)
     leg.Draw()

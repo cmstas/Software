@@ -16,6 +16,7 @@ def GetMT2Color(sample):
     if 'frag' in sample: return 38
     if 'fake' in sample: return 46
     if 'lost lepton' in sample: return 864
+    if 'WW' in sample: return 619
 
     ## sample names
     if 'top' in sample: return 855
