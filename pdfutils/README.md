@@ -23,6 +23,11 @@ rename_pdf "Preliminary" "Cake" input_test.pdf
 Note: this takes wildcards too.
 
 ### addingutils.py
+Or let's say that someone asks you to go through all your plots
+and add, say, some arxiv label because it's trivial to do that 
+when your plots are made with several different macros, right??? 
+That's where this comes in.
+
 This one is more manual since there's more customization.
 Note that you may need a CMSSW environment since pyROOT is used.
 Edit the file to have the proper root object to overlay.
