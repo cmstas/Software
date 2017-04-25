@@ -57,6 +57,9 @@ OPTIONAL arguments (required to use argument keywords. e.g., pass the argument `
 32. `drawZeros` - if `convertToPoisson` is set to True, this determines whether do draw markers at bins with 0 contents (note that the Poisson error according to the formula at the above link in this case is 1.8)
 33. `drawSystematicBand` - draw a band in the ratio plot to show systematic errors.
 34. `systematics` - if the above option is set to True, this is a list of relative systematic errors (i.e., 0.4 for a 40% uncertainty). Must be the same length as the number of bins.
+35. `h_sig_vec` - list of signal histograms to overlay on top of data/MC.
+36. `sig_names` - list of names for the signals to put in legend.
+
 
 ### Comparison plots
 Use `ppm.plotComparison` to plot a comparison between 2 histograms. This needs more work.

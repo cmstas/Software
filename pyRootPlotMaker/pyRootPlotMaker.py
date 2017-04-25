@@ -193,7 +193,8 @@ def plotDataMC(h_bkg_vec_, bkg_names, h_data=None, title=None, subtitles=None, d
                energy=13, xAxisTitle="H_{T}", xAxisUnit="GeV", userMax=None, userMin=None, doSort=False,
                doMT2Colors=False, markerSize=0.9, doOverflow=True, titleSize=0.04, subtitleSize=0.03, subLegText=None,
                subLegTextSize=0.03, cmsText="CMS Preliminary", cmsTextSize=0.035, doBkgError=False, functions=[], 
-               legCoords=None, doPull=False, convertToPoisson=False, drawZeros=True, drawSystematicBand=False, systematics=None):
+               legCoords=None, doPull=False, convertToPoisson=False, drawZeros=True, drawSystematicBand=False, systematics=None,
+               h_sig_vec=[], sig_names=[]):
     
     if h_data == None:
         doRatio = False
@@ -328,6 +329,12 @@ def plotDataMC(h_bkg_vec_, bkg_names, h_data=None, title=None, subtitles=None, d
     for function in functions:
         function.Draw("SAME")
 
+    ## signals
+    sig_cols = [ROOT.kMagenta, ROOT.kCyan, ROOT.kOrange+7, ROOT.kGreen]
+    for isig in range(len(h_sig_vec)):
+        h_sig_vec[isig].SetLineColor(sig_cols[isig])
+        h_sig_vec[isig].SetLineWidth(2)
+        h_sig_vec[isig].Draw("SAME HIST")
 
     ## legend
         
@@ -341,6 +348,8 @@ def plotDataMC(h_bkg_vec_, bkg_names, h_data=None, title=None, subtitles=None, d
             leg.AddEntry(h_data[ih],dataTitle[ih])
     for i in range(len(h_bkg_vec)):
         leg.AddEntry(h_bkg_vec[-i-1],bkg_names[-i-1],"f")
+    for i in range(len(h_sig_vec)):
+        leg.AddEntry(h_sig_vec[i], sig_names[i], "l")
     leg.Draw()
     
     # handle all of the text
@@ -470,7 +479,7 @@ def plotComparison(h1_, h2_, title="", ratioTitle="Data/MC", h1Title="MC", h2Tit
     h2.SetLineColor(ROOT.kBlack)
     h2.Draw("SAME PE")
     
-    leg = ROOT.TLegend(0.70,0.75,0.89,0.89)
+    leg = ROOT.TLegend(0.60,0.75,0.89,0.89)
     leg.AddEntry(h1, h1Title)
     leg.AddEntry(h2, h2Title)
     leg.Draw()
