@@ -19,4 +19,4 @@ for input_filename in filenames:
 
     c1.SaveAs("overlay.pdf")
     outname = input_filename.replace(".pdf","_overlay.pdf")
-    os.system("pdftk input_test.pdf multistamp overlay.pdf output %s" % outname)
+    os.system("pdftk %s multistamp overlay.pdf output %s" % (input_filename,outname))
