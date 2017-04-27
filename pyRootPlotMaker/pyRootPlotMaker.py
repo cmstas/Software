@@ -82,7 +82,7 @@ def plotBackgrounds(h_bkg_vec_, bkg_names, canvas=None, stack=None, saveAs=None,
 ## make a ratio plot. For use within the plotDataMC and plotComparison functions
 def plotRatio(h1, h2, canvas=None, ratioHist=None, xRangeUser=None, ratioTitle = None, markerSize=0.7, 
               doPull=False, convertToPoisson=False, ratioGraph=None, drawZeros=True, drawSystematicBand=False,
-              systematics=None, h_syst=None):
+              systematics=None, h_syst=None, yRangeUser=None):
 
     if doPull:
         convertToPoisson = False
@@ -121,10 +121,16 @@ def plotRatio(h1, h2, canvas=None, ratioHist=None, xRangeUser=None, ratioTitle =
     ratioHist.SetTitle("")
     #yaxis
     if not doPull:
-        ratioHist.GetYaxis().SetRangeUser(0,2)
+        if yRangeUser == None:
+            ratioHist.GetYaxis().SetRangeUser(0,2)
+        else:
+            ratioHist.GetYaxis().SetRangeUser(yRangeUser[0],yRangeUser[1])            
         ratioHist.GetYaxis().SetNdivisions(505)
     else:
-        ratioHist.GetYaxis().SetRangeUser(-4,4)
+        if yRangeUser == None:
+            ratioHist.GetYaxis().SetRangeUser(-4,4)
+        else:
+            ratioHist.GetYaxis().SetRangeUser(yRangeUser[0],yRangeUser[1])            
         ratioHist.GetYaxis().SetNdivisions(204,False)
     ratioHist.GetYaxis().SetTitle(ratioTitle)        
     ratioHist.GetYaxis().SetTitleSize(0.18)
@@ -431,7 +437,7 @@ def plotDataMC(h_bkg_vec_, bkg_names, h_data=None, title=None, subtitles=None, d
 ## make a comparison plot between two histograms. Plots both histos on one axis, as well as a ratio plot
 def plotComparison(h1_, h2_, title="", ratioTitle="Data/MC", h1Title="MC", h2Title="Data", saveAs=None,
                    size=(700,600), xRangeUser=None, markerSize=0.65, doPause=False, isLog=True,
-                   normalize=False, xAxisTitle=""):
+                   normalize=False, xAxisTitle="", ratioYRange=None):
 
     h1 = ROOT.TH1D()
     h1_.Copy(h1)
@@ -475,9 +481,9 @@ def plotComparison(h1_, h2_, title="", ratioTitle="Data/MC", h1Title="MC", h2Tit
         h1.GetYaxis().SetTitle("Entries / {0} GeV".format(h1.GetXaxis().GetBinWidth(1)))
     h1.GetYaxis().SetTitleOffset(1.2)
     h1.GetXaxis().SetTitle(xAxisTitle)
-    h1.Draw("PE")
     h2.SetLineColor(ROOT.kBlack)
-    h2.Draw("SAME PE")
+    h2.Draw("PE")
+    h1.Draw("SAME PE")
     
     leg = ROOT.TLegend(0.60,0.75,0.89,0.89)
     leg.AddEntry(h1, h1Title)
@@ -489,7 +495,7 @@ def plotComparison(h1_, h2_, title="", ratioTitle="Data/MC", h1Title="MC", h2Tit
     pads[1].cd()
     ratio = ROOT.TH1D()
     plotRatio(h1,h2,canvas=pads[1], ratioHist=ratio, ratioTitle=ratioTitle, xRangeUser=xRangeUser, 
-              markerSize=markerSize)
+              markerSize=markerSize, yRangeUser=ratioYRange)
 
     c.Update()
     c.SetWindowSize(c.GetWw()+4, c.GetWh()+50)
