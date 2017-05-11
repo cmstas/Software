@@ -4,7 +4,7 @@ import ppmUtils as utils
 ## do not use this manually! call plotDataMC with no h_data argument
 def plotBackgrounds(h_bkg_vec_, bkg_names, canvas=None, stack=None, saveAs=None, xRangeUser=None, doPause=False, 
                     isLog=True, xAxisTitle="H_{T}", xAxisUnit="GeV", dataMax=0, userMax=None, userMin=None,
-                    doLegend=False, doMT2Colors=False, doOverflow=True, shallowCopy=True):
+                    doLegend=False, doMT2Colors=False, doOverflow=True, shallowCopy=True, sigMax=0):
 
     # make shallow copies of hists so we don't overwrite the originals
     if shallowCopy:
@@ -60,7 +60,7 @@ def plotBackgrounds(h_bkg_vec_, bkg_names, canvas=None, stack=None, saveAs=None,
     stack.GetYaxis().SetTitleOffset(1.4)
     stack.GetXaxis().SetTitleOffset(1.2)
 
-    utils.SetYBounds(stack, isLog, h_bkg_vec, dataMax, xRangeUser)
+    utils.SetYBounds(stack, isLog, h_bkg_vec, max(dataMax, sigMax), xRangeUser)
     if userMax!=None:
         stack.SetMaximum(userMax)
     if userMin!=None:
@@ -290,10 +290,19 @@ def plotDataMC(h_bkg_vec_, bkg_names, h_data=None, title=None, subtitles=None, d
                 if y>dataMax:
                     dataMax = y
 
+    sigMax = 0
+    if h_sig_vec!=None:
+        for ih in range(len(h_sig_vec)):
+            for i in range(1,h_sig_vec[ih].GetNbinsX()+1):
+                y = h_sig_vec[ih].GetBinContent(i)+h_sig_vec[ih].GetBinError(i)
+                if y>sigMax:
+                    sigMax = y
+
     stack = ROOT.THStack("hs","")
     plotBackgrounds(h_bkg_vec, bkg_names, canvas=pads[0], stack=stack, xRangeUser=xRangeUser, isLog=isLog, 
                     xAxisTitle=xAxisTitle, xAxisUnit=xAxisUnit, dataMax=dataMax, shallowCopy=False,
-                    userMax=userMax, userMin=userMin, doMT2Colors=doMT2Colors, doOverflow=doOverflow)
+                    userMax=userMax, userMin=userMin, doMT2Colors=doMT2Colors, doOverflow=doOverflow, 
+                    sigMax=sigMax)
 
     if doBkgError:
         h_err = ROOT.TH1D()
@@ -437,7 +446,7 @@ def plotDataMC(h_bkg_vec_, bkg_names, h_data=None, title=None, subtitles=None, d
 ## make a comparison plot between two histograms. Plots both histos on one axis, as well as a ratio plot
 def plotComparison(h1_, h2_, title="", ratioTitle="Data/MC", h1Title="MC", h2Title="Data", saveAs=None,
                    size=(700,600), xRangeUser=None, markerSize=0.65, doPause=False, isLog=True,
-                   normalize=False, xAxisTitle="", ratioYRange=None):
+                   normalize=False, xAxisTitle="", ratioYRange=None, yRangeUser=None):
 
     h1 = ROOT.TH1D()
     h1_.Copy(h1)
@@ -460,7 +469,7 @@ def plotComparison(h1_, h2_, title="", ratioTitle="Data/MC", h1Title="MC", h2Tit
     pads.append(ROOT.TPad("2","2",0.0,0.0,1.0,0.17))
 
     pads[0].SetLogy(isLog)
-    pads[0].SetTopMargin(0.09)
+    pads[0].SetTopMargin(0.08)
     pads[0].SetLeftMargin(0.12)
     pads[0].SetBottomMargin(0.10)
     pads[1].SetLeftMargin(0.12)
@@ -475,6 +484,9 @@ def plotComparison(h1_, h2_, title="", ratioTitle="Data/MC", h1Title="MC", h2Tit
     if xRangeUser!=None:
         h1.GetXaxis().SetRangeUser(*xRangeUser)
         h2.GetXaxis().SetRangeUser(*xRangeUser)
+    if yRangeUser!=None:
+        h1.GetYaxis().SetRangeUser(*yRangeUser)
+        h2.GetYaxis().SetRangeUser(*yRangeUser)
     if normalize:
         h1.GetYaxis().SetTitle("Normalized")
     else:
