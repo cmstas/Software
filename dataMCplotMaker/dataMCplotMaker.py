@@ -59,6 +59,8 @@ if __name__ == "__main__":
             "legendTaller": 0.15,
             "yTitleOffset": -0.5,
             "type": "Preliminary",
+            # "flagLocation": "0.6,0.965,0.07",
+            "flagLocation": "0.5,0.7,0.15", # add a US flag because 'merica
             }
 
     dataMCplot(h_data, bgs=[h_wz,h_ttz], titles=["WZ","t#bar{t}Z"], title="test", colors=[r.kGreen+2,r.kBlue-1], opts=d_opts)

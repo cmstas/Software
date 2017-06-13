@@ -28,4 +28,6 @@ void singlePlotMaker(TH1F* h1, std::string title="", std::string options_string=
 //Quick wrapper
 void singleComparisonMaker(TH1F* h1, TH1F* h2, std::string title="", std::string title2="", std::string options_string="");
 
+void drawFlag(TCanvas *c1, float cx, float cy, float size);
+
 #endif

@@ -18,6 +18,7 @@
 #include "TChain.h"
 #include "TColor.h"
 #include "TCut.h"
+#include "TMarker.h"
 #include "TROOT.h"
 
 //Parse Parameters from options input string

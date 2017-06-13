@@ -288,6 +288,7 @@ void dataMCplotMaker(TH1F* Data_in, std::vector <std::pair <TH1F*, TH1F*> > Back
   std::vector <std::string> vLines;
   std::vector <std::string> hLines;
   std::string boxLines = "";
+  std::string flagLocation = "";
   bool doHalf = 0;
   bool doPull = 0;
   Int_t nDivisions = -1;
@@ -384,6 +385,7 @@ void dataMCplotMaker(TH1F* Data_in, std::vector <std::pair <TH1F*, TH1F*> > Back
     else if (Options[i].find("vLine") < Options[i].length()) vLines.push_back(getString(Options[i], "vLine").c_str());
     else if (Options[i].find("hLine") < Options[i].length()) hLines.push_back(getString(Options[i], "hLine").c_str());
     else if (Options[i].find("boxLines") < Options[i].length()) boxLines = getString(Options[i], "boxLines").c_str();
+    else if (Options[i].find("flagLocation") < Options[i].length()) flagLocation = getString(Options[i], "flagLocation").c_str();
     else if (Options[i].find("setMaximum") < Options[i].length()) setMaximum = atof( getString(Options[i], "setMaximum").c_str() );
     else if (Options[i].find("setMaxMultiplier") < Options[i].length()) setMaxMultiplier = atof( getString(Options[i], "setMaxMultiplier").c_str() );
     else if (Options[i].find("legendUp") < Options[i].length()) legendUp = atof( getString(Options[i], "legendUp").c_str() );
@@ -845,7 +847,8 @@ void dataMCplotMaker(TH1F* Data_in, std::vector <std::pair <TH1F*, TH1F*> > Back
           stack->GetXaxis()->SetBinLabel(i+1, ((TObjString *)(tx->At(i)))->String());
       }
       if(xAxisVerticalBinLabels) stack->GetXaxis()->LabelsOption("v");
-      else stack->GetXaxis()->LabelsOption("u");
+      // else stack->GetXaxis()->LabelsOption("u");
+      else stack->GetXaxis()->LabelsOption();
   }
 
   //Show Percentage
@@ -1044,7 +1047,7 @@ void dataMCplotMaker(TH1F* Data_in, std::vector <std::pair <TH1F*, TH1F*> > Back
           float upEdge = Data->GetXaxis()->GetBinUpEdge(xbin);
           float dataContent = Data->GetBinContent(xbin);
           totData += dataContent;
-          buff += Form("%i|[%.1f,%.1f]|",xbin,lowEdge,upEdge);
+          buff += Form("%i|[%.2f,%.2f]|",xbin,lowEdge,upEdge);
           
           float bkgTot = 0.0; // total along row
           float bkgSqError = 0.0;
@@ -1066,7 +1069,7 @@ void dataMCplotMaker(TH1F* Data_in, std::vector <std::pair <TH1F*, TH1F*> > Back
           
           // Total columns, ratio
           buff += Form("%.2f+-%.2f|", bkgTot, sqrt(bkgSqError));
-          buff += Form("%.2f+-%.2f|", dataContent, sqrt(dataContent));
+          buff += Form("%.0f|", dataContent);
           buff += Form("%.2f+-%.2f", r, r*sqrt( 1.0/dataContent + bkgSqError/(bkgTot*bkgTot) ));
           if (hasSignal) {
               buff += Form("|%.2f+-%.2f", Signals.at(0)->GetBinContent(xbin), Signals.at(0)->GetBinError(xbin));
@@ -1091,7 +1094,7 @@ void dataMCplotMaker(TH1F* Data_in, std::vector <std::pair <TH1F*, TH1F*> > Back
 
       float r = 1.0*totData/totalBkg;
       buff += Form("%.2f+-%.2f|", totalBkg, sqrt(totalBkgSqError));
-      buff += Form("%.2f+-%.2f|", 1.0*totData, sqrt(totData));
+      buff += Form("%.0f|", 1.0*totData);
       buff += Form("%.2f+-%.2f", r, r*sqrt( 1.0/totData + totalBkgSqError/(totalBkg*totalBkg) ));
       if (hasSignal) {
           buff += Form("|%.2f", Signals[0]->Integral());
@@ -1140,8 +1143,11 @@ void dataMCplotMaker(TH1F* Data_in, std::vector <std::pair <TH1F*, TH1F*> > Back
     float yRowOffset = 0.65 - nRows*0.05; // painstakingly-determined empirical formula
     float xPctFudge = 0.01, yPctFudge = 0.01;
     if (Titles.size() < 5) yPctFudge = 0.005; // damn, this works nicely
+    if (Titles.size() > 7) yPctFudge = 0.005;
     if (Titles.size() > 9) yPctFudge = 0.015;
     if (Signals.size() > 0) yPctFudge += 0.0345;
+
+    yPctFudge += 0.008;
 
     for (unsigned int iEntry = 0; iEntry < Titles.size(); iEntry++)  {
       float xPctNDC = xPctFudge+leg->GetX1()+halfFillWidth*0.8;
@@ -1277,6 +1283,8 @@ void dataMCplotMaker(TH1F* Data_in, std::vector <std::pair <TH1F*, TH1F*> > Back
     if ( noLumi) tex->DrawLatex(xpos,type_y,"                   "); // FIXME
     tex->SetTextAlign(11);
   }
+
+
   // float xshift = -0.00;//configurable?
   float xshift = (linear ? -0.00 : -0.03) ;//configurable?
 
@@ -1476,6 +1484,18 @@ void dataMCplotMaker(TH1F* Data_in, std::vector <std::pair <TH1F*, TH1F*> > Back
   }
   //--------------------------------
 
+  // Draw US flag
+  TString flagString(flagLocation);
+  if(flagString.CountChar(',') == 2) {
+      TObjArray *tokens = flagString.Tokenize(",");
+      float cx = (((TObjString *)(tokens->At(0)))->String()).Atof();
+      float cy = (((TObjString *)(tokens->At(1)))->String()).Atof();
+      float size = (((TObjString *)(tokens->At(2)))->String()).Atof();
+      // drawFlag(&c0, 0.5,0.7, 0.1); // middle for ratio plots
+      // drawFlag(&c0, 0.6,0.965, 0.07); // top for nonratio plots
+      drawFlag(&c0, cx,cy,size); // custom
+  }
+
   if (noTextBetweenPads) {
       finPad[1]->cd();
       TLatex *textest = new TLatex();
@@ -1498,6 +1518,7 @@ void dataMCplotMaker(TH1F* Data_in, std::vector <std::pair <TH1F*, TH1F*> > Back
       else textest->DrawLatex(0.23,ytest,Form("%s",type.c_str()));
       finPad[0]->cd();
   }
+
 
   //Print plot as pdf 
   if (!noOutput){
@@ -1563,4 +1584,85 @@ void dataMCplotMaker(TH1F* Data_in, std::vector <std::pair <TH1F*, float> > Back
 
   dataMCplotMaker(Data_in, Backgrounds_pair_in, Titles, titleIn, title2In, options_string, Signals_in, SignalTitles, color_input); 
 
+}
+
+void drawFlag(TCanvas *c1, float cx, float cy, float size) {
+    c1->cd();
+    float aspect_ratio = c1->GetWindowWidth()/c1->GetWindowHeight();
+    float xmin = cx-size/2.;
+    float xmax = cx+size/2.;
+    float ymin = cy-size/(2./aspect_ratio);
+    float ymax = cy+size/(2./aspect_ratio);
+    TPad* fp = new TPad("fp","fp",xmin,ymin,xmax,ymax);
+    fp->SetFillStyle(0);
+    fp->Draw();
+    fp->cd();
+    float A = 1.;
+    float B = 1.9;
+    float D = 0.76;
+    float G = 0.063/B;
+    float H = 0.063/B;
+    float E = 0.054;
+    float F = 0.054;
+    for (int i = 0; i < 13; i++) {
+        float xlow = 0.;
+        float xhigh = 1.;
+        float ylow = 0.5*(1.-A/B) + i*(A/B)/13.;
+        float yhigh = 0.5*(1.-A/B) + (i+1)*(A/B)/13.;
+        if (i >= 6) xlow = D/B;
+        // auto col(i%2 ? kWhite : kRed-10);
+        auto col(i%2 ? kWhite : kRed-7);
+        TBox* box = new TBox(xlow,ylow,xhigh,yhigh);
+        box->SetFillColor(col);
+        box->SetLineColor(col);
+        box->Draw();
+    }
+    TBox *starbox = new TBox( 0., 0.5*(1-A/B)+6./13*(A/B), D/B, 1.-0.5*(1-A/B) );
+    // starbox->SetFillColor(kBlue-10);
+    // starbox->SetLineColor(kBlue-10);
+    starbox->SetFillColor(kBlue-7);
+    starbox->SetLineColor(kBlue-7);
+    starbox->Draw();
+
+    int row = 0;
+    int inrow = 0;
+    float ybottom = 0.5*(1-A/B)+6./13*(1-A/B);
+    float starsize = 0.1+(xmax-xmin)*3.0;
+    for (int i = 0; i < 50; i++) {
+
+        float x = -1.;
+        float y = -1.;
+        if (inrow == 0) x = G;
+        else x = G+2*H*inrow;
+        if (row == 0) y = ybottom+E;
+        else y = ybottom+E+(F*row)*(A/B);
+        if (row%2!=0) x += H;
+
+        TMarker *tm = new TMarker(x,y,kFullStar);
+        tm->SetMarkerColor(kWhite);
+        tm->SetMarkerSize(-1.0*starsize); // negative to flip so points upwards
+        tm->Draw();
+
+        inrow++;
+        if (row%2 == 0) {
+            if (inrow == 6) {
+                inrow = 0;
+                row += 1;
+            }
+        } else {
+            if (inrow == 5) {
+                inrow = 0;
+                row += 1;
+            }
+        }
+    }
+
+    TLatex *lab = new TLatex(0.5,0.15,"#font[52]{Made in USA}");
+    lab->SetTextAlign(22);
+    lab->SetTextSize(0.1);
+    // lab->SetTextColor(kGray);
+    lab->SetTextColor(kGray+2);
+    lab->Draw();
+
+    c1->cd();
 }
