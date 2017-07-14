@@ -3,6 +3,35 @@ import ROOT as r
 r.gROOT.ProcessLine(".L {0}/dataMCplotMaker.cc+".format(os.path.realpath(__file__).rsplit("/",1)[0]))
 from ROOT import dataMCplotMaker
 
+def post_plotting(opts):
+    fnamejson = opts["outputName"].replace(".pdf",".json")
+    if os.path.isfile(fnamejson):
+        clean_json(fnamejson)
+
+def clean_json(fname):
+    # replace inf, nan with 1000000
+    # remove non-plaintext stuff in TLatex objects
+    import re
+    buff = ""
+    with open(fname,"r") as fhin:
+        foundlatex = False
+        for line in fhin:
+            if "inf" in line or "nan" in line:
+                if re.search(r'\binf\b', line): 
+                    line = line.replace("inf","1000000")
+                elif re.search(r'\bnan\b', line):
+                    line = line.replace("nan","1000000")
+            if foundlatex and "fTitle" in line:
+                line = re.sub("#[a-z]+\[[0-9\.\-]+\]", "", line)
+                foundlatex = False
+            if "TLatex" in line:
+                foundlatex = True
+            buff += line
+    with open(fname,"w") as fhout:
+        fhout.write(buff)
+
+
+
 def dataMCplot(data, bgs=[], systs=[], titles=[], sigs=[], sigtitles=[], title="", subtitle="", colors=[], opts={}, opts_str=""):
     v_bgs = r.vector("TH1F*")()
     v_sigs = r.vector("TH1F*")()
@@ -36,6 +65,7 @@ def dataMCplot(data, bgs=[], systs=[], titles=[], sigs=[], sigtitles=[], title="
             v_bgs.push_back(bg)
         the_bgs = v_bgs
     dataMCplotMaker(data, the_bgs, v_titles, title, subtitle, opts_str, v_sigs, v_sigtitles, v_colors)
+    post_plotting(opts)
 
 if __name__ == "__main__":
     h_data = r.TH1F("data", "", 7, 0, 7)
@@ -52,6 +82,7 @@ if __name__ == "__main__":
             "outputName": "plots/test.pdf",
             "xAxisLabel": "Njets",
             "noXaxisUnit": True,
+            "percentageInBox": True,
             "isLinear": True,
             "legendUp": -0.15,
             "legendRight": -0.08,
@@ -59,7 +90,10 @@ if __name__ == "__main__":
             "legendTaller": 0.15,
             "yTitleOffset": -0.5,
             "type": "Preliminary",
+            "darkColorLines": True,
             # "flagLocation": "0.6,0.965,0.07",
+            "makeTable": True,
+            "makeJSON": True,
             "flagLocation": "0.5,0.7,0.15", # add a US flag because 'merica
             }
 
