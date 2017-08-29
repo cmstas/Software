@@ -26,7 +26,8 @@ def GetMT2Color(sample):
     if 'zinv' in sample: return 418
     if 'dyjetsll' in sample: return 430
     if 'gjets' in sample: return 18
-
+    if 'data' in sample: return 430
+    
     return ROOT.kBlack
 
 def GetLastBin(h, xmax=None):
