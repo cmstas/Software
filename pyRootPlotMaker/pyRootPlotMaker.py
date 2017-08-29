@@ -82,7 +82,7 @@ def plotBackgrounds(h_bkg_vec_, bkg_names, canvas=None, stack=None, saveAs=None,
 ## make a ratio plot. For use within the plotDataMC and plotComparison functions
 def plotRatio(h1, h2, canvas=None, ratioHist=None, xRangeUser=None, ratioTitle = None, markerSize=0.7, 
               doPull=False, convertToPoisson=False, ratioGraph=None, drawZeros=True, drawSystematicBand=False,
-              systematics=None, h_syst=None, yRangeUser=None):
+              systematics=None, h_syst=None, yRangeUser=None, showRatioErrs=True):
 
     if doPull:
         convertToPoisson = False
@@ -117,6 +117,10 @@ def plotRatio(h1, h2, canvas=None, ratioHist=None, xRangeUser=None, ratioTitle =
             err = ROOT.TMath.Sqrt(h2.GetBinError(i)**2 + h1.GetBinError(i)**2)
             ratioHist.SetBinContent(i,diff/err)
             ratioHist.SetBinError(i,1.0)
+
+    if not showRatioErrs:
+        for i in range(1,ratioHist.GetNbinsX()+1):
+            ratioHist.SetBinError(i,0)
 
     ratioHist.SetTitle("")
     #yaxis
@@ -186,6 +190,7 @@ def plotRatio(h1, h2, canvas=None, ratioHist=None, xRangeUser=None, ratioTitle =
         line.DrawLine(xmin,-1,xmax,-1)
         line.DrawLine(xmin,-2,xmax,-2)
         line.DrawLine(xmin,-3,xmax,-3)
+
     if convertToPoisson:
         ratioGraph.Draw("SAME PZ")
     else:
@@ -278,7 +283,10 @@ def plotDataMC(h_bkg_vec_, bkg_names, h_data=None, title=None, subtitles=None, d
         data_error = ROOT.Double(0)
         data_integral = h_data[0].IntegralAndError(0,-1,data_error)
         scaleFactor = data_integral/tot_MC_integral
-        scaleFactorError = scaleFactor * (data_error/data_integral + tot_MC_error/tot_MC_integral)
+        if data_integral > 0:
+            scaleFactorError = scaleFactor * (data_error/data_integral + tot_MC_error/tot_MC_integral)
+        else:
+            scaleFactorError = 0.0
     for i in range(len(h_bkg_vec)):
         h_bkg_vec[i].Scale(scaleFactor)
 
@@ -445,8 +453,9 @@ def plotDataMC(h_bkg_vec_, bkg_names, h_data=None, title=None, subtitles=None, d
 
 ## make a comparison plot between two histograms. Plots both histos on one axis, as well as a ratio plot
 def plotComparison(h1_, h2_, title="", ratioTitle="Data/MC", h1Title="MC", h2Title="Data", saveAs=None,
-                   size=(700,600), xRangeUser=None, markerSize=0.65, doPause=False, isLog=True,
-                   normalize=False, xAxisTitle="", ratioYRange=None, yRangeUser=None):
+                   size=(700,600), xRangeUser=None, markerSize=0.65, doPause=False, isLog=True, style=1,
+                   doOverflow=True, normalize=False, xAxisTitle="", ratioYRange=None, yRangeUser=None, 
+                   showRatioErrs=True):
 
     h1 = ROOT.TH1D()
     h1_.Copy(h1)
@@ -458,6 +467,10 @@ def plotComparison(h1_, h2_, title="", ratioTitle="Data/MC", h1Title="MC", h2Tit
             h1.Scale(1.0/h1.Integral(0,-1)/h1.GetBinWidth(1))
         if h2.Integral(0,-1) > 0:
             h2.Scale(1.0/h2.Integral(0,-1)/h2.GetBinWidth(1))
+
+    if doOverflow:
+        utils.PutOverflowInLastBin(h1, None if xRangeUser==None else xRangeUser[1])
+        utils.PutOverflowInLastBin(h2, None if xRangeUser==None else xRangeUser[1])
 
     ROOT.gStyle.SetOptStat(0)
 
@@ -479,7 +492,6 @@ def plotComparison(h1_, h2_, title="", ratioTitle="Data/MC", h1Title="MC", h2Tit
     pads[0].cd()
         
     h1.SetTitle(title)
-    h1.SetLineColor(ROOT.kRed)
     h1.GetXaxis().SetTitleOffset(1.15)
     if xRangeUser!=None:
         h1.GetXaxis().SetRangeUser(*xRangeUser)
@@ -493,9 +505,19 @@ def plotComparison(h1_, h2_, title="", ratioTitle="Data/MC", h1Title="MC", h2Tit
         h1.GetYaxis().SetTitle("Entries / {0} GeV".format(h1.GetXaxis().GetBinWidth(1)))
     h1.GetYaxis().SetTitleOffset(1.2)
     h1.GetXaxis().SetTitle(xAxisTitle)
-    h2.SetLineColor(ROOT.kBlack)
-    h2.Draw("PE")
-    h1.Draw("SAME PE")
+    if style==2:
+        h1.SetLineColor(ROOT.kRed)
+        h2.SetLineColor(ROOT.kBlack)
+        h2.SetMarkerStyle(20)
+        h2.SetMarkerSize(markerSize)
+        h2.SetMarkerColor(ROOT.kBlack)
+        h1.Draw("HIST")
+        h2.Draw("SAME PE")
+    else:
+        h1.SetLineColor(ROOT.kRed)
+        h2.SetLineColor(ROOT.kBlack)
+        h2.Draw("PE")
+        h1.Draw("SAME PE")
     
     leg = ROOT.TLegend(0.60,0.75,0.89,0.89)
     leg.AddEntry(h1, h1Title)
@@ -507,7 +529,7 @@ def plotComparison(h1_, h2_, title="", ratioTitle="Data/MC", h1Title="MC", h2Tit
     pads[1].cd()
     ratio = ROOT.TH1D()
     plotRatio(h1,h2,canvas=pads[1], ratioHist=ratio, ratioTitle=ratioTitle, xRangeUser=xRangeUser, 
-              markerSize=markerSize, yRangeUser=ratioYRange)
+              markerSize=markerSize, yRangeUser=ratioYRange, showRatioErrs=showRatioErrs)
 
     c.Update()
     c.SetWindowSize(c.GetWw()+4, c.GetWh()+50)
