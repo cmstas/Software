@@ -20,6 +20,10 @@
 #include "TCut.h"
 #include "TMarker.h"
 #include "TROOT.h"
+#if ROOT_VERSION_CODE > ROOT_VERSION(6,8,0)
+#include "TBufferJSON.h"
+#endif
+
 
 //Parse Parameters from options input string
 inline std::vector <std::string> GetParms(std::string blah){

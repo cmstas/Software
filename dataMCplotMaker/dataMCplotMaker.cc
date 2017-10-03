@@ -337,6 +337,7 @@ void dataMCplotMaker(TH1F* Data_in, std::vector <std::pair <TH1F*, TH1F*> > Back
   bool poissonErrorsNoZeros = 0;
   bool noGrass = 0;
   bool makeTable = 0;
+  bool makeJSON = 0;
   bool makeRootFile = 0;
   bool doWide = 0;
   bool noDataWidth = 0;
@@ -427,6 +428,7 @@ void dataMCplotMaker(TH1F* Data_in, std::vector <std::pair <TH1F*, TH1F*> > Back
     else if (Options[i].find("poissonErrorsNoZeros") < Options[i].length()) poissonErrorsNoZeros = true;
     else if (Options[i].find("noGrass") < Options[i].length()) noGrass = true;
     else if (Options[i].find("makeTable") < Options[i].length()) makeTable = true;
+    else if (Options[i].find("makeJSON") < Options[i].length()) makeJSON = true;
     else if (Options[i].find("makeRootFile") < Options[i].length()) makeRootFile = true;
     else if (Options[i].find("doWide") < Options[i].length()) doWide = true;
     else std::cout << "Warning: Option not recognized!  Option: " << Options[i] << std::endl;
@@ -666,16 +668,16 @@ void dataMCplotMaker(TH1F* Data_in, std::vector <std::pair <TH1F*, TH1F*> > Back
     else c0.SetCanvasSize(800, 700);
     if (errHistAtBottom == false){
         if (noTextBetweenPads) {
-            finPad[0] = new TPad("1", "1", 0.0, 0.0, 1.0, 0.79);
-            finPad[1] = new TPad("2", "2", 0.0, 0.78, 1.0, 0.99);
+            finPad[0] = new TPad("p1", "p1", 0.0, 0.0, 1.0, 0.79);
+            finPad[1] = new TPad("p2", "p2", 0.0, 0.78, 1.0, 0.99);
         } else {
-            finPad[0] = new TPad("1", "1", 0.0, 0.0, 1.0, 0.84);
-            finPad[1] = new TPad("2", "2", 0.0, 0.83, 1.0, 1.0);
+            finPad[0] = new TPad("p1", "p1", 0.0, 0.0, 1.0, 0.84);
+            finPad[1] = new TPad("p2", "p2", 0.0, 0.83, 1.0, 1.0);
         }
     }
     else{
-      finPad[0] = new TPad("1", "1", 0.0, 0.16, 1.0, 1.0);
-      finPad[1] = new TPad("2", "2", 0.0, 0.0, 1.0, 0.17);
+      finPad[0] = new TPad("p1", "p1", 0.0, 0.16, 1.0, 1.0);
+      finPad[1] = new TPad("p2", "p2", 0.0, 0.0, 1.0, 0.17);
     }
     if (!linear) finPad[0]->SetLogy();
     finPad[0]->SetTopMargin(0.05);
@@ -1580,6 +1582,12 @@ void dataMCplotMaker(TH1F* Data_in, std::vector <std::pair <TH1F*, TH1F*> > Back
       c0.Write();
       outFile->Close();
   }
+
+#if ROOT_VERSION_CODE > ROOT_VERSION(6,8,0)
+  if (makeJSON) {
+      TBufferJSON::ExportToFile(Form("%s.json",outputName.c_str()),&c0);
+  }
+#endif
 
   //Clean up
   for (unsigned int i = 0; i < Signals.size(); i++) delete Signals[i];
