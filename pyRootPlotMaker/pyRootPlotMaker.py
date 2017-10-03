@@ -4,7 +4,8 @@ import ppmUtils as utils
 ## do not use this manually! call plotDataMC with no h_data argument
 def plotBackgrounds(h_bkg_vec_, bkg_names, canvas=None, stack=None, saveAs=None, xRangeUser=None, doPause=False, 
                     isLog=True, xAxisTitle="H_{T}", xAxisUnit="GeV", dataMax=0, userMax=None, userMin=None,
-                    doLegend=False, doMT2Colors=False, doOverflow=True, shallowCopy=True, sigMax=0):
+                    doLegend=False, doMT2Colors=False, doOverflow=True, shallowCopy=True, sigMax=0,
+                    customColors=None):
 
     # make shallow copies of hists so we don't overwrite the originals
     if shallowCopy:
@@ -32,6 +33,8 @@ def plotBackgrounds(h_bkg_vec_, bkg_names, canvas=None, stack=None, saveAs=None,
     for i in range(nh):
         if doMT2Colors:
             h_bkg_vec[i].SetFillColor(utils.GetMT2Color(bkg_names[i]))
+        elif customColors!=None:
+            h_bkg_vec[i].SetFillColor(customColors[nh-1-i])
         else:
             h_bkg_vec[i].SetFillColor(colors[nh-1-i])
         h_bkg_vec[i].SetLineColor(ROOT.kBlack)
@@ -205,12 +208,15 @@ def plotDataMC(h_bkg_vec_, bkg_names, h_data=None, title=None, subtitles=None, r
                doMT2Colors=False, markerSize=0.9, doOverflow=True, titleSize=0.04, subtitleSize=0.03, subLegText=None,
                subLegTextSize=0.03, cmsText="CMS Preliminary", cmsTextSize=0.035, doBkgError=False, functions=[], 
                legCoords=None, doPull=False, convertToPoisson=False, drawZeros=True, drawSystematicBand=False, systematics=None,
-               h_sig_vec=[], sig_names=[]):
-    
+               h_sig_vec=[], sig_names=[], customColors=None, verticalLines=[]):    
+
     if h_data == None:
         doRatio = False
         scaleMCtoData = False
         
+    if customColors!=None and len(customColors) < len(h_bkg_vec_):
+        raise RuntimeError("Not enough colors for all backgrounds! {0} colors, {1} backgrounds.".format(len(customColors),len(h_bkg_vec_)))
+
     if drawSystematicBand and systematics==None:
         raise RuntimeError("Must supply a list of systematics to draw uncertainty band!")
 
@@ -310,7 +316,7 @@ def plotDataMC(h_bkg_vec_, bkg_names, h_data=None, title=None, subtitles=None, r
     plotBackgrounds(h_bkg_vec, bkg_names, canvas=pads[0], stack=stack, xRangeUser=xRangeUser, isLog=isLog, 
                     xAxisTitle=xAxisTitle, xAxisUnit=xAxisUnit, dataMax=dataMax, shallowCopy=False,
                     userMax=userMax, userMin=userMin, doMT2Colors=doMT2Colors, doOverflow=doOverflow, 
-                    sigMax=sigMax)
+                    sigMax=sigMax, customColors=customColors)
 
     if doBkgError:
         h_err = ROOT.TH1D()
@@ -358,6 +364,22 @@ def plotDataMC(h_bkg_vec_, bkg_names, h_data=None, title=None, subtitles=None, r
         h_sig_vec[isig].SetLineColor(sig_cols[isig])
         h_sig_vec[isig].SetLineWidth(2)
         h_sig_vec[isig].Draw("SAME HIST")
+
+    ## draw vertical lines
+    line = ROOT.TLine()
+    line.SetLineWidth(2)
+    line.SetLineColor(ROOT.kRed)
+    for linex in verticalLines:
+        lm = pads[0].GetLeftMargin()
+        rm = pads[0].GetRightMargin()
+        tm = pads[0].GetTopMargin()
+        bm = pads[0].GetBottomMargin()
+        if xRangeUser!=None:
+            xrange = xRangeUser
+        else:
+            xrange = (h_bkg_vec[0].GetXaxis().GetXmin(), h_bkg_vec[0].GetXaxis().GetXmax())
+        xndc = lm + float(linex-xrange[0])/(xrange[1]-xrange[0]) * (1-rm-lm)
+        line.DrawLineNDC(xndc,bm,xndc,1-tm)
 
     ## legend
         
@@ -506,7 +528,9 @@ def plotComparison(h1_, h2_, title="", ratioTitle="Data/MC", h1Title="MC", h2Tit
     h1.GetYaxis().SetTitleOffset(1.2)
     h1.GetXaxis().SetTitle(xAxisTitle)
     if style==2:
-        h1.SetLineColor(ROOT.kRed)
+        h1.SetLineColor(ROOT.kAzure-6)
+        h1.SetFillColor(ROOT.kAzure-9)
+        h1.SetLineWidth(1)
         h2.SetLineColor(ROOT.kBlack)
         h2.SetMarkerStyle(20)
         h2.SetMarkerSize(markerSize)
@@ -541,8 +565,152 @@ def plotComparison(h1_, h2_, title="", ratioTitle="Data/MC", h1Title="MC", h2Tit
         raw_input()
 
 
+def plotEfficiency(h_num_, h_den_, doOverflow=True, xRangeUser=None, size=(800,700), axisMax=1.3, 
+                   xAxisTitle="H_{T}", xAxisUnit="GeV", lumi = 1.0, lumiUnit="fb", energy=13, 
+                   year=2017, printEffic=False, effCut=None, effVar=None, subtitle=None, saveAs=None):
+    
+    h_num = ROOT.TH1D()
+    h_num_.Copy(h_num)
+    h_den = ROOT.TH1D()
+    h_den_.Copy(h_den)
 
+    if doOverflow:
+        utils.PutOverflowInLastBin(h_num, None if xRangeUser==None else xRangeUser[1])
+        utils.PutOverflowInLastBin(h_den, None if xRangeUser==None else xRangeUser[1])
 
+    ROOT.gStyle.SetOptStat(0)
+
+    c = ROOT.TCanvas()
+    c.SetCanvasSize(size[0],size[1])
+
+    c.SetTopMargin(0.08)
+    c.SetLeftMargin(0.12)
+    c.SetBottomMargin(0.12)
+    c.SetRightMargin(0.12)
+
+    c.SetTickx(1)
+
+    # scale denom/num histograms
+    base_width = h_den.GetBinWidth(1)
+    for i in range(1,h_den.GetNbinsX()+1):
+        sf = h_den.GetBinWidth(i) / base_width
+        h_den.SetBinContent(i, h_den.GetBinContent(i) / sf)
+        h_num.SetBinContent(i, h_num.GetBinContent(i) / sf)
+    maxval = h_den.GetMaximum()
+    sf = 0.9 / maxval
+    h_num.Scale(sf)
+    h_den.Scale(sf)
+        
+    h_den.GetYaxis().SetRangeUser(0,axisMax)
+    h_den.GetYaxis().SetTitle("")
+    if xRangeUser != None:
+        h_den.GetXaxis().SetRangeUser(xRangeUser[0], xRangeUser[1])
+    h_den.GetXaxis().SetLabelOffset(0.015)
+    h_den.GetXaxis().SetTitleOffset(1.40)
+    if xAxisUnit != None:
+        h_den.GetXaxis().SetTitle("{0} [{1}]".format(xAxisTitle, xAxisUnit))
+    else:
+        h_den.GetXaxis().SetTitle(xAxisTitle)
+    h_den.GetXaxis().SetTitleSize(0.04)
+        
+    h_den.Draw("AXIS SAME")
+
+    line = ROOT.TLine()
+    line.SetLineStyle(3)
+    line.SetLineWidth(1)
+    line.SetLineColor(ROOT.kGray+2)
+    xmin = xRangeUser[0] if xRangeUser!=None else graph.GetXaxis().GetXmin()
+    xmax = xRangeUser[1] if xRangeUser!=None else graph.GetXaxis().GetXmax()
+    line.DrawLine(xmin, 1.0, xmax, 1.0)
+    line.DrawLine(xmin, 0.8, xmax, 0.8)
+    line.DrawLine(xmin, 0.6, xmax, 0.6)
+    line.DrawLine(xmin, 0.4, xmax, 0.4)
+    line.DrawLine(xmin, 0.2, xmax, 0.2)
+
+    h_num.SetFillColor(ROOT.kAzure+1)
+    h_num.SetLineColor(ROOT.kAzure+3)
+    h_num.SetLineWidth(1)
+    h_num.SetLineStyle(1)
+    h_den.SetFillStyle(0)
+    h_den.SetLineColor(ROOT.kAzure+3)
+    h_den.SetLineWidth(2)
+    h_den.SetLineStyle(2)
+
+    h_num.Draw("HIST SAME")
+    h_den.Draw("HIST SAME")
+
+    eff = ROOT.TEfficiency(h_num_, h_den_)
+    eff.SetMarkerStyle(20)
+    eff.SetMarkerSize(0.9)
+    eff.Draw("P SAME")
+    
+    h_den.Draw("AXIS SAME")
+
+    c.Update()
+    axis = ROOT.TGaxis(c.GetUxmax(), c.GetUymin(), c.GetUxmax(), c.GetUymax(), 0, axisMax / sf, 510, "+L")
+    axis.SetLabelFont(h_den.GetYaxis().GetLabelFont())
+    axis.SetLabelSize(h_den.GetYaxis().GetLabelSize())
+    axis.Draw()
+
+    text = ROOT.TLatex()
+    text.SetTextFont(42)
+    text.SetTextSize(axis.GetLabelSize() * 1.2)
+    text.SetTextAlign(32)
+    text.SetTextAngle(90)
+    text.DrawLatexNDC(0.04, 0.735, "Efficiency")
+    text.SetTextAlign(12)
+    text.SetTextAngle(270)
+    text.DrawLatexNDC(0.97, 0.735, "Events / {0} {1}".format(base_width, xAxisUnit))
+
+    text.SetTextAlign(31)
+    text.SetTextAngle(0)
+    text.SetTextSize(0.04)
+    if year!=None:
+        string = "{0} {1}^{{-1}} ({2} TeV, {3})".format(lumi, lumiUnit, energy, year)
+    else:
+        string = "{0} {1}^{{-1}} ({2} TeV)".format(lumi, lumiUnit, energy)
+    text.DrawLatexNDC(0.87, 0.93, string)
+
+    text.SetTextFont(62)
+    text.SetTextSize(0.05)
+    text.SetTextAlign(11)
+    text.DrawLatexNDC(0.17, 0.84, "CMS")
+    text.SetTextFont(52)
+    text.SetTextSize(0.04)
+    text.SetTextAlign(13)
+    text.DrawLatexNDC(0.17, 0.83, "Preliminary")
+
+    if printEffic and effCut==None:
+        raise Exception("must provide an effCut if you want to print efficiency!")
+    if printEffic and effCut != None:
+        ibin = 1
+        while h_den_.GetBinLowEdge(ibin) < effCut:
+            ibin += 1
+        if h_den_.GetBinLowEdge(ibin) != effCut:
+            print "ERROR: effCut must be on a bin edge!!"
+        else:
+            tot = h_den_.Integral(ibin, -1)
+            pas= h_num_.Integral(ibin, -1)
+            effic = float(pas)/tot
+            errup = ROOT.TEfficiency.ClopperPearson(tot, pas, 0.6827, 1) - effic
+            errdown = effic - ROOT.TEfficiency.ClopperPearson(tot, pas, 0.6827, 0)
+            text.SetTextFont(62)
+            text.SetTextSize(0.035)
+            text.SetTextAlign(33)
+            if effVar==None:
+                effVar = xAxisTitle
+            text.DrawLatexNDC(0.83, 0.88, "#varepsilon({0} > {1} GeV) = {2:.1f}^{{+{3:.1f}}}_\
+{{-{4:.1f}}} %".format(effVar, effCut, 100*effic, 100*errup, 100*errdown))
+
+    if subtitle != None:
+        text.SetTextFont(52)
+        text.SetTextSize(0.035)
+        text.SetTextAlign(33)
+        text.DrawLatexNDC(0.83, 0.81, subtitle)
+            
+
+    if saveAs != None:
+        c.SaveAs(saveAs)
 
 
 

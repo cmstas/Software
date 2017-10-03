@@ -59,11 +59,14 @@ OPTIONAL arguments (required to use argument keywords. e.g., pass the argument `
 34. `systematics` - if the above option is set to True, this is a list of relative systematic errors (i.e., 0.4 for a 40% uncertainty). Must be the same length as the number of bins.
 35. `h_sig_vec` - list of signal histograms to overlay on top of data/MC.
 36. `sig_names` - list of names for the signals to put in legend.
-
+37. `customColors` - list of root colors to use for backgrounds. Must be at least the size of background list.
+38. `verticalLines` - list of x-values to draw vertcal lines at. Useful for showing cuts.
 
 ### Comparison plots
 Use `ppm.plotComparison` to plot a comparison between 2 histograms. This needs more work.
 
+### Efficiency plots
+Use `ppm.plotEfficiency` to make pretty trigger efficiency plots. Should be moslty self-explanatory, should document later
 
 ###TODO
 
