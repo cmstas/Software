@@ -566,8 +566,9 @@ def plotComparison(h1_, h2_, title="", ratioTitle="Data/MC", h1Title="MC", h2Tit
 
 
 def plotEfficiency(h_num_, h_den_, doOverflow=True, xRangeUser=None, size=(800,700), axisMax=1.3, 
-                   xAxisTitle="H_{T}", xAxisUnit="GeV", lumi = 1.0, lumiUnit="fb", energy=13, 
-                   year=2017, printEffic=False, effCut=None, effVar=None, subtitle=None, saveAs=None):
+                   xAxisTitle="H_{T}", yAxisTitle="Efficiency", xAxisUnit="GeV", lumi = 1.0, lumiUnit="fb", 
+                   energy=13, year=2017, printEffic=False, effCut=None, effVar=None, subtitle=None, 
+                   fitwindow=None, fitstart=None, saveAs=None):
     
     h_num = ROOT.TH1D()
     h_num_.Copy(h_num)
@@ -596,8 +597,8 @@ def plotEfficiency(h_num_, h_den_, doOverflow=True, xRangeUser=None, size=(800,7
         sf = h_den.GetBinWidth(i) / base_width
         h_den.SetBinContent(i, h_den.GetBinContent(i) / sf)
         h_num.SetBinContent(i, h_num.GetBinContent(i) / sf)
-    maxval = h_den.GetMaximum()
-    sf = 0.9 / maxval
+    maxval = h_num.GetMaximum()
+    sf = 0.5 / maxval
     h_num.Scale(sf)
     h_den.Scale(sf)
         
@@ -643,6 +644,24 @@ def plotEfficiency(h_num_, h_den_, doOverflow=True, xRangeUser=None, size=(800,7
     eff.SetMarkerStyle(20)
     eff.SetMarkerSize(0.9)
     eff.Draw("P SAME")
+    c.Update()
+
+    if fitwindow != None:
+        fit = ROOT.TF1("fit","[0]/(1+exp(-[1]*(x-[2])))", fitwindow[0], fitwindow[1])
+        fit.SetNpx(500)
+        if fitstart==None:
+            fit.SetParameter(0, 1)
+            fit.SetParameter(1, 0.2)
+            fit.SetParameter(2, 0.5*(fitwindow[0]+fitwindow[1]))
+        else:
+            fit.SetParameters(fitstart[0], fitstart[1], fitstart[2])
+        graph = eff.GetPaintedGraph()
+        graph.Fit(fit, "QNR","goff")
+        fit.SetLineColor(ROOT.kRed)
+        fit.SetLineWidth(2)
+        fit.Draw("SAME")
+        eff.Draw("P SAME")
+        # print -1/fit.GetParameter(1)*ROOT.TMath.Log(1/0.98-1)+fit.GetParameter(2)
     
     h_den.Draw("AXIS SAME")
 
@@ -657,7 +676,7 @@ def plotEfficiency(h_num_, h_den_, doOverflow=True, xRangeUser=None, size=(800,7
     text.SetTextSize(axis.GetLabelSize() * 1.2)
     text.SetTextAlign(32)
     text.SetTextAngle(90)
-    text.DrawLatexNDC(0.04, 0.735, "Efficiency")
+    text.DrawLatexNDC(0.04, 0.735, yAxisTitle)
     text.SetTextAlign(12)
     text.SetTextAngle(270)
     text.DrawLatexNDC(0.97, 0.735, "Events / {0} {1}".format(base_width, xAxisUnit))
