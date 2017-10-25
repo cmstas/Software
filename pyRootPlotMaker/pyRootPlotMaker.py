@@ -83,9 +83,9 @@ def plotBackgrounds(h_bkg_vec_, bkg_names, canvas=None, stack=None, saveAs=None,
         raw_input()
 
 ## make a ratio plot. For use within the plotDataMC and plotComparison functions
-def plotRatio(h1, h2, canvas=None, ratioHist=None, xRangeUser=None, ratioTitle = None, markerSize=0.7, 
+def plotRatio(h1, h2, canvas=None, ratioHist=None, xRangeUser=None, ratioTitle = None, markerSize=0.7, markerStyle=20,
               doPull=False, convertToPoisson=False, ratioGraph=None, drawZeros=True, drawSystematicBand=False,
-              systematics=None, h_syst=None, yRangeUser=None, showRatioErrs=True):
+              systematics=None, h_syst=None, yRangeUser=None, showRatioErrs=True, justDrawPoints=False):
 
     if doPull:
         convertToPoisson = False
@@ -149,16 +149,25 @@ def plotRatio(h1, h2, canvas=None, ratioHist=None, xRangeUser=None, ratioTitle =
     ratioHist.GetXaxis().SetTitle("")
     ratioHist.GetXaxis().SetTickSize(0.06)
     #markers
-    ratioHist.SetMarkerStyle(20)
+    ratioHist.SetMarkerStyle(markerStyle)
     ratioHist.SetMarkerSize(markerSize)    
     if convertToPoisson:
-        ratioGraph.SetMarkerStyle(20)
+        ratioGraph.SetMarkerStyle(markerStyle)
         ratioGraph.SetMarkerSize(markerSize)
-        ratioHist.Reset()
-        ratioHist.Draw()
-        ratioGraph.Draw("PZ")
+        if justDrawPoints:
+            ratioGraph.Draw("SAME PZ")
+        else:
+            ratioHist.Reset()
+            ratioHist.Draw()
+            ratioGraph.Draw("PZ")
     else:
-        ratioHist.Draw("PE")
+        if justDrawPoints:
+            ratioHist.Draw("SAME PE")
+        else:
+            ratioHist.Draw("PE")
+
+    if justDrawPoints:
+        return
 
     # systematics
     if drawSystematicBand:
@@ -208,7 +217,7 @@ def plotDataMC(h_bkg_vec_, bkg_names, h_data=None, title=None, subtitles=None, r
                doMT2Colors=False, markerSize=0.9, doOverflow=True, titleSize=0.04, subtitleSize=0.03, subLegText=None,
                subLegTextSize=0.03, cmsText="CMS Preliminary", cmsTextSize=0.035, doBkgError=False, functions=[], 
                legCoords=None, doPull=False, convertToPoisson=False, drawZeros=True, drawSystematicBand=False, systematics=None,
-               h_sig_vec=[], sig_names=[], customColors=None, verticalLines=[]):    
+               h_sig_vec=[], sig_names=[], customColors=None, verticalLines=[], ratioType=0):    
 
     if h_data == None:
         doRatio = False
@@ -455,14 +464,25 @@ def plotDataMC(h_bkg_vec_, bkg_names, h_data=None, title=None, subtitles=None, r
         h_bkg_vec[0].Copy(h1)
         for i in range(len(h_bkg_vec)-1):
             h1.Add(h_bkg_vec[i+1])
-        ratioHist = ROOT.TH1D()
-        ratioGraph = ROOT.TGraphAsymmErrors()
-        h_syst = ROOT.TH1D()
 
-        # currently only support drawing ratio for one data histogram. Uses the first one in the list.
-        plotRatio(h1, h_data[0], canvas=pads[1], ratioHist=ratioHist, ratioTitle=ratioTitle, xRangeUser=xRangeUser, markerSize=markerSize,
-                  doPull=doPull, convertToPoisson=convertToPoisson, ratioGraph=ratioGraph, drawZeros=drawZeros,
-                  drawSystematicBand=drawSystematicBand, systematics=systematics, h_syst=h_syst)
+        
+        ratioHist = [ROOT.TH1D() for h in h_data]
+        ratioGraph = [ROOT.TGraphAsymmErrors() for h in h_data]
+        h_syst = ROOT.TH1D()
+        for ih,hd in enumerate(h_data):
+            if ih==0:
+                plotRatio(h1, hd, canvas=pads[1], ratioHist=ratioHist[ih], ratioTitle=ratioTitle, xRangeUser=xRangeUser, markerSize=markerSize, markerStyle = hd.GetMarkerStyle(),
+                          doPull=doPull, convertToPoisson=convertToPoisson, ratioGraph=ratioGraph[ih], drawZeros=drawZeros,
+                          drawSystematicBand=drawSystematicBand, systematics=systematics, h_syst=h_syst)
+            else:
+                if ratioType==0:
+                    hden = h1
+                    hnum = hd
+                else:
+                    hden = hd
+                    hnum = h_data[0]
+                plotRatio(hden, hnum, canvas=pads[1], ratioHist=ratioHist[ih], xRangeUser=xRangeUser, markerSize=markerSize, markerStyle=hd.GetMarkerStyle(),
+                          doPull=doPull, convertToPoisson=convertToPoisson, ratioGraph=ratioGraph[ih], drawZeros=drawZeros, justDrawPoints=True)
     
     c.Update()
     c.SetWindowSize(c.GetWw()+4, c.GetWh()+50)
