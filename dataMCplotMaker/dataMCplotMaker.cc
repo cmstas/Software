@@ -299,7 +299,7 @@ void dataMCplotMaker(TH1F* Data_in, std::vector <std::pair <TH1F*, TH1F*> > Back
   bool percentageInBox = false;
   bool errHistAtBottom = false;
   std::vector<int> percent;
-  std::vector<int> counts;
+  std::vector<float> counts;
   std::string datacolor = "";
   std::string ratiocolor = "";
   bool noOutput = false;
@@ -335,10 +335,12 @@ void dataMCplotMaker(TH1F* Data_in, std::vector <std::pair <TH1F*, TH1F*> > Back
   int lumiPrec = 1; 
   bool noTextBetweenPads = 0;
   bool poissonErrorsNoZeros = 0;
+  bool noGrass = 0;
   bool makeTable = 0;
   bool makeJSON = 0;
   bool makeRootFile = 0;
   bool doWide = 0;
+  bool noDataWidth = 0;
 
   //Loop over options and change default settings to user-defined settings
   for (unsigned int i = 0; i < Options.size(); i++){
@@ -399,6 +401,7 @@ void dataMCplotMaker(TH1F* Data_in, std::vector <std::pair <TH1F*, TH1F*> > Back
     else if (Options[i].find("percentageInBox") < Options[i].length()) percentageInBox = true; 
     else if (Options[i].find("errHistAtBottom") < Options[i].length()) errHistAtBottom = true; 
     else if (Options[i].find("noOutput") < Options[i].length()) noOutput = true; 
+    else if (Options[i].find("noDataWidth") < Options[i].length()) noDataWidth = true; 
     else if (Options[i].find("noErrBars") < Options[i].length()) noErrBars = true; 
     else if (Options[i].find("histoErrors") < Options[i].length()) histoErrors = true; 
     else if (Options[i].find("sigError") < Options[i].length()) sigError = true; 
@@ -423,6 +426,7 @@ void dataMCplotMaker(TH1F* Data_in, std::vector <std::pair <TH1F*, TH1F*> > Back
     else if (Options[i].find("systBlack") < Options[i].length()) systBlack = true; 
     else if (Options[i].find("noTextBetweenPads") < Options[i].length()) noTextBetweenPads = true;
     else if (Options[i].find("poissonErrorsNoZeros") < Options[i].length()) poissonErrorsNoZeros = true;
+    else if (Options[i].find("noGrass") < Options[i].length()) noGrass = true;
     else if (Options[i].find("makeTable") < Options[i].length()) makeTable = true;
     else if (Options[i].find("makeJSON") < Options[i].length()) makeJSON = true;
     else if (Options[i].find("makeRootFile") < Options[i].length()) makeRootFile = true;
@@ -994,6 +998,7 @@ void dataMCplotMaker(TH1F* Data_in, std::vector <std::pair <TH1F*, TH1F*> > Back
   }
 
     if(overrideSyst->GetEntries() > 0) {
+        overrideSyst->SetMarkerSize(0); 
         overrideSyst->SetFillColor(kGray+2); 
         overrideSyst->SetFillStyle(systFillStyle); 
         overrideSyst->Draw("E2 SAME");
@@ -1013,12 +1018,18 @@ void dataMCplotMaker(TH1F* Data_in, std::vector <std::pair <TH1F*, TH1F*> > Back
       const double alpha = 1 - 0.6827;
       for (int i = 0; i < g->GetN(); ++i) {
         int N = g->GetY()[i];
+        if (noGrass) {
+            if (N == 0) continue;
+        }
         double L = (N==0) ? 0 : (ROOT::Math::gamma_quantile(alpha/2,N,1.));
         // double U = (N==0) ? 0 : (ROOT::Math::gamma_quantile_c(alpha/2,N+1,1));
         // // poisson grass
         double U = (ROOT::Math::gamma_quantile_c(alpha/2,N+1,1));
-        g->SetPointEYlow(i, N-L);
-        g->SetPointEYhigh(i, U-N);
+        double xerr = Data->GetBinWidth(i)/2.;
+        if (noDataWidth) xerr = 0.;
+        g->SetPointError(i, xerr, xerr, N-L, U-N);
+        // g->SetPointEYlow(i, N-L);
+        // g->SetPointEYhigh(i, U-N);
         // std::cout << " i: " << i << " N: " << N << " U: " << U << " L: " << L << " N-L: " << N-L << " U-N: " << U-N << std::endl;
       }
       g->Draw("PZSAME");
@@ -1115,19 +1126,21 @@ void dataMCplotMaker(TH1F* Data_in, std::vector <std::pair <TH1F*, TH1F*> > Back
 
   //Legend
   TLegend *leg;
+  TString dataDrawOpt = "lep";
+  if (noDataWidth) dataDrawOpt = "ep";
   if ((Backgrounds.size()+Signals.size() == 1 || Backgrounds.size()+Signals.size() == 2) && (noData || noRatioPlot || ratioOnly) && !compareMultiple) leg = new TLegend(0.7+legendRight,0.79+legendUp,0.92+legendRight+legendWider_,0.87+legendUp+legendTaller_); 
   else if ((Backgrounds.size()+Signals.size() == 1 || Backgrounds.size()+Signals.size() == 2) && !noData && !noRatioPlot && !ratioOnly) leg = new TLegend(0.7+legendRight,0.69+legendUp,0.92+legendRight+legendWider_,0.77+legendUp+legendTaller_); 
   else leg = new TLegend(0.7+legendRight,0.59+legendUp,0.92+legendRight+legendWider_,0.87+legendUp+legendTaller_);
   leg->SetTextSize(legendTextSize);
   leg->SetTextFont(42);
-  if (!noData && !ratioOnly && !legendCounts) leg->AddEntry(Data, dataName.c_str(), "lep");
-  if (!noData && !ratioOnly && legendCounts) leg->AddEntry(Data, Form("%s [%i]",dataName.c_str(),(int)(Data->Integral())), "lep");
+  if (!noData && !ratioOnly && !legendCounts) leg->AddEntry(Data, dataName.c_str(),dataDrawOpt);
+  if (!noData && !ratioOnly && legendCounts) leg->AddEntry(Data, Form("%s [%i]",dataName.c_str(),(int)(Data->Integral())),dataDrawOpt);
   if (showPercentage) for (int i = Titles.size()-1; i > -1; i--) Titles[i] =  Form("%s [%i%%]", Titles[i].c_str(), percent[i]);
-  if (legendCounts) for (int i = Titles.size()-1; i > -1; i--) Titles[i] =  Form("%s [%i]", Titles[i].c_str(), counts[i]);
+  if (legendCounts) for (int i = Titles.size()-1; i > -1; i--) Titles[i] =  Form("%s [%.2f]", Titles[i].c_str(), counts[i]);
   if (!dots && !nostack) for (int i = Titles.size()-1; i > -1; i--) leg->AddEntry(Backgrounds[i], Titles[i].c_str(), "f");
   // if (dots || nostack) for (int i = Titles.size()-1; i > -1; i--) leg->AddEntry(Backgrounds[i], Titles[i].c_str(), "L");
   if (dots || nostack) for (int i = Titles.size()-1; i > -1; i--) leg->AddEntry(Backgrounds[i], Titles[i].c_str(), "f"); // FIXME
-  if (use_signals && !compareMultiple) for (int i = SignalTitles.size()-1; i > -1; i--) leg->AddEntry(Signals[i], SignalTitles[i].c_str(), "LPE");
+  if (use_signals && !compareMultiple) for (int i = SignalTitles.size()-1; i > -1; i--) leg->AddEntry(Signals[i], SignalTitles[i].c_str(), "lep");
   leg->SetFillStyle(0);
   if ( legendBox) leg->SetBorderSize(1);
   if (!legendBox) leg->SetBorderSize(0);
@@ -1145,6 +1158,7 @@ void dataMCplotMaker(TH1F* Data_in, std::vector <std::pair <TH1F*, TH1F*> > Back
     float yRowOffset = 0.65 - nRows*0.05; // painstakingly-determined empirical formula
     float xPctFudge = 0.01, yPctFudge = 0.01;
     if (Titles.size() < 5) yPctFudge = 0.005; // damn, this works nicely
+    if (Titles.size() > 6) yPctFudge = -0.001;
     if (Titles.size() > 7) yPctFudge = 0.005;
     if (Titles.size() > 9) yPctFudge = 0.015;
     if (Signals.size() > 0) yPctFudge += 0.0345;
@@ -1179,7 +1193,7 @@ void dataMCplotMaker(TH1F* Data_in, std::vector <std::pair <TH1F*, TH1F*> > Back
   TLatex *tex = new TLatex();
   tex->SetNDC();
   tex->SetTextSize(0.035);
-  float title_y_coord = 0.88;
+  float title_y_coord = 0.90;
   if (noData || noRatioPlot) title_y_coord = 0.78; 
   if (outOfFrame && (noData || noRatioPlot)) title_y_coord += 0.09;
   if (colorTitle) title = Form("#color[4]{%s}",title);
@@ -1292,14 +1306,14 @@ void dataMCplotMaker(TH1F* Data_in, std::vector <std::pair <TH1F*, TH1F*> > Back
 
 
   if (!noType && !noTextBetweenPads) {
+    float ycoord = outOfFrame ? .00 : .08;
+    // float ycoord = outOfFrame ? .005 : .08;
     if ((noData || noRatioPlot) && overrideHeader[0] == '\0'){
-      float ycoord = outOfFrame ? .00 : .08;
       tex->DrawLatex(0.16+xshift,type_y-ycoord, "#font[61]{#scale[1.25]{CMS}}");
       float xcoord = outOfFrame ? .27+xshift : .16+xshift;
       if (type!="") tex->DrawLatex(xcoord,type_y-ycoord, Form("#font[52]{%s}",type.c_str()));
     }
     if (!noData && !noRatioPlot && overrideHeader[0] == '\0'){ 
-      float ycoord = outOfFrame ? .00 : .08;
       float xcoord = outOfFrame ? .16+xshift : .83+xshift;
       // if (noTextBetweenPads) {
 	// ycoord = 0.00;
@@ -1345,6 +1359,12 @@ void dataMCplotMaker(TH1F* Data_in, std::vector <std::pair <TH1F*, TH1F*> > Back
     err_hist->GetYaxis()->SetTitleSize(0.08);
     err_hist->GetYaxis()->SetTitleOffset(1.8);
     if (Background_systs.size() > 0) background_syst_ratio = (TH1F*)background_syst->Clone();
+    if(overrideSyst->GetEntries() > 0) {
+        background_syst_ratio = (TH1F*)overrideSyst->Clone();
+        background_syst_ratio->Sumw2();
+        background_syst_ratio->SetFillColor(kGray+2); 
+        background_syst_ratio->SetFillStyle(systFillStyle); 
+    }
     for (int ib = 1; ib < err_hist->GetNbinsX()+1; ib++){
       float MC_value = 0;
       float MC_error_2 = 0;
@@ -1368,6 +1388,21 @@ void dataMCplotMaker(TH1F* Data_in, std::vector <std::pair <TH1F*, TH1F*> > Back
       else if (Background_systs.size() > 0) background_syst_ratio->SetBinError(ib, 0); 
       if (Background_systs.size() > 0) background_syst_ratio->SetBinContent(ib, 1); 
 
+      // if (ib == 4) {
+      //     std::cout <<  " value: " << value <<  " MC_err: " << MC_err <<  " MC_value: " << MC_value <<  " data_err: " << data_err <<  " data_value: " << data_value <<  std::endl;
+      // }
+      // // 0.139609 err_hist->GetBinError(ib): 0.0987478
+      // // err_hist->SetBinContent(4, 0.139609);
+      // // err_hist->SetBinError(4, 0.0987478);
+      // std::cout <<  " ib: " << ib <<  " err_hist->GetBinContent(ib): " << err_hist->GetBinContent(ib) <<  " err_hist->GetBinError(ib): " << err_hist->GetBinError(ib) <<  std::endl;
+
+      if (overrideSyst->GetEntries() > 0) {
+          if (background_syst_ratio->GetBinContent(ib) > 0) {
+              background_syst_ratio->SetBinError(ib, overrideSyst->GetBinError(ib)/overrideSyst->GetBinContent(ib)); 
+          }
+          else background_syst_ratio->SetBinError(ib, 0); 
+          background_syst_ratio->SetBinContent(ib, 1); 
+      }
 
       if (doPull) {
           // float pull = RooStats::NumberCountingUtils::BinomialObsZ(19,41,0.5);
@@ -1420,6 +1455,7 @@ void dataMCplotMaker(TH1F* Data_in, std::vector <std::pair <TH1F*, TH1F*> > Back
     int maxbin = err_hist->GetXaxis()->GetNbins();
     line.DrawLine(err_hist->GetXaxis()->GetBinLowEdge(1),doPull?0:1,err_hist->GetXaxis()->GetBinUpEdge(maxbin),doPull?0:1);
     if (do_background_syst && Background_systs.size() > 0) background_syst_ratio->Draw("E2 SAME");//draw the shaded area before the dots
+    if (overrideSyst->GetEntries() > 0) background_syst_ratio->Draw("E2 SAME");//draw the shaded area before the dots
     if(noErrBars && ratioLine && !poissonErrorsNoZeros) err_hist->Draw("HIST SAME");
     else if(noErrBars && !poissonErrorsNoZeros) err_hist->Draw("pSAME");
     else if (poissonErrorsNoZeros) {
@@ -1455,6 +1491,10 @@ void dataMCplotMaker(TH1F* Data_in, std::vector <std::pair <TH1F*, TH1F*> > Back
 
             if (MC_value < 1e-6 && data_value == 0) continue;
 
+            if (noGrass) {
+                if (data_value == 0) continue;
+            }
+
             // MC_error = pow(MC_error_2, 0.5);
             MC_error = 0.0;
 
@@ -1463,11 +1503,13 @@ void dataMCplotMaker(TH1F* Data_in, std::vector <std::pair <TH1F*, TH1F*> > Back
 
             double ratio = data_value / MC_value;
             double xerr = err_hist->GetBinWidth(ib)/2.;
+            if (noDataWidth) xerr = 0.;
             double rerrup = pow(pow(data_up/MC_value,2) + pow(MC_error*data_value/(MC_value*MC_value),2), 0.5);
             double rerrdown = pow(pow(data_down/MC_value,2) + pow(MC_error*data_value/(MC_value*MC_value),2), 0.5);
             int ipoint = g->GetN();
             g->SetPoint(ipoint, err_hist->GetBinCenter(ib), ratio);
             g->SetPointError(ipoint, xerr, xerr, rerrdown, rerrup);
+
             // std::cout << " ib: " << ib << " ratio: " << ratio << " xerr: " << xerr << " rerrdown: " << rerrdown << " rerrup: " << rerrup << " data_value: " << data_value << " MC_value: " << MC_value << " MC_error: " << MC_error << " data_up: " << data_up << " data_down: " << data_down << std::endl;
             // ib ratio xerr rerrdown rerrup data_value MC_value MC_error data_up data_down
         }
@@ -1635,7 +1677,7 @@ void drawFlag(TCanvas *c1, float cx, float cy, float size) {
     int row = 0;
     int inrow = 0;
     float ybottom = 0.5*(1-A/B)+6./13*(1-A/B);
-    float starsize = 0.1+(xmax-xmin)*3.0;
+    float starsize = 0.05+(xmax-xmin)*2.0;
     for (int i = 0; i < 50; i++) {
 
         float x = -1.;
@@ -1665,7 +1707,7 @@ void drawFlag(TCanvas *c1, float cx, float cy, float size) {
         }
     }
 
-    TLatex *lab = new TLatex(0.5,0.15,"#font[52]{Made in USA}");
+    TLatex *lab = new TLatex(0.5,0.15,"#font[52]{Mostly made in USA}");
     lab->SetTextAlign(22);
     lab->SetTextSize(0.1);
     // lab->SetTextColor(kGray);

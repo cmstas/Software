@@ -32,13 +32,14 @@ def clean_json(fname):
 
 
 
-def dataMCplot(data, bgs=[], systs=[], titles=[], sigs=[], sigtitles=[], title="", subtitle="", colors=[], opts={}, opts_str=""):
+def dataMCplot(data, bgs=[], systs=[], titles=[], sigs=[], sigtitles=[], title="", subtitle="", colors=[], opts={}, opts_str="", total_syst=None):
     v_bgs = r.vector("TH1F*")()
     v_sigs = r.vector("TH1F*")()
     v_titles = r.vector('string')()
     v_sigtitles = r.vector('string')()
     v_colors = r.vector('Color_t')()
     v_bgsysts = r.vector('pair<TH1F*,float>')()
+    bgtotalsyst = r.TH1F()
 
     for k,v in opts.items():
         if type(v) is bool:
@@ -64,7 +65,13 @@ def dataMCplot(data, bgs=[], systs=[], titles=[], sigs=[], sigtitles=[], title="
         for bg in bgs: 
             v_bgs.push_back(bg)
         the_bgs = v_bgs
-    dataMCplotMaker(data, the_bgs, v_titles, title, subtitle, opts_str, v_sigs, v_sigtitles, v_colors)
+    if total_syst:
+        bgtotalsyst = total_syst
+
+    if total_syst:
+        dataMCplotMaker(data, the_bgs, v_titles, title, subtitle, opts_str, v_sigs, v_sigtitles, v_colors, bgtotalsyst)
+    else:
+        dataMCplotMaker(data, the_bgs, v_titles, title, subtitle, opts_str, v_sigs, v_sigtitles, v_colors)
     post_plotting(opts)
 
 if __name__ == "__main__":
@@ -72,9 +79,15 @@ if __name__ == "__main__":
     h_wz = h_data.Clone("wz")
     h_ttz = h_data.Clone("ttz")
 
-    h_data.FillRandom("gaus",1000)
-    h_wz.FillRandom("gaus",500)
-    h_ttz.FillRandom("gaus",500)
+    # h_data.FillRandom("gaus",1000)
+    # h_wz.FillRandom("gaus",500)
+    # h_ttz.FillRandom("gaus",500)
+    # h_data.FillRandom("gaus",5)
+    h_wz.FillRandom("gaus",5)
+    h_ttz.FillRandom("gaus",10)
+
+    for i in range(10): h_data.Fill(0)
+    for i in range(2): h_data.Fill(1)
 
     d_opts = {
             "poissonErrorsNoZeros": True,
@@ -90,6 +103,9 @@ if __name__ == "__main__":
             "legendTaller": 0.15,
             "yTitleOffset": -0.5,
             "type": "Preliminary",
+            "noGrass": True,
+            # "flagLocation": "0.6,0.965,0.07",
+            # "flagLocation": "0.5,0.7,0.15", # add a US flag because 'merica
             "darkColorLines": True,
             # "flagLocation": "0.6,0.965,0.07",
             "makeTable": True,
