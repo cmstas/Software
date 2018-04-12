@@ -65,17 +65,41 @@ def PutOverflowInLastBin(h, xmax=None):
     nb = h.GetNbinsX()
     lastbin = GetLastBin(h,xmax)
 
-    bc1 = h.GetBinContent(lastbin)
-    bc2 = h.Integral(lastbin+1,nb+1)
-    be1 = h.GetBinError(lastbin)
-    be2 = ROOT.TMath.Sqrt(sum([h.GetBinError(i)**2 for i in range(lastbin+1,nb+2)]))
+    bc_new = h.Integral(lastbin,nb+1)
+    be_new = ROOT.TMath.Sqrt(sum([h.GetBinError(i)**2 for i in range(lastbin,nb+2)]))
     
-    h.SetBinContent(lastbin,bc1+bc2)
-    h.SetBinError(lastbin,ROOT.TMath.Sqrt(be1**2+be2**2))
+    h.SetBinContent(lastbin,bc_new)
+    h.SetBinError(lastbin,be_new)
 
     for i in range(lastbin+1,nb+2):
         h.SetBinContent(i,0)
         h.SetBinError(i,0)
+
+def PutUnderflowInFirstBin(h, xmin=None):
+
+    firstbin = GetFirstBin(h,xmin)
+
+    bc_new = h.Integral(0,firstbin)
+    be_new = ROOT.TMath.Sqrt(sum([h.GetBinError(i)**2 for i in range(0,firstbin+1)]))
+    
+    h.SetBinContent(firstbin,bc_new)
+    h.SetBinError(firstbin,be_new)
+
+    for i in range(0,firstbin):
+        h.SetBinContent(i,0)
+        h.SetBinError(i,0)
+
+def GetUnderOverHist(f, hname, rename=None, color=None):
+    h = f.Get(hname)
+    if h == None:
+        raise Exception("ERROR [pyRootPlotMaker]: {0} not found in {1}".format(hname,f.GetTitle()))
+    if rename != None:
+        h.SetTitle(rename)
+    if color != None:
+        h.SetLineColor(color)
+    PutUnderflowInFirstBin(h)
+    PutOverflowInLastBin(h)
+    return h
 
 def SetYBounds(stack, isLog, h_bkg_vec, data_max, xRangeUser):
     xmin = None if xRangeUser==None else xRangeUser[0]

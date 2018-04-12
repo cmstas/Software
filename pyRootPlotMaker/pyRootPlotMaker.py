@@ -199,7 +199,7 @@ def plotRatio(h1, h2, canvas=None, ratioHist=None, xRangeUser=None, ratioTitle =
 
 
 ## plot data and stacked background hist. See README for argument explanations
-def plotDataMC(h_bkg_vec_, bkg_names, h_data=None, title=None, subtitles=None, ratioTitle=None, doRatio=True, scaleMCtoData=False, saveAs=None, 
+def plotDataMC(h_bkg_vec_, bkg_names, h_data=None, title=None, subtitles=None, ratioTitle=None, doRatio=True, yRangeUserRatio=None, scaleMCtoData=False, saveAs=None, 
                isLog=True, dataTitle="Data", xRangeUser=None, doPause=False, lumi=1.0, lumiUnit="fb", noLumi=False,
                energy=13, xAxisTitle="H_{T}", xAxisUnit="GeV", userMax=None, userMin=None, doSort=False,
                doMT2Colors=False, markerSize=0.9, doOverflow=True, titleSize=0.04, subtitleSize=0.03, subLegText=None,
@@ -438,7 +438,7 @@ def plotDataMC(h_bkg_vec_, bkg_names, h_data=None, title=None, subtitles=None, r
         h_syst = ROOT.TH1D()
 
         # currently only support drawing ratio for one data histogram. Uses the first one in the list.
-        plotRatio(h1, h_data[0], canvas=pads[1], ratioHist=ratioHist, ratioTitle=ratioTitle, xRangeUser=xRangeUser, markerSize=markerSize,
+        plotRatio(h1, h_data[0], canvas=pads[1], ratioHist=ratioHist, ratioTitle=ratioTitle, xRangeUser=xRangeUser, yRangeUser=yRangeUserRatio, markerSize=markerSize,
                   doPull=doPull, convertToPoisson=convertToPoisson, ratioGraph=ratioGraph, drawZeros=drawZeros,
                   drawSystematicBand=drawSystematicBand, systematics=systematics, h_syst=h_syst)
     
