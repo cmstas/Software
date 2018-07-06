@@ -89,16 +89,22 @@ def PutUnderflowInFirstBin(h, xmin=None):
         h.SetBinContent(i,0)
         h.SetBinError(i,0)
 
-def GetUnderOverHist(f, hname, rename=None, color=None):
-    h = f.Get(hname)
-    if h == None:
+def GetUnderOverHist(f, hname, rename=None, color=None, linewidth=3, under=True, over=True, norm=False):
+    hbase = f.Get(hname)
+    if hbase == None:
         raise Exception("ERROR [pyRootPlotMaker]: {0} not found in {1}".format(hname,f.GetTitle()))
+    h = hbase.Clone(hbase.GetName() + "_UnderOver")
     if rename != None:
         h.SetTitle(rename)
     if color != None:
         h.SetLineColor(color)
-    PutUnderflowInFirstBin(h)
-    PutOverflowInLastBin(h)
+    h.SetLineWidth(linewidth)
+    if (under):
+        PutUnderflowInFirstBin(h)
+    if (over):
+        PutOverflowInLastBin(h)
+    if (norm):
+        h.Scale(1.0 / h.Integral())
     return h
 
 def SetYBounds(stack, isLog, h_bkg_vec, data_max, xRangeUser):
