@@ -468,15 +468,15 @@ if __name__ == "__main__":
         typ = d_bname_to_info[bname]["type"]
         buff += "  %s &%s() { return %s.%s(); }\n" % (typ, alias, objectname, alias)
     if haveHLTInfo:
-        buff += "  bool passHLTTrigger(TString trigName) { return cms3.passHLTTrigger(trigName); }\n"
+        buff += "  bool passHLTTrigger(TString trigName) { return %s.passHLTTrigger(trigName); }\n" % (objectname)
     if haveHLT8E29Info:
-        buff += "  bool passHLT8E29Trigger(TString trigName) { return cms3.passHLT8E29Trigger(trigName); }\n"
+        buff += "  bool passHLT8E29Trigger(TString trigName) { return %s.passHLT8E29Trigger(trigName); }\n" % (objectname)
     if haveL1Info:
-        buff += "  bool passL1Trigger(TString trigName) { return cms3.passL1Trigger(trigName); }\n"
+        buff += "  bool passL1Trigger(TString trigName) { return %s.passL1Trigger(trigName); }\n" % (objectname)
     if haveTauIDInfo:
-        buff += "  float passTauID(TString idName, unsigned int tauIndex) { return cms3.passTauID(idName, tauIndex); }\n"
+        buff += "  float passTauID(TString idName, unsigned int tauIndex) { return %s.passTauID(idName, tauIndex); }\n" % (objectname)
     if haveBtagInfo:
-        buff += "  float getbtagvalue(TString bDiscriminatorName, unsigned int jetIndex) { return cms3.getbtagvalue(bDiscriminatorName, jetIndex); }\n" 
+        buff += "  float getbtagvalue(TString bDiscriminatorName, unsigned int jetIndex) { return %s.getbtagvalue(bDiscriminatorName, jetIndex); }\n" % (objectname)
     buff += "}\n"
 
     with open("%s.cc" % classname, "w") as fhout:

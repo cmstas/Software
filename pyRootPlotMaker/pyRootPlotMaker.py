@@ -216,7 +216,7 @@ def plotRatio(h1, h2, canvas=None, ratioHist=None, xRangeUser=None, ratioTitle =
 
 
 ## plot data and stacked background hist. See README for argument explanations
-def plotDataMC(h_bkg_vec_, bkg_names, h_data=None, title=None, subtitles=None, ratioTitle=None, doRatio=True, scaleMCtoData=False, saveAs=None, 
+def plotDataMC(h_bkg_vec_, bkg_names, h_data=None, title=None, subtitles=None, ratioTitle=None, doRatio=True, yRangeUserRatio=None, scaleMCtoData=False, saveAs=None, 
                isLog=True, dataTitle="Data", xRangeUser=None, doPause=False, lumi=1.0, lumiUnit="fb", noLumi=False,
                energy=13, xAxisTitle="H_{T}", xAxisUnit="GeV", userMax=None, userMin=None, doSort=False,
                doMT2Colors=False, markerSize=0.9, doOverflow=True, titleSize=0.04, subtitleSize=0.03, subLegText=None,
@@ -473,7 +473,6 @@ def plotDataMC(h_bkg_vec_, bkg_names, h_data=None, title=None, subtitles=None, r
         for i in range(len(h_bkg_vec)-1):
             h1.Add(h_bkg_vec[i+1])
 
-        
         ratioHist = [ROOT.TH1D() for h in h_data]
         ratioGraph = [ROOT.TGraphAsymmErrors() for h in h_data]
         h_syst = ROOT.TH1D()
