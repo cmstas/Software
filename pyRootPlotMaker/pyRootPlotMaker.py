@@ -83,9 +83,10 @@ def plotBackgrounds(h_bkg_vec_, bkg_names, canvas=None, stack=None, saveAs=None,
         raw_input()
 
 ## make a ratio plot. For use within the plotDataMC and plotComparison functions
-def plotRatio(h1, h2, canvas=None, ratioHist=None, xRangeUser=None, ratioTitle = None, markerSize=0.7, markerStyle=20,
-              doPull=False, convertToPoisson=False, ratioGraph=None, drawZeros=True, drawSystematicBand=False,
-              systematics=None, h_syst=None, yRangeUser=None, showRatioErrs=True, justDrawPoints=False):
+def plotRatio(h1, h2, canvas=None, ratioHist=None, xRangeUser=None, ratioTitle = None, markerSize=0.7, markerStyle=20, 
+              markerColor=ROOT.kBlack, doPull=False, convertToPoisson=False, ratioGraph=None, drawZeros=True, 
+              drawSystematicBand=False, systematics=None, h_syst=None, yRangeUser=None, showRatioErrs=True, 
+              justDrawPoints=False):
 
     if doPull:
         convertToPoisson = False
@@ -151,9 +152,13 @@ def plotRatio(h1, h2, canvas=None, ratioHist=None, xRangeUser=None, ratioTitle =
     #markers
     ratioHist.SetMarkerStyle(markerStyle)
     ratioHist.SetMarkerSize(markerSize)    
+    ratioHist.SetMarkerColor(markerColor)
+    ratioHist.SetLineColor(markerColor)
     if convertToPoisson:
         ratioGraph.SetMarkerStyle(markerStyle)
         ratioGraph.SetMarkerSize(markerSize)
+        ratioGraph.SetMarkerColor(markerColor)
+        ratioGraph.SetLineColor(markerColor)
         if justDrawPoints:
             ratioGraph.Draw("SAME PZ")
         else:
@@ -240,6 +245,7 @@ def plotDataMC(h_bkg_vec_, bkg_names, h_data=None, title=None, subtitles=None, r
         if type(h_data) != type(list()):
             h_data = [h_data]
         if len(h_data) > 4:
+            print h_data
             raise RuntimeError("currently only supports up to 4 data histograms!")
         h_data_ = [ROOT.TH1D() for h in h_data]
         for i in range(len(h_data)):
@@ -340,27 +346,28 @@ def plotDataMC(h_bkg_vec_, bkg_names, h_data=None, title=None, subtitles=None, r
     ## data
     if h_data != None:
         styles = [20,24,21,25]
-        N_DATA_EVENTS = int(h_data[0].GetEntries()) #curretly only support counting of events for first histogram
+        colors = [ROOT.kBlack,ROOT.kBlack,ROOT.kRed,ROOT.kBlack]
+        N_DATA_EVENTS = [int(h.Integral(0,-1)) for h in h_data] #curretly only support counting of events for first histogram
         for ih in range(len(h_data)):
             h_data[ih].SetMarkerStyle(styles[ih])
             h_data[ih].SetMarkerSize(markerSize)
-            h_data[ih].SetMarkerColor(ROOT.kBlack)
-            h_data[ih].SetLineColor(ROOT.kBlack)
+            h_data[ih].SetMarkerColor(colors[ih])
+            h_data[ih].SetLineColor(colors[ih])
             if xRangeUser!=None:
                 h_data[ih].GetXaxis().SetRangeUser(*xRangeUser)
             if doOverflow:
                 utils.PutOverflowInLastBin(h_data[ih], None if xRangeUser==None else xRangeUser[1])
         if convertToPoisson:
             h_data_poisson = [ROOT.TGraphAsymmErrors() for h in h_data]
-            for ih in range(len(h_data)):
+            for ih in range(len(h_data)-1,-1,-1):
                 utils.ConvertToPoissonGraph(h_data[ih], h_data_poisson[ih], drawZeros=drawZeros)
                 h_data_poisson[ih].SetMarkerStyle(styles[ih])
                 h_data_poisson[ih].SetMarkerSize(markerSize)
-                h_data_poisson[ih].SetMarkerColor(ROOT.kBlack)
-                h_data_poisson[ih].SetLineColor(ROOT.kBlack)
+                h_data_poisson[ih].SetMarkerColor(colors[ih])
+                h_data_poisson[ih].SetLineColor(colors[ih])
                 h_data_poisson[ih].Draw("SAME PZ")
         else:
-            for ih in range(len(h_data)):
+            for ih in range(len(h_data)-1,-1,-1):
                 h_data[ih].Draw("SAME E0")
 
     ## functions
@@ -443,15 +450,16 @@ def plotDataMC(h_bkg_vec_, bkg_names, h_data=None, title=None, subtitles=None, r
         subLegText = [subLegText]
     for s in subLegText:
         if h_data==None:
-            N_DATA_EVENTS = 1
-        vals = (N_DATA_EVENTS,scaleFactor,scaleFactorError)
-        s = s.replace("{ndata}","{0:d}")
-        s = s.replace("{datamcsf}","{1:.2f}")
-        s = s.replace("{datamcsferr}","{2:.2f}")
+            N_DATA_EVENTS = [0]
+        vals = {"ndata":N_DATA_EVENTS[0], "datamcsf":scaleFactor, "datamcsferr":scaleFactorError}
+        for i in range(len(N_DATA_EVENTS)):
+            vals["ndata{0}".format(i+1)] = N_DATA_EVENTS[i]
+        s = s.replace("{datamcsf}","{datamcsf:.2f}")
+        s = s.replace("{datamcsferr}","{datamcsferr:.2f}")
         text.SetTextFont(62)
         text.SetTextAlign(13)
         text.SetTextSize(subLegTextSize)
-        text.DrawLatex(cursorX,cursorY,s.format(*vals))
+        text.DrawLatex(cursorX,cursorY,s.format(**vals))
         cursorY -= 0.03+0.005
 
 
@@ -469,9 +477,10 @@ def plotDataMC(h_bkg_vec_, bkg_names, h_data=None, title=None, subtitles=None, r
         ratioHist = [ROOT.TH1D() for h in h_data]
         ratioGraph = [ROOT.TGraphAsymmErrors() for h in h_data]
         h_syst = ROOT.TH1D()
-        for ih,hd in enumerate(h_data):
-            if ih==0:
-                plotRatio(h1, hd, canvas=pads[1], ratioHist=ratioHist[ih], ratioTitle=ratioTitle, xRangeUser=xRangeUser, markerSize=markerSize, markerStyle = hd.GetMarkerStyle(),
+        for ih,hd in list(enumerate(h_data))[::-1]:
+            if ih==len(h_data)-1:
+                plotRatio(h1, hd, canvas=pads[1], ratioHist=ratioHist[ih], ratioTitle=ratioTitle, xRangeUser=xRangeUser, 
+                          markerSize=markerSize, markerStyle=hd.GetMarkerStyle(), markerColor=hd.GetMarkerColor(),
                           doPull=doPull, convertToPoisson=convertToPoisson, ratioGraph=ratioGraph[ih], drawZeros=drawZeros,
                           drawSystematicBand=drawSystematicBand, systematics=systematics, h_syst=h_syst)
             else:
@@ -481,7 +490,8 @@ def plotDataMC(h_bkg_vec_, bkg_names, h_data=None, title=None, subtitles=None, r
                 else:
                     hden = hd
                     hnum = h_data[0]
-                plotRatio(hden, hnum, canvas=pads[1], ratioHist=ratioHist[ih], xRangeUser=xRangeUser, markerSize=markerSize, markerStyle=hd.GetMarkerStyle(),
+                plotRatio(hden, hnum, canvas=pads[1], ratioHist=ratioHist[ih], xRangeUser=xRangeUser, 
+                          markerSize=markerSize, markerStyle=hd.GetMarkerStyle(), markerColor=hd.GetMarkerColor(),
                           doPull=doPull, convertToPoisson=convertToPoisson, ratioGraph=ratioGraph[ih], drawZeros=drawZeros, justDrawPoints=True)
     
     c.Update()
@@ -497,7 +507,9 @@ def plotDataMC(h_bkg_vec_, bkg_names, h_data=None, title=None, subtitles=None, r
 def plotComparison(h1_, h2_, title="", ratioTitle="Data/MC", h1Title="MC", h2Title="Data", saveAs=None,
                    size=(700,600), xRangeUser=None, markerSize=0.65, doPause=False, isLog=True, style=1,
                    doOverflow=True, normalize=False, xAxisTitle="", ratioYRange=None, yRangeUser=None, 
-                   showRatioErrs=True):
+                   showRatioErrs=True, showNEvents=False):
+
+    nEntries = (int(h1_.GetEntries()), int(h2_.GetEntries()))
 
     h1 = ROOT.TH1D()
     h1_.Copy(h1)
@@ -532,9 +544,13 @@ def plotComparison(h1_, h2_, title="", ratioTitle="Data/MC", h1Title="MC", h2Tit
     pads[0].Draw()
     pads[1].Draw()
     pads[0].cd()
+
+    if not isLog:
+        h1.SetMinimum(0)
         
     h1.SetTitle(title)
     h1.GetXaxis().SetTitleOffset(1.15)
+    h1.SetMaximum((100 if isLog else 1.3)*max(h1.GetMaximum(), h2.GetMaximum()))
     if xRangeUser!=None:
         h1.GetXaxis().SetRangeUser(*xRangeUser)
         h2.GetXaxis().SetRangeUser(*xRangeUser)
@@ -557,16 +573,30 @@ def plotComparison(h1_, h2_, title="", ratioTitle="Data/MC", h1Title="MC", h2Tit
         h2.SetMarkerColor(ROOT.kBlack)
         h1.Draw("HIST")
         h2.Draw("SAME PE")
+    elif style==3:
+        h1.SetLineColor(ROOT.kRed)
+        h2.SetLineColor(ROOT.kBlack)
+        h2.Draw("L HIST")
+        h1.Draw("SAME L HIST")
     else:
         h1.SetLineColor(ROOT.kRed)
         h2.SetLineColor(ROOT.kBlack)
-        h2.Draw("PE")
-        h1.Draw("SAME PE")
+        h1.Draw("PE")
+        h2.Draw("SAME PE")
     
     leg = ROOT.TLegend(0.60,0.75,0.89,0.89)
     leg.AddEntry(h1, h1Title)
     leg.AddEntry(h2, h2Title)
     leg.Draw()
+
+    if showNEvents:
+        text = ROOT.TLatex()
+        text.SetNDC(1)
+        text.SetTextAlign(32)
+        text.SetTextFont(42)
+        text.SetTextSize(0.04)
+        text.DrawLatex(0.585, 0.855, "# Events: " + str(nEntries[0]))
+        text.DrawLatex(0.585, 0.785, str(nEntries[1]))
     
     ######## ratio plot ############
     
@@ -588,7 +618,7 @@ def plotComparison(h1_, h2_, title="", ratioTitle="Data/MC", h1Title="MC", h2Tit
 def plotEfficiency(h_num_, h_den_, doOverflow=True, xRangeUser=None, size=(800,700), axisMax=1.3, 
                    xAxisTitle="H_{T}", yAxisTitle="Efficiency", xAxisUnit="GeV", lumi = 1.0, lumiUnit="fb", 
                    energy=13, year=2017, printEffic=False, effCut=None, effVar=None, subtitle=None, 
-                   fitwindow=None, fitstart=None, saveAs=None):
+                   fitwindow=None, fitstart=None, printPlateau=None, saveAs=None):
     
     h_num = ROOT.TH1D()
     h_num_.Copy(h_num)
@@ -640,8 +670,8 @@ def plotEfficiency(h_num_, h_den_, doOverflow=True, xRangeUser=None, size=(800,7
     line.SetLineStyle(3)
     line.SetLineWidth(1)
     line.SetLineColor(ROOT.kGray+2)
-    xmin = xRangeUser[0] if xRangeUser!=None else graph.GetXaxis().GetXmin()
-    xmax = xRangeUser[1] if xRangeUser!=None else graph.GetXaxis().GetXmax()
+    xmin = xRangeUser[0] if xRangeUser!=None else h_den.GetXaxis().GetXmin()
+    xmax = xRangeUser[1] if xRangeUser!=None else h_den.GetXaxis().GetXmax()
     line.DrawLine(xmin, 1.0, xmax, 1.0)
     line.DrawLine(xmin, 0.8, xmax, 0.8)
     line.DrawLine(xmin, 0.6, xmax, 0.6)
@@ -672,7 +702,7 @@ def plotEfficiency(h_num_, h_den_, doOverflow=True, xRangeUser=None, size=(800,7
         if fitstart==None:
             fit.SetParameter(0, 1)
             fit.SetParameter(1, 0.2)
-            fit.SetParameter(2, 0.5*(fitwindow[0]+fitwindow[1]))
+            fit.SetParameter(2, fitwindow[0])
         else:
             fit.SetParameters(fitstart[0], fitstart[1], fitstart[2])
         graph = eff.GetPaintedGraph()
@@ -696,10 +726,10 @@ def plotEfficiency(h_num_, h_den_, doOverflow=True, xRangeUser=None, size=(800,7
     text.SetTextSize(axis.GetLabelSize() * 1.2)
     text.SetTextAlign(32)
     text.SetTextAngle(90)
-    text.DrawLatexNDC(0.04, 0.735, yAxisTitle)
+    text.DrawLatexNDC(0.04, 0.890, yAxisTitle)
     text.SetTextAlign(12)
     text.SetTextAngle(270)
-    text.DrawLatexNDC(0.97, 0.735, "Events / {0} {1}".format(base_width, xAxisUnit))
+    text.DrawLatexNDC(0.98, 0.890, "Events / {0} {1}".format(base_width, xAxisUnit))
 
     text.SetTextAlign(31)
     text.SetTextAngle(0)
@@ -711,13 +741,16 @@ def plotEfficiency(h_num_, h_den_, doOverflow=True, xRangeUser=None, size=(800,7
     text.DrawLatexNDC(0.87, 0.93, string)
 
     text.SetTextFont(62)
-    text.SetTextSize(0.05)
-    text.SetTextAlign(11)
-    text.DrawLatexNDC(0.17, 0.84, "CMS")
-    text.SetTextFont(52)
+    # text.SetTextSize(0.05)
+    # text.SetTextAlign(11)
+    # text.DrawLatexNDC(0.17, 0.84, "CMS")
+    # text.SetTextFont(52)
+    # text.SetTextSize(0.04)
+    # text.SetTextAlign(13)
+    # text.DrawLatexNDC(0.17, 0.83, "Preliminary")
     text.SetTextSize(0.04)
-    text.SetTextAlign(13)
-    text.DrawLatexNDC(0.17, 0.83, "Preliminary")
+    text.SetTextAlign(11)
+    text.DrawLatexNDC(0.13, 0.93, "CMS Preliminary")
 
     if printEffic and effCut==None:
         raise Exception("must provide an effCut if you want to print efficiency!")
@@ -734,12 +767,24 @@ def plotEfficiency(h_num_, h_den_, doOverflow=True, xRangeUser=None, size=(800,7
             errup = ROOT.TEfficiency.ClopperPearson(tot, pas, 0.6827, 1) - effic
             errdown = effic - ROOT.TEfficiency.ClopperPearson(tot, pas, 0.6827, 0)
             text.SetTextFont(62)
-            text.SetTextSize(0.035)
+            text.SetTextSize(0.030)
             text.SetTextAlign(33)
             if effVar==None:
                 effVar = xAxisTitle
             text.DrawLatexNDC(0.83, 0.88, "#varepsilon({0} > {1} GeV) = {2:.1f}^{{+{3:.1f}}}_\
 {{-{4:.1f}}} %".format(effVar, effCut, 100*effic, 100*errup, 100*errdown))
+            
+    if printPlateau != None and fitwindow==None:
+        raise Exception("must do a fit if you want to print plateau!")
+    if type(printPlateau) not in (int,float) or printPlateau<=0 or printPlateau>=1:
+        raise Exception("printPlateau must be a float between 0 and 1!")        
+    if printPlateau != None and fitwindow!=None:
+        v = -1/fit.GetParameter(1)*ROOT.TMath.Log(1.0/printPlateau-1)+fit.GetParameter(2)
+        ycoord = 0.88 if not printEffic else 0.82
+        text.SetTextFont(62)
+        text.SetTextSize(0.030)
+        text.SetTextAlign(33)
+        text.DrawLatexNDC(0.83, ycoord, "{0:.0f}% of plateau at {1} = {2:.0f} {3}".format(100*printPlateau, xAxisTitle, v, xAxisUnit))
 
     if subtitle != None:
         text.SetTextFont(52)
