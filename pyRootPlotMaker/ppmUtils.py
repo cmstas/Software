@@ -8,7 +8,8 @@ def GetMT2Color(sample):
     if 'w+jets' in sample: return 417
     if 'ww' in sample: return 419
     if 'qcd' in sample: return 401
-    if 'rs qcd' in sample: return 401
+    if 'rs from' in sample: return 401
+    if 'r&s from' in sample: return 401
     if 'prompt' in sample: return 18
     if 'z(#font[12]{ll})' in sample: return 430
     if 'z+jets' in sample: return 418
@@ -183,6 +184,21 @@ def GetPoissonRatioGraph(h_mc, h_data, g_ratio, drawZeros=True, useMCErr=True):
         g_ratio.SetPoint(thisPoint, x, r)
         g_ratio.SetPointError(thisPoint, xerr, xerr, rerrdown, rerrup)
 
+def GetEfficRatioGraph(hnum, hden, g_ratio):
+    level = 0.6827
+    for i in range(1, hnum.GetNbinsX()+1):
+        x = hnum.GetBinCenter(i)
+        xerr = hnum.GetBinWidth(i) / 2.0
+        num = int(hnum.GetBinContent(i))
+        den = int(hden.GetBinContent(i))        
+        if den > 0:
+            val = float(num)/den
+            errup = ROOT.TEfficiency.ClopperPearson(den, num, level, 1) - val
+            errdn = val - ROOT.TEfficiency.ClopperPearson(den, num, level, 0)
+            thisPoint = g_ratio.GetN()
+            g_ratio.SetPoint(thisPoint, x, val)
+            g_ratio.SetPointError(thisPoint, xerr, xerr, errdn, errup)
+
 def DrawCmsText(canvas, text="CMS Preliminary", textFont=62, textSize=0.035):
     ttext = ROOT.TLatex()
     ttext.SetNDC(1)
@@ -193,7 +209,7 @@ def DrawCmsText(canvas, text="CMS Preliminary", textFont=62, textSize=0.035):
     canvas.cd()
     ttext.DrawLatex(canvas.GetLeftMargin(), 1.0-canvas.GetTopMargin()+0.01, text)
 
-def DrawLumiText(canvas, lumi=1.0, lumiUnit="fb", energy=13, textFont=42, textSize=0.035):
+def DrawLumiText(canvas, lumi=1.0, lumiUnit="fb", energy=13, textFont=42, textSize=0.035, bonusText=None):
     ttext = ROOT.TLatex()
     ttext.SetNDC(1)
     ttext.SetTextFont(textFont)
@@ -201,7 +217,7 @@ def DrawLumiText(canvas, lumi=1.0, lumiUnit="fb", energy=13, textFont=42, textSi
     ttext.SetTextSize(textSize)
 
     canvas.cd()
-    text = "{0} {1}^{{-1}} ({2} TeV)".format(lumi,lumiUnit,energy)
+    text = "{0} {1}^{{-1}} ({2} TeV{3})".format(lumi,lumiUnit,energy, ", "+bonusText if bonusText is not None else "")
     ttext.DrawLatex(1.0-canvas.GetRightMargin()-0.01, 1.0-canvas.GetTopMargin()+0.01, text)
     
 
