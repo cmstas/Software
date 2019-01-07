@@ -48,19 +48,24 @@ if __name__ == "__main__":
         temp_aliases = trees[-1].GetListOfAliases()
         temp_branches = trees[-1].GetListOfBranches()
         
-        for ala in temp_aliases:
-            alias = ala.GetName()
-            if alias not in names:                
-                names.add(alias)
-                aliases.Add(ala)
-                branches.Add(trees[-1].GetBranch(trees[-1].GetAlias(alias)))
-            if "hlt_trigNames" in alias: haveHLTInfo = True
-            if "hlt8e29_trigNames" in alias: haveHLT8E29Info = True
-            if "l1_trigNames" in alias: haveL1Info = True
-            if "taus_pf_IDnames" in alias: haveTauIDInfo = True
-            if "pfjets_bDiscriminatorNames" in alias: haveBtagInfo = True
+        if temp_aliases:
+            for ala in temp_aliases:
+                alias = ala.GetName()
+                if alias not in names:
+                    names.add(alias)
+                    aliases.Add(ala)
+                    branches.Add(trees[-1].GetBranch(trees[-1].GetAlias(alias)))
+                if "hlt_trigNames" in alias: haveHLTInfo = True
+                if "hlt8e29_trigNames" in alias: haveHLT8E29Info = True
+                if "l1_trigNames" in alias: haveL1Info = True
+                if "taus_pf_IDnames" in alias: haveTauIDInfo = True
+                if "pfjets_bDiscriminatorNames" in alias: haveBtagInfo = True
+        else:
+            for br in temp_branches:
+                branches.Add(br)
+
             
-    if os.path.isfile("ScanChain.C") or os.path.isfile("doAll.C"):
+    if make_looper and (os.path.isfile("ScanChain.C") or os.path.isfile("doAll.C")):
         print ">>> Hey, you already have a looper here! I will be a bro and not overwrite them. Delete 'em if you want to regenerate 'em."
         make_looper = False
 
@@ -125,8 +130,6 @@ if __name__ == "__main__":
 
     d_bname_to_info = {}
 
-    print "\n -------- \n"
-    
     # cuts = ["filtcscBeamHalo2015","evtevent","evtlumiBlock","evtbsp4","hltprescales","hltbits","hlttrigNames","musp4","evtpfmet","muschi2","ak8jets_pfcandIndicies","hlt_prescales"]
     cuts = ["lep1_p4","lep2_p4"]
     isCMS3 = False
@@ -166,7 +169,7 @@ if __name__ == "__main__":
                 "type": typ,
                 }        
         
-    if aliases:
+    if len(aliases):
         have_aliases = True
         for iala, ala in enumerate(aliases):
             alias = ala.GetName()
@@ -210,7 +213,8 @@ if __name__ == "__main__":
         alias = d_bname_to_info[bname]["alias"]
         typ = d_bname_to_info[bname]["type"]
         cname = d_bname_to_info[bname]["class"]
-        buff += '  %s %s_;\n' % (typ.replace("const","").strip(), alias) # NJA
+        needpointer = "vector<" in typ or "LorentzVector" in typ
+        buff += '  %s %s%s_;\n' % (typ.replace("const","").strip(),"*" if needpointer else "",alias)
         buff += '  TBranch *%s_branch;\n' % (alias)
         buff += '  bool %s_isLoaded;\n' % (alias)
     buff += 'public:\n'
@@ -321,6 +325,7 @@ if __name__ == "__main__":
         alias = d_bname_to_info[bname]["alias"]
         typ = d_bname_to_info[bname]["type"]
         cname = d_bname_to_info[bname]["class"]
+        needpointer = "vector<" in typ or "LorentzVector" in typ
         buff += "%s &%s::%s() {\n" % (typ, classname, alias)
         buff += "  if (not %s_isLoaded) {\n" % (alias)
         buff += "    if (%s_branch != 0) {\n" % (alias)
@@ -331,7 +336,7 @@ if __name__ == "__main__":
         buff += "    }\n"
         buff += "    %s_isLoaded = true;\n" % (alias)
         buff += "  }\n"
-        buff += "  return %s_;\n" % (alias)
+        buff += "  return %s%s_;\n" % ("*" if needpointer else "", alias)
         buff += "}\n"
 
     if haveHLTInfo:
