@@ -4,6 +4,7 @@ def GetMT2Color(sample):
     sample = sample.lower()
 
     ## if we are using nice titles
+    if 'top' in sample and "geq2 genb" in sample: return ROOT.kRed+1
     if 'top' in sample: return 855
     if 'w+jets' in sample: return 417
     if 'ww' in sample: return 419
@@ -16,7 +17,8 @@ def GetMT2Color(sample):
     if 'z(#nu#nu)' in sample: return 418
     if 'frag' in sample: return 38
     if 'fake' in sample: return 46
-    if 'lost lepton' in sample: return 864
+    # if 'lost lepton' in sample: return 864
+    if 'lost lepton' in sample: return 855
     if 'ewk' in sample: return 855
 
     ## sample names
@@ -142,6 +144,9 @@ def ConvertToPoissonGraph(h_data, graph, drawZeros=True):
         x = h_data.GetBinCenter(i)
         xerr = h_data.GetBinWidth(i)/2
         y = h_data.GetBinContent(i)
+
+        if y < 0:
+            continue
         
         if y==0 and not drawZeros:
             continue
@@ -207,7 +212,7 @@ def DrawCmsText(canvas, text="CMS Preliminary", textFont=62, textSize=0.035):
     ttext.SetTextSize(textSize)
 
     canvas.cd()
-    ttext.DrawLatex(canvas.GetLeftMargin(), 1.0-canvas.GetTopMargin()+0.01, text)
+    ttext.DrawLatex(canvas.GetLeftMargin()+0.01, 1.0-canvas.GetTopMargin()+0.01, text)
 
 def DrawLumiText(canvas, lumi=1.0, lumiUnit="fb", energy=13, textFont=42, textSize=0.035, bonusText=None):
     ttext = ROOT.TLatex()

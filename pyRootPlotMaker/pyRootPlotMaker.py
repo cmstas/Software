@@ -5,6 +5,7 @@ import ppmUtils as utils
 def plotBackgrounds(h_bkg_vec_, bkg_names, canvas=None, stack=None, saveAs=None, xRangeUser=None, doPause=False, 
                     isLog=True, xAxisTitle="H_{T}", xAxisUnit="GeV", dataMax=0, userMax=None, userMin=None,
                     doLegend=False, doMT2Colors=False, doOverflow=True, shallowCopy=True, sigMax=0,
+                    xAxisTitleSize=0.035, yAxisTitleSize=0.035, xAxisLabelSize=None, yAxisLabelSize=None, yAxisTitleOffset=1.4,
                     customColors=None):
 
     # make shallow copies of hists so we don't overwrite the originals
@@ -60,8 +61,14 @@ def plotBackgrounds(h_bkg_vec_, bkg_names, canvas=None, stack=None, saveAs=None,
     if binWidth != 'Bin':
         binWidth = str(round(binWidth,5)) + " " + (xAxisUnit if xAxisUnit!=None else "")
     stack.GetYaxis().SetTitle("Events / {0}".format(binWidth))
-    stack.GetYaxis().SetTitleOffset(1.4)
+    stack.GetYaxis().SetTitleOffset(yAxisTitleOffset)
     stack.GetXaxis().SetTitleOffset(1.2)
+    stack.GetXaxis().SetTitleSize(xAxisTitleSize)
+    stack.GetYaxis().SetTitleSize(yAxisTitleSize)
+    if xAxisLabelSize is not None:
+        stack.GetXaxis().SetLabelSize(xAxisLabelSize)
+    if yAxisLabelSize is not None:
+        stack.GetYaxis().SetLabelSize(yAxisLabelSize)
 
     utils.SetYBounds(stack, isLog, h_bkg_vec, max(dataMax, sigMax), xRangeUser)
     if userMax!=None:
@@ -84,7 +91,7 @@ def plotBackgrounds(h_bkg_vec_, bkg_names, canvas=None, stack=None, saveAs=None,
 
 ## make a ratio plot. For use within the plotDataMC and plotComparison functions
 def plotRatio(h1, h2, canvas=None, ratioHist=None, xRangeUser=None, ratioTitle = None, markerSize=0.7, markerStyle=20, 
-              markerColor=ROOT.kBlack, doPull=False, convertToPoisson=False, ratioGraph=None, drawZeros=True, 
+              markerColor=ROOT.kBlack, doPull=False, convertToPoisson=False, ratioGraph=None, drawZeros=True, isEffic=False,
               drawSystematicBand=False, systematics=None, h_syst=None, yRangeUser=None, showRatioErrs=True, 
               justDrawPoints=False):
 
@@ -106,6 +113,7 @@ def plotRatio(h1, h2, canvas=None, ratioHist=None, xRangeUser=None, ratioTitle =
             ratioTitle = "Pull"
 
     canvas.cd()
+    canvas.SetTickx(1)
     canvas.SetTicky(1)
 
     if not doPull:
@@ -113,14 +121,17 @@ def plotRatio(h1, h2, canvas=None, ratioHist=None, xRangeUser=None, ratioTitle =
         ratioHist.Divide(h1)
         if convertToPoisson:
             utils.GetPoissonRatioGraph(h1,h2,ratioGraph,drawZeros=drawZeros)
+        elif isEffic:
+            utils.GetEfficRatioGraph(h2, h1, ratioGraph)
     else:
         nbins = h1.GetNbinsX()
         h2.Copy(ratioHist)
         for i in range(1,nbins+1):
             diff = h2.GetBinContent(i)-h1.GetBinContent(i)
             err = ROOT.TMath.Sqrt(h2.GetBinError(i)**2 + h1.GetBinError(i)**2)
-            ratioHist.SetBinContent(i,diff/err)
-            ratioHist.SetBinError(i,1.0)
+            if err>0:
+                ratioHist.SetBinContent(i,diff/err)
+                ratioHist.SetBinError(i,1.0)
 
     if not showRatioErrs:
         for i in range(1,ratioHist.GetNbinsX()+1):
@@ -141,20 +152,20 @@ def plotRatio(h1, h2, canvas=None, ratioHist=None, xRangeUser=None, ratioTitle =
             ratioHist.GetYaxis().SetRangeUser(yRangeUser[0],yRangeUser[1])            
         ratioHist.GetYaxis().SetNdivisions(204,False)
     ratioHist.GetYaxis().SetTitle(ratioTitle)        
-    ratioHist.GetYaxis().SetTitleSize(0.18)
-    ratioHist.GetYaxis().SetTitleOffset(0.17)
-    ratioHist.GetYaxis().SetLabelSize(0.13)
+    ratioHist.GetYaxis().SetTitleSize(0.20)
+    ratioHist.GetYaxis().SetTitleOffset(0.21)
+    ratioHist.GetYaxis().SetLabelSize(0.17)
     ratioHist.GetYaxis().CenterTitle()
     #xaxis
     ratioHist.GetXaxis().SetLabelSize(0.0)
     ratioHist.GetXaxis().SetTitle("")
-    ratioHist.GetXaxis().SetTickSize(0.06)
+    ratioHist.GetXaxis().SetTickSize(0.08)
     #markers
     ratioHist.SetMarkerStyle(markerStyle)
     ratioHist.SetMarkerSize(markerSize)    
     ratioHist.SetMarkerColor(markerColor)
     ratioHist.SetLineColor(markerColor)
-    if convertToPoisson:
+    if convertToPoisson or isEffic:
         ratioGraph.SetMarkerStyle(markerStyle)
         ratioGraph.SetMarkerSize(markerSize)
         ratioGraph.SetMarkerColor(markerColor)
@@ -216,13 +227,15 @@ def plotRatio(h1, h2, canvas=None, ratioHist=None, xRangeUser=None, ratioTitle =
 
 
 ## plot data and stacked background hist. See README for argument explanations
-def plotDataMC(h_bkg_vec_, bkg_names, h_data=None, title=None, subtitles=None, ratioTitle=None, doRatio=True, yRangeUserRatio=None, scaleMCtoData=False, saveAs=None, 
-               isLog=True, dataTitle="Data", xRangeUser=None, doPause=False, lumi=1.0, lumiUnit="fb", noLumi=False,
-               energy=13, xAxisTitle="H_{T}", xAxisUnit="GeV", userMax=None, userMin=None, doSort=False,
-               doMT2Colors=False, markerSize=0.9, doOverflow=True, titleSize=0.04, subtitleSize=0.03, subLegText=None,
-               subLegTextSize=0.03, cmsText="CMS Preliminary", cmsTextSize=0.035, doBkgError=False, functions=[], 
-               legCoords=None, doPull=False, convertToPoisson=False, drawZeros=True, drawSystematicBand=False, systematics=None,
-               h_sig_vec=[], sig_names=[], customColors=None, verticalLines=[], ratioType=0):    
+def plotDataMC(h_bkg_vec_, bkg_names, h_data=None, title=None, subtitles=None, ratioTitle=None, doRatio=True, yRangeUserRatio=None, 
+               scaleMCtoData=False, saveAs=None, extensions=None, isLog=True, dataTitle="Data", xRangeUser=None, doPause=False, 
+               lumi=1.0, lumiUnit="fb", noLumi=False, energy=13, extraEnergyText=None, xAxisTitle="H_{T}", xAxisUnit="GeV", 
+               xAxisTitleSize=0.035, yAxisTitleSize=0.035, xAxisLabelSize=None, yAxisLabelSize=None, yAxisTitleOffset=1.4,
+               userMax=None, userMin=None, doSort=False, doMT2Colors=False, markerSize=0.9, doOverflow=True,
+               titleSize=0.04, subtitleSize=0.03, subLegText=None, subLegTextSize=0.03, cmsText="CMS Preliminary", 
+               cmsTextSize=0.035, doBkgError=False, functions=[], legCoords=None, legNCol=1, drawLegBox=True, doPull=False, 
+               convertToPoisson=False, drawZeros=True, drawSystematicBand=False, systematics=None, h_sig_vec=[], sig_names=[], 
+               scaleSigToMC=False, customColors=None, verticalLines=[], ratioType=0, ratioEffic=False):    
 
     if h_data == None:
         doRatio = False
@@ -298,7 +311,7 @@ def plotDataMC(h_bkg_vec_, bkg_names, h_data=None, title=None, subtitles=None, r
 
     scaleFactor = 1.0
     scaleFactorError = 1.0
-    if(h_data!=None and scaleMCtoData):
+    if(h_data!=None):
         tot_MC_error = ROOT.TMath.Sqrt(sum([x**2 for x in int_errors]))
         tot_MC_integral = sum(integrals)
         data_error = ROOT.Double(0)
@@ -308,8 +321,9 @@ def plotDataMC(h_bkg_vec_, bkg_names, h_data=None, title=None, subtitles=None, r
             scaleFactorError = scaleFactor * (data_error/data_integral + tot_MC_error/tot_MC_integral)
         else:
             scaleFactorError = 0.0
-    for i in range(len(h_bkg_vec)):
-        h_bkg_vec[i].Scale(scaleFactor)
+    if scaleMCtoData:
+        for i in range(len(h_bkg_vec)):
+            h_bkg_vec[i].Scale(scaleFactor)
 
     dataMax = 0
     if h_data!=None:
@@ -321,17 +335,26 @@ def plotDataMC(h_bkg_vec_, bkg_names, h_data=None, title=None, subtitles=None, r
 
     sigMax = 0
     if h_sig_vec!=None:
-        for ih in range(len(h_sig_vec)):
-            for i in range(1,h_sig_vec[ih].GetNbinsX()+1):
-                y = h_sig_vec[ih].GetBinContent(i)+h_sig_vec[ih].GetBinError(i)
+        for h in h_sig_vec:
+            if scaleSigToMC:
+                h.Scale(sum(integrals) / h.Integral(0,-1))
+                if type(scaleSigToMC)==float:
+                    h.Scale(scaleSigToMC)
+            if doOverflow:
+                utils.PutOverflowInLastBin(h, None if xRangeUser==None else xRangeUser[1])
+            for i in range(1,h.GetNbinsX()+1):
+                y = h.GetBinContent(i)+h.GetBinError(i)
                 if y>sigMax:
                     sigMax = y
+
 
     stack = ROOT.THStack("hs","")
     plotBackgrounds(h_bkg_vec, bkg_names, canvas=pads[0], stack=stack, xRangeUser=xRangeUser, isLog=isLog, 
                     xAxisTitle=xAxisTitle, xAxisUnit=xAxisUnit, dataMax=dataMax, shallowCopy=False,
                     userMax=userMax, userMin=userMin, doMT2Colors=doMT2Colors, doOverflow=doOverflow, 
-                    sigMax=sigMax, customColors=customColors)
+                    sigMax=sigMax, xAxisTitleSize=xAxisTitleSize, yAxisTitleSize=yAxisTitleSize, 
+                    xAxisLabelSize=xAxisLabelSize, yAxisLabelSize=yAxisLabelSize, yAxisTitleOffset=yAxisTitleOffset,
+                    customColors=customColors)
 
     if doBkgError:
         h_err = ROOT.TH1D()
@@ -402,11 +425,15 @@ def plotDataMC(h_bkg_vec_, bkg_names, h_data=None, title=None, subtitles=None, r
     if legCoords == None:
         legCoords = (0.65,0.72,0.87,0.89)
     leg = ROOT.TLegend(*legCoords)
+    leg.SetNColumns(legNCol)
+    if not drawLegBox:
+        leg.SetBorderSize(0)
+        leg.SetFillStyle(0)
     if h_data != None:
         if type(dataTitle) != type(list()):
             dataTitle = [dataTitle]
         for ih in range(len(h_data)):
-            leg.AddEntry(h_data[ih],dataTitle[ih])
+            leg.AddEntry(h_data[ih],dataTitle[ih], 'lpe')
     for i in range(len(h_bkg_vec)):
         leg.AddEntry(h_bkg_vec[-i-1],bkg_names[-i-1],"f")
     for i in range(len(h_sig_vec)):
@@ -438,7 +465,7 @@ def plotDataMC(h_bkg_vec_, bkg_names, h_data=None, title=None, subtitles=None, r
         cursorY -= subtitleSize + 0.015
     # lumi
     if not noLumi:
-        utils.DrawLumiText(pads[0],lumi=lumi,lumiUnit=lumiUnit,energy=energy,textFont=42,textSize=cmsTextSize)
+        utils.DrawLumiText(pads[0],lumi=lumi,lumiUnit=lumiUnit,energy=energy,textFont=42,textSize=cmsTextSize, bonusText=extraEnergyText)
     # CMS text
     utils.DrawCmsText(pads[0],text=cmsText,textFont=62,textSize=cmsTextSize)
     # Sub-legend text
@@ -476,28 +503,37 @@ def plotDataMC(h_bkg_vec_, bkg_names, h_data=None, title=None, subtitles=None, r
         ratioHist = [ROOT.TH1D() for h in h_data]
         ratioGraph = [ROOT.TGraphAsymmErrors() for h in h_data]
         h_syst = ROOT.TH1D()
+        hasDrawn = False
         for ih,hd in list(enumerate(h_data))[::-1]:
-            if ih==len(h_data)-1:
+            if ratioType==0:
                 plotRatio(h1, hd, canvas=pads[1], ratioHist=ratioHist[ih], ratioTitle=ratioTitle, xRangeUser=xRangeUser, 
-                          markerSize=markerSize, markerStyle=hd.GetMarkerStyle(), markerColor=hd.GetMarkerColor(),
+                          markerSize=markerSize, markerStyle=hd.GetMarkerStyle(), markerColor=hd.GetMarkerColor(), isEffic=ratioEffic,
                           doPull=doPull, convertToPoisson=convertToPoisson, ratioGraph=ratioGraph[ih], drawZeros=drawZeros,
-                          drawSystematicBand=drawSystematicBand, systematics=systematics, h_syst=h_syst)
+                          drawSystematicBand=drawSystematicBand, systematics=systematics, h_syst=h_syst, yRangeUser=yRangeUserRatio,
+                          justDrawPoints=hasDrawn)
+                hasDrawn = True
             else:
-                if ratioType==0:
-                    hden = h1
-                    hnum = hd
-                else:
-                    hden = hd
-                    hnum = h_data[0]
-                plotRatio(hden, hnum, canvas=pads[1], ratioHist=ratioHist[ih], xRangeUser=xRangeUser, 
-                          markerSize=markerSize, markerStyle=hd.GetMarkerStyle(), markerColor=hd.GetMarkerColor(),
-                          doPull=doPull, convertToPoisson=convertToPoisson, ratioGraph=ratioGraph[ih], drawZeros=drawZeros, justDrawPoints=True)
+                if len(h_data) <= 1:
+                    raise Exception("ratio Type==1 only for multiple data histograms!")
+                if ih==0: continue
+                hden = h_data[0]
+                hnum = hd
+                if ratioTitle=="Data/MC": ratioTitle="Data/Data"
+                plotRatio(hden, hnum, canvas=pads[1], ratioHist=ratioHist[ih], ratioTitle=ratioTitle, xRangeUser=xRangeUser, 
+                          markerSize=markerSize, markerStyle=hd.GetMarkerStyle(), markerColor=hd.GetMarkerColor(), isEffic=ratioEffic,
+                          doPull=doPull, convertToPoisson=convertToPoisson, ratioGraph=ratioGraph[ih], drawZeros=drawZeros, 
+                          yRangeUser=yRangeUserRatio, justDrawPoints=hasDrawn)
+                hasDrawn = True
     
     c.Update()
     c.SetWindowSize(c.GetWw()+4, c.GetWh()+50)
 
-    if saveAs!=None:
-        c.SaveAs(saveAs)
+    if saveAs is not None:
+        if extensions is None:
+            c.SaveAs(saveAs)
+        else:
+            for ext in extensions:
+                c.SaveAs(saveAs+"."+ext)
 
     if doPause:
         raw_input()
@@ -614,7 +650,7 @@ def plotComparison(h1_, h2_, title="", ratioTitle="Data/MC", h1Title="MC", h2Tit
         raw_input()
 
 
-def plotEfficiency(h_num_, h_den_, doOverflow=True, xRangeUser=None, size=(800,700), axisMax=1.3, 
+def plotEfficiency(h_num_, h_den_, doOverflow=True, xRangeUser=None, size=(800,700), axisMin=0.0, axisMax=1.3, 
                    xAxisTitle="H_{T}", yAxisTitle="Efficiency", xAxisUnit="GeV", lumi = 1.0, lumiUnit="fb", 
                    energy=13, year=2017, printEffic=False, effCut=None, effVar=None, subtitle=None, 
                    fitwindow=None, fitstart=None, printPlateau=None, saveAs=None):
@@ -651,7 +687,7 @@ def plotEfficiency(h_num_, h_den_, doOverflow=True, xRangeUser=None, size=(800,7
     h_num.Scale(sf)
     h_den.Scale(sf)
         
-    h_den.GetYaxis().SetRangeUser(0,axisMax)
+    h_den.GetYaxis().SetRangeUser(axisMin,axisMax)
     h_den.GetYaxis().SetTitle("")
     if xRangeUser != None:
         h_den.GetXaxis().SetRangeUser(xRangeUser[0], xRangeUser[1])
@@ -773,11 +809,11 @@ def plotEfficiency(h_num_, h_den_, doOverflow=True, xRangeUser=None, size=(800,7
             text.DrawLatexNDC(0.83, 0.88, "#varepsilon({0} > {1} GeV) = {2:.1f}^{{+{3:.1f}}}_\
 {{-{4:.1f}}} %".format(effVar, effCut, 100*effic, 100*errup, 100*errdown))
             
-    if printPlateau != None and fitwindow==None:
+    if printPlateau is not None and fitwindow is None:
         raise Exception("must do a fit if you want to print plateau!")
-    if type(printPlateau) not in (int,float) or printPlateau<=0 or printPlateau>=1:
-        raise Exception("printPlateau must be a float between 0 and 1!")        
-    if printPlateau != None and fitwindow!=None:
+    if printPlateau is not None and (type(printPlateau) not in (int,float) or printPlateau<=0 or printPlateau>=1):
+        raise Exception("printPlateau must be a float between 0 and 1! It is: "+str(printPlateau))        
+    if printPlateau is not None and fitwindow is not None:
         v = -1/fit.GetParameter(1)*ROOT.TMath.Log(1.0/printPlateau-1)+fit.GetParameter(2)
         ycoord = 0.88 if not printEffic else 0.82
         text.SetTextFont(62)
