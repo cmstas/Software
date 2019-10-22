@@ -1,5 +1,5 @@
 {
-  // test3
+  // test4
   gSystem->Load("libSimpleTable.so");
   gROOT->ProcessLine(".L test.cpp+"); 
   gROOT->ProcessLine("test()"); 
