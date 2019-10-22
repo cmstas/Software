@@ -4,7 +4,7 @@ import ppmUtils as utils
 ## do not use this manually! call plotDataMC with no h_data argument
 def plotBackgrounds(h_bkg_vec_, bkg_names, canvas=None, stack=None, saveAs=None, xRangeUser=None, doPause=False, 
                     isLog=True, xAxisTitle="H_{T}", xAxisUnit="GeV", dataMax=0, userMax=None, userMin=None,
-                    doLegend=False, doMT2Colors=False, doOverflow=True, shallowCopy=True, sigMax=0,
+                    normText=None, doLegend=False, doMT2Colors=False, doOverflow=True, shallowCopy=True, sigMax=0,
                     xAxisTitleSize=0.035, yAxisTitleSize=0.035, xAxisLabelSize=None, yAxisLabelSize=None, yAxisTitleOffset=1.4,
                     customColors=None):
 
@@ -50,17 +50,18 @@ def plotBackgrounds(h_bkg_vec_, bkg_names, canvas=None, stack=None, saveAs=None,
     if xRangeUser!=None:
         stack.GetXaxis().SetRangeUser(*xRangeUser)
 
-    binWidth = utils.GetBinWidth(h_bkg_vec[0])
-    if binWidth == None:  ## uneven binning
-        binWidth = 'Bin'
+    if normText is None:
+        normText = utils.GetBinWidth(h_bkg_vec[0])
+        if normText is None:  ## uneven binning
+            normText = 'bin'
+        else:
+            normText = str(round(normText,5)) + " " + (xAxisUnit if xAxisUnit is not None else "")
 
     if xAxisUnit==None:
         stack.GetXaxis().SetTitle(xAxisTitle)
     else:
         stack.GetXaxis().SetTitle(xAxisTitle + " [{0}]".format(xAxisUnit))
-    if binWidth != 'Bin':
-        binWidth = str(round(binWidth,5)) + " " + (xAxisUnit if xAxisUnit!=None else "")
-    stack.GetYaxis().SetTitle("Events / {0}".format(binWidth))
+    stack.GetYaxis().SetTitle("Events / {0}".format(normText))
     stack.GetYaxis().SetTitleOffset(yAxisTitleOffset)
     stack.GetXaxis().SetTitleOffset(1.2)
     stack.GetXaxis().SetTitleSize(xAxisTitleSize)
@@ -71,10 +72,18 @@ def plotBackgrounds(h_bkg_vec_, bkg_names, canvas=None, stack=None, saveAs=None,
         stack.GetYaxis().SetLabelSize(yAxisLabelSize)
 
     utils.SetYBounds(stack, isLog, h_bkg_vec, max(dataMax, sigMax), xRangeUser)
+    h = stack.GetHistogram()
     if userMax!=None:
-        stack.SetMaximum(userMax)
+        if type(userMax)==tuple:
+            stack.SetMaximum(max(h.GetMaximum(), userMax[0]))
+        else:
+            stack.SetMaximum(userMax)
     if userMin!=None:
-        stack.SetMinimum(userMin)
+        if type(userMin)==tuple:
+            stack.SetMinimum(min(h.GetMinimum(), userMin[0]))
+        else:
+            stack.SetMinimum(userMin)
+            
 
     ## legend
     if doLegend:
@@ -229,11 +238,11 @@ def plotRatio(h1, h2, canvas=None, ratioHist=None, xRangeUser=None, ratioTitle =
 ## plot data and stacked background hist. See README for argument explanations
 def plotDataMC(h_bkg_vec_, bkg_names, h_data=None, title=None, subtitles=None, ratioTitle=None, doRatio=True, yRangeUserRatio=None, 
                scaleMCtoData=False, saveAs=None, extensions=None, isLog=True, dataTitle="Data", xRangeUser=None, doPause=False, 
-               lumi=1.0, lumiUnit="fb", noLumi=False, energy=13, extraEnergyText=None, xAxisTitle="H_{T}", xAxisUnit="GeV", 
+               lumi=1.0, lumiUnit="fb", energy=13, extraEnergyText=None, xAxisTitle="H_{T}", xAxisUnit="GeV", normText=None,
                xAxisTitleSize=0.035, yAxisTitleSize=0.035, xAxisLabelSize=None, yAxisLabelSize=None, yAxisTitleOffset=1.4,
                userMax=None, userMin=None, doSort=False, doMT2Colors=False, markerSize=0.9, doOverflow=True,
                titleSize=0.04, subtitleSize=0.03, subLegText=None, subLegTextSize=0.03, cmsText="CMS Preliminary", 
-               cmsTextSize=0.035, doBkgError=False, functions=[], legCoords=None, legNCol=1, drawLegBox=True, doPull=False, 
+               cmsTextSize=0.040, doBkgError=False, functions=[], legCoords=None, legNCol=1, drawLegBox=True, doPull=False, 
                convertToPoisson=False, drawZeros=True, drawSystematicBand=False, systematics=None, h_sig_vec=[], sig_names=[], 
                scaleSigToMC=False, customColors=None, verticalLines=[], ratioType=0, ratioEffic=False):    
 
@@ -298,8 +307,9 @@ def plotDataMC(h_bkg_vec_, bkg_names, h_data=None, title=None, subtitles=None, r
     pads[0].cd()
 
     ## MC
+    UPBOUND = -1 if doOverflow else h_bkg_vec[0].GetNbinsX()
     int_errors = [ROOT.Double(0) for i in range(len(h_bkg_vec))]
-    integrals = [h_bkg_vec[i].IntegralAndError(0,-1,int_errors[i]) for i in range(len(h_bkg_vec))]
+    integrals = [h_bkg_vec[i].IntegralAndError(0,UPBOUND,int_errors[i]) for i in range(len(h_bkg_vec))]
     if doSort:
         zipped = zip(h_bkg_vec,bkg_names)
         sorted_bkg = [x for (y,x) in sorted(zip(integrals,zipped))]
@@ -315,7 +325,7 @@ def plotDataMC(h_bkg_vec_, bkg_names, h_data=None, title=None, subtitles=None, r
         tot_MC_error = ROOT.TMath.Sqrt(sum([x**2 for x in int_errors]))
         tot_MC_integral = sum(integrals)
         data_error = ROOT.Double(0)
-        data_integral = h_data[0].IntegralAndError(0,-1,data_error)
+        data_integral = h_data[0].IntegralAndError(0,UPBOUND,data_error)
         scaleFactor = data_integral/tot_MC_integral
         if data_integral > 0:
             scaleFactorError = scaleFactor * (data_error/data_integral + tot_MC_error/tot_MC_integral)
@@ -352,7 +362,7 @@ def plotDataMC(h_bkg_vec_, bkg_names, h_data=None, title=None, subtitles=None, r
     plotBackgrounds(h_bkg_vec, bkg_names, canvas=pads[0], stack=stack, xRangeUser=xRangeUser, isLog=isLog, 
                     xAxisTitle=xAxisTitle, xAxisUnit=xAxisUnit, dataMax=dataMax, shallowCopy=False,
                     userMax=userMax, userMin=userMin, doMT2Colors=doMT2Colors, doOverflow=doOverflow, 
-                    sigMax=sigMax, xAxisTitleSize=xAxisTitleSize, yAxisTitleSize=yAxisTitleSize, 
+                    sigMax=sigMax, xAxisTitleSize=xAxisTitleSize, yAxisTitleSize=yAxisTitleSize, normText=normText,
                     xAxisLabelSize=xAxisLabelSize, yAxisLabelSize=yAxisLabelSize, yAxisTitleOffset=yAxisTitleOffset,
                     customColors=customColors)
 
@@ -464,10 +474,11 @@ def plotDataMC(h_bkg_vec_, bkg_names, h_data=None, title=None, subtitles=None, r
         text.DrawLatex(cursorX,cursorY,s)
         cursorY -= subtitleSize + 0.015
     # lumi
-    if not noLumi:
+    if lumi is not None:
         utils.DrawLumiText(pads[0],lumi=lumi,lumiUnit=lumiUnit,energy=energy,textFont=42,textSize=cmsTextSize, bonusText=extraEnergyText)
     # CMS text
-    utils.DrawCmsText(pads[0],text=cmsText,textFont=62,textSize=cmsTextSize)
+    if cmsText is not None:
+        utils.DrawCmsText(pads[0],text=cmsText,textFont=62,textSize=cmsTextSize)
     # Sub-legend text
     cursorX = legCoords[0]
     cursorY = legCoords[1]-0.01
@@ -542,6 +553,7 @@ def plotDataMC(h_bkg_vec_, bkg_names, h_data=None, title=None, subtitles=None, r
 def plotComparison(h1_, h2_, title="", ratioTitle="Data/MC", h1Title="MC", h2Title="Data", saveAs=None,
                    size=(700,600), xRangeUser=None, markerSize=0.65, doPause=False, isLog=True, style=1,
                    doOverflow=True, normalize=False, xAxisTitle="", ratioYRange=None, yRangeUser=None, 
+                   cmsText="CMS Preliminary", energy=13, extraEnergyText=None, subLegText=None,
                    showRatioErrs=True, showNEvents=False):
 
     nEntries = (int(h1_.GetEntries()), int(h2_.GetEntries()))
@@ -568,13 +580,14 @@ def plotComparison(h1_, h2_, title="", ratioTitle="Data/MC", h1Title="MC", h2Tit
 
     pads = []
     pads.append(ROOT.TPad("1","1",0.0,0.16,1.0,1.0))
-    pads.append(ROOT.TPad("2","2",0.0,0.0,1.0,0.17))
+    pads.append(ROOT.TPad("2","2",0.0,0.0,1.0,0.16))
 
     pads[0].SetLogy(isLog)
     pads[0].SetTopMargin(0.08)
     pads[0].SetLeftMargin(0.12)
-    pads[0].SetBottomMargin(0.10)
+    pads[0].SetBottomMargin(0.13)
     pads[1].SetLeftMargin(0.12)
+    pads[1].SetTopMargin(0.05)
     
     pads[0].Draw()
     pads[1].Draw()
@@ -598,6 +611,10 @@ def plotComparison(h1_, h2_, title="", ratioTitle="Data/MC", h1Title="MC", h2Tit
         h1.GetYaxis().SetTitle("Entries / {0} GeV".format(h1.GetXaxis().GetBinWidth(1)))
     h1.GetYaxis().SetTitleOffset(1.2)
     h1.GetXaxis().SetTitle(xAxisTitle)
+    h1.GetXaxis().SetTitleSize(0.04)
+    h1.GetYaxis().SetTitleSize(0.04)
+    h1.GetXaxis().SetLabelSize(0.04)
+    h1.GetYaxis().SetLabelSize(0.04)
     if style==2:
         h1.SetLineColor(ROOT.kAzure-6)
         h1.SetFillColor(ROOT.kAzure-9)
@@ -623,6 +640,31 @@ def plotComparison(h1_, h2_, title="", ratioTitle="Data/MC", h1Title="MC", h2Tit
     leg.AddEntry(h1, h1Title)
     leg.AddEntry(h2, h2Title)
     leg.Draw()
+
+    text = ROOT.TLatex()
+    text.SetNDC(1)
+    text.SetTextFont(62)
+    text.SetTextSize(0.045)
+    text.SetTextAlign(11)
+    text.DrawLatex(0.13, 0.93, cmsText)
+    energyText = "{0} TeV".format(energy)
+    if extraEnergyText is not None:
+        energyText += " ({0})".format(extraEnergyText)
+    text.SetTextFont(42)
+    text.SetTextAlign(31)
+    text.DrawLatex(0.89,0.93,energyText)
+
+    if subLegText is not None:
+        text.SetTextFont(42)
+        text.SetTextSize(0.04)
+        text.SetTextAlign(33)
+        text.SetTextColor(ROOT.kBlue)
+        lines = subLegText.split(r"\\")
+        x = 0.88
+        y = 0.73
+        for line in lines:
+            text.DrawLatex(x, y, line)
+            y -= 0.06
 
     if showNEvents:
         text = ROOT.TLatex()

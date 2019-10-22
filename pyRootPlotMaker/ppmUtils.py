@@ -136,13 +136,13 @@ def SetYBounds(stack, isLog, h_bkg_vec, data_max, xRangeUser):
     else:
         stack.SetMaximum(tmax*1.33)
 
-def ConvertToPoissonGraph(h_data, graph, drawZeros=True):
+def ConvertToPoissonGraph(h_data, graph, drawZeros=True, drawXerr=True):
 
     alpha = 1-0.6827
 
     for i in range(1,h_data.GetNbinsX()+1):
         x = h_data.GetBinCenter(i)
-        xerr = h_data.GetBinWidth(i)/2
+        xerr = h_data.GetBinWidth(i)/2 if drawXerr else 0.0
         y = h_data.GetBinContent(i)
 
         if y < 0:
@@ -161,7 +161,7 @@ def ConvertToPoissonGraph(h_data, graph, drawZeros=True):
         graph.SetPoint(thisPoint, x, y)
         graph.SetPointError(thisPoint, xerr, xerr, yerrminus, yerrplus)
 
-def GetPoissonRatioGraph(h_mc, h_data, g_ratio, drawZeros=True, useMCErr=True):
+def GetPoissonRatioGraph(h_mc, h_data, g_ratio, drawZeros=True, drawXerr=True, useMCErr=True):
 
     alpha = 1-0.6827
 
@@ -183,7 +183,7 @@ def GetPoissonRatioGraph(h_mc, h_data, g_ratio, drawZeros=True, useMCErr=True):
         rerrup = ROOT.TMath.Sqrt((dataerrup/mcy)**2 + (mcerr*datay/mcy**2)**2)
         rerrdown = ROOT.TMath.Sqrt((dataerrdown/mcy)**2 + (mcerr*datay/mcy**2)**2)
 
-        xerr = h_mc.GetBinWidth(i)/2
+        xerr = h_mc.GetBinWidth(i)/2 if drawXerr else 0.0
 
         thisPoint = g_ratio.GetN()
         g_ratio.SetPoint(thisPoint, x, r)
