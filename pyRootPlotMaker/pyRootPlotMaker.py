@@ -5,7 +5,8 @@ import ppmUtils as utils
 def plotBackgrounds(h_bkg_vec_, bkg_names, canvas=None, stack=None, saveAs=None, xRangeUser=None, doPause=False, 
                     isLog=True, xAxisTitle="H_{T}", xAxisUnit="GeV", dataMax=0, userMax=None, userMin=None,
                     normText=None, doLegend=False, doMT2Colors=False, doOverflow=True, shallowCopy=True, sigMax=0,
-                    xAxisTitleSize=0.035, yAxisTitleSize=0.035, xAxisLabelSize=None, yAxisLabelSize=None, yAxisTitleOffset=1.4,
+                    xAxisTitleSize=0.035, xAxisLabelSize=None, xAxisTitleOffset=1.2,
+                    yAxisTitleSize=0.035, yAxisLabelSize=None, yAxisTitleOffset=1.4,
                     customColors=None):
 
     # make shallow copies of hists so we don't overwrite the originals
@@ -63,7 +64,7 @@ def plotBackgrounds(h_bkg_vec_, bkg_names, canvas=None, stack=None, saveAs=None,
         stack.GetXaxis().SetTitle(xAxisTitle + " [{0}]".format(xAxisUnit))
     stack.GetYaxis().SetTitle("Events / {0}".format(normText))
     stack.GetYaxis().SetTitleOffset(yAxisTitleOffset)
-    stack.GetXaxis().SetTitleOffset(1.2)
+    stack.GetXaxis().SetTitleOffset(xAxisTitleOffset)
     stack.GetXaxis().SetTitleSize(xAxisTitleSize)
     stack.GetYaxis().SetTitleSize(yAxisTitleSize)
     if xAxisLabelSize is not None:
@@ -80,7 +81,10 @@ def plotBackgrounds(h_bkg_vec_, bkg_names, canvas=None, stack=None, saveAs=None,
             stack.SetMaximum(userMax)
     if userMin!=None:
         if type(userMin)==tuple:
-            stack.SetMinimum(min(h.GetMinimum(), userMin[0]))
+            if len(userMin)==1:
+                stack.SetMinimum(min(h.GetMinimum(), userMin[0]))
+            else:
+                stack.SetMinimum(max(min(h.GetMinimum(), userMin[1]), userMin[0]))
         else:
             stack.SetMinimum(userMin)
             
@@ -161,9 +165,9 @@ def plotRatio(h1, h2, canvas=None, ratioHist=None, xRangeUser=None, ratioTitle =
             ratioHist.GetYaxis().SetRangeUser(yRangeUser[0],yRangeUser[1])            
         ratioHist.GetYaxis().SetNdivisions(204,False)
     ratioHist.GetYaxis().SetTitle(ratioTitle)        
-    ratioHist.GetYaxis().SetTitleSize(0.20)
+    ratioHist.GetYaxis().SetTitleSize(0.22)
     ratioHist.GetYaxis().SetTitleOffset(0.21)
-    ratioHist.GetYaxis().SetLabelSize(0.17)
+    ratioHist.GetYaxis().SetLabelSize(0.19)
     ratioHist.GetYaxis().CenterTitle()
     #xaxis
     ratioHist.GetXaxis().SetLabelSize(0.0)
@@ -239,9 +243,10 @@ def plotRatio(h1, h2, canvas=None, ratioHist=None, xRangeUser=None, ratioTitle =
 def plotDataMC(h_bkg_vec_, bkg_names, h_data=None, title=None, subtitles=None, ratioTitle=None, doRatio=True, yRangeUserRatio=None, 
                scaleMCtoData=False, saveAs=None, extensions=None, isLog=True, dataTitle="Data", xRangeUser=None, doPause=False, 
                lumi=1.0, lumiUnit="fb", energy=13, extraEnergyText=None, xAxisTitle="H_{T}", xAxisUnit="GeV", normText=None,
-               xAxisTitleSize=0.035, yAxisTitleSize=0.035, xAxisLabelSize=None, yAxisLabelSize=None, yAxisTitleOffset=1.4,
+               xAxisTitleSize=0.035, yAxisTitleSize=0.035, xAxisLabelSize=None, yAxisLabelSize=None, 
+               yAxisTitleOffset=1.4, xAxisTitleOffset=1.2,
                userMax=None, userMin=None, doSort=False, doMT2Colors=False, markerSize=0.9, doOverflow=True,
-               titleSize=0.04, subtitleSize=0.03, subLegText=None, subLegTextSize=0.03, cmsText="CMS Preliminary", 
+               titleSize=0.04, subtitleSize=0.03, subLegText=None, subLegTextSize=0.03, cmsText="CMS Preliminary", cmsTextInside=False,
                cmsTextSize=0.040, doBkgError=False, functions=[], legCoords=None, legNCol=1, drawLegBox=True, doPull=False, 
                convertToPoisson=False, drawZeros=True, drawSystematicBand=False, systematics=None, h_sig_vec=[], sig_names=[], 
                scaleSigToMC=False, customColors=None, verticalLines=[], ratioType=0, ratioEffic=False):    
@@ -364,7 +369,7 @@ def plotDataMC(h_bkg_vec_, bkg_names, h_data=None, title=None, subtitles=None, r
                     userMax=userMax, userMin=userMin, doMT2Colors=doMT2Colors, doOverflow=doOverflow, 
                     sigMax=sigMax, xAxisTitleSize=xAxisTitleSize, yAxisTitleSize=yAxisTitleSize, normText=normText,
                     xAxisLabelSize=xAxisLabelSize, yAxisLabelSize=yAxisLabelSize, yAxisTitleOffset=yAxisTitleOffset,
-                    customColors=customColors)
+                    xAxisTitleOffset=xAxisTitleOffset, customColors=customColors)
 
     if doBkgError:
         h_err = ROOT.TH1D()
@@ -478,7 +483,7 @@ def plotDataMC(h_bkg_vec_, bkg_names, h_data=None, title=None, subtitles=None, r
         utils.DrawLumiText(pads[0],lumi=lumi,lumiUnit=lumiUnit,energy=energy,textFont=42,textSize=cmsTextSize, bonusText=extraEnergyText)
     # CMS text
     if cmsText is not None:
-        utils.DrawCmsText(pads[0],text=cmsText,textFont=62,textSize=cmsTextSize)
+        utils.DrawCmsText(pads[0],text=cmsText,textFont=62,textSize=cmsTextSize, insideAxes=cmsTextInside)
     # Sub-legend text
     cursorX = legCoords[0]
     cursorY = legCoords[1]-0.01
@@ -554,7 +559,7 @@ def plotComparison(h1_, h2_, title="", ratioTitle="Data/MC", h1Title="MC", h2Tit
                    size=(700,600), xRangeUser=None, markerSize=0.65, doPause=False, isLog=True, style=1,
                    doOverflow=True, normalize=False, xAxisTitle="", ratioYRange=None, yRangeUser=None, 
                    cmsText="CMS Preliminary", energy=13, extraEnergyText=None, subLegText=None,
-                   showRatioErrs=True, showNEvents=False):
+                   showRatioErrs=True, showNEvents=False, extensions=None, bigText=False):
 
     nEntries = (int(h1_.GetEntries()), int(h2_.GetEntries()))
 
@@ -587,7 +592,7 @@ def plotComparison(h1_, h2_, title="", ratioTitle="Data/MC", h1Title="MC", h2Tit
     pads[0].SetLeftMargin(0.12)
     pads[0].SetBottomMargin(0.13)
     pads[1].SetLeftMargin(0.12)
-    pads[1].SetTopMargin(0.05)
+    pads[1].SetTopMargin(0.08)
     
     pads[0].Draw()
     pads[1].Draw()
@@ -611,10 +616,10 @@ def plotComparison(h1_, h2_, title="", ratioTitle="Data/MC", h1Title="MC", h2Tit
         h1.GetYaxis().SetTitle("Entries / {0} GeV".format(h1.GetXaxis().GetBinWidth(1)))
     h1.GetYaxis().SetTitleOffset(1.2)
     h1.GetXaxis().SetTitle(xAxisTitle)
-    h1.GetXaxis().SetTitleSize(0.04)
-    h1.GetYaxis().SetTitleSize(0.04)
-    h1.GetXaxis().SetLabelSize(0.04)
-    h1.GetYaxis().SetLabelSize(0.04)
+    h1.GetXaxis().SetTitleSize(0.05 if bigText else 0.04)
+    h1.GetYaxis().SetTitleSize(0.05 if bigText else 0.04)
+    h1.GetXaxis().SetLabelSize(0.05 if bigText else 0.04)
+    h1.GetYaxis().SetLabelSize(0.05 if bigText else 0.04)
     if style==2:
         h1.SetLineColor(ROOT.kAzure-6)
         h1.SetFillColor(ROOT.kAzure-9)
@@ -635,8 +640,11 @@ def plotComparison(h1_, h2_, title="", ratioTitle="Data/MC", h1Title="MC", h2Tit
         h2.SetLineColor(ROOT.kBlack)
         h1.Draw("PE")
         h2.Draw("SAME PE")
-    
-    leg = ROOT.TLegend(0.60,0.75,0.89,0.89)
+
+    if bigText:
+        leg = ROOT.TLegend(0.55,0.72,0.89,0.89)
+    else:
+        leg = ROOT.TLegend(0.60,0.75,0.89,0.89)
     leg.AddEntry(h1, h1Title)
     leg.AddEntry(h2, h2Title)
     leg.Draw()
@@ -644,7 +652,7 @@ def plotComparison(h1_, h2_, title="", ratioTitle="Data/MC", h1Title="MC", h2Tit
     text = ROOT.TLatex()
     text.SetNDC(1)
     text.SetTextFont(62)
-    text.SetTextSize(0.045)
+    text.SetTextSize(0.055 if bigText else 0.045)
     text.SetTextAlign(11)
     text.DrawLatex(0.13, 0.93, cmsText)
     energyText = "{0} TeV".format(energy)
@@ -656,12 +664,12 @@ def plotComparison(h1_, h2_, title="", ratioTitle="Data/MC", h1Title="MC", h2Tit
 
     if subLegText is not None:
         text.SetTextFont(42)
-        text.SetTextSize(0.04)
+        text.SetTextSize(0.05 if bigText else 0.04)
         text.SetTextAlign(33)
         text.SetTextColor(ROOT.kBlue)
         lines = subLegText.split(r"\\")
         x = 0.88
-        y = 0.73
+        y = 0.70 if bigText else 0.73
         for line in lines:
             text.DrawLatex(x, y, line)
             y -= 0.06
@@ -686,7 +694,11 @@ def plotComparison(h1_, h2_, title="", ratioTitle="Data/MC", h1Title="MC", h2Tit
     c.SetWindowSize(c.GetWw()+4, c.GetWh()+50)
 
     if saveAs!=None:
-        c.SaveAs(saveAs)
+        if extensions is None:
+            c.SaveAs(saveAs)
+        else:
+            for ext in extensions:
+                c.SaveAs(saveAs+"."+ext)
 
     if doPause:
         raw_input()

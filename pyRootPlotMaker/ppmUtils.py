@@ -204,7 +204,7 @@ def GetEfficRatioGraph(hnum, hden, g_ratio):
             g_ratio.SetPoint(thisPoint, x, val)
             g_ratio.SetPointError(thisPoint, xerr, xerr, errdn, errup)
 
-def DrawCmsText(canvas, text="CMS Preliminary", textFont=62, textSize=0.035):
+def DrawCmsText(canvas, text="CMS Preliminary", textFont=62, textSize=0.035, insideAxes=False):
     ttext = ROOT.TLatex()
     ttext.SetNDC(1)
     ttext.SetTextFont(textFont)
@@ -212,7 +212,10 @@ def DrawCmsText(canvas, text="CMS Preliminary", textFont=62, textSize=0.035):
     ttext.SetTextSize(textSize)
 
     canvas.cd()
-    ttext.DrawLatex(canvas.GetLeftMargin()+0.01, 1.0-canvas.GetTopMargin()+0.01, text)
+    if insideAxes:
+        ttext.DrawLatex(canvas.GetLeftMargin()+0.04, 1.0-canvas.GetTopMargin()-0.01-textSize, text)
+    else:
+        ttext.DrawLatex(canvas.GetLeftMargin()+0.01, 1.0-canvas.GetTopMargin()+0.01, text)
 
 def DrawLumiText(canvas, lumi=1.0, lumiUnit="fb", energy=13, textFont=42, textSize=0.035, bonusText=None):
     ttext = ROOT.TLatex()
@@ -222,7 +225,10 @@ def DrawLumiText(canvas, lumi=1.0, lumiUnit="fb", energy=13, textFont=42, textSi
     ttext.SetTextSize(textSize)
 
     canvas.cd()
-    text = "{0} {1}^{{-1}} ({2} TeV{3})".format(lumi,lumiUnit,energy, ", "+bonusText if bonusText is not None else "")
+    if energy is not None:
+        text = "{0} {1}^{{#minus1}} ({2} TeV{3})".format(lumi,lumiUnit,energy, ", "+bonusText if bonusText is not None else "")
+    else:
+        text = "{0} {1}^{{#minus1}}{2}".format(lumi,lumiUnit, " ("+bonusText+")" if bonusText is not None else "")
     ttext.DrawLatex(1.0-canvas.GetRightMargin()-0.01, 1.0-canvas.GetTopMargin()+0.01, text)
 
 # Function to add labels to plots in the official CMS style circa Moriond 2019.
