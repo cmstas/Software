@@ -1,7 +1,14 @@
 ### pdf utilities for editing plots
 #### pdftk
-Needed for these operations, and is provided as an executable here. 
-Please put it in your path before using the scripts here.
+The executable previously in the repository no longer works on SLC7.
+Luckily `pdftk` is available via `docker` (and thus `singularity`). E.g.,
+```
+singularity run docker://mnuessler/pdftk -h
+```
+or
+```
+alias pdftk="singularity run docker://mnuessler/pdftk"
+```
 
 #### renamingutils.sh
 ```bash
